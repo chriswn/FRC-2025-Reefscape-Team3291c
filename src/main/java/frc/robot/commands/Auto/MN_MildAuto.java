@@ -44,7 +44,7 @@ public class MN_MildAuto extends SequentialCommandGroup {
             // Pass through an interior waypoint
             List.of(new Translation2d(0.5, 0)),
             // End 1 meter straight ahead of where we started, facing forward
-            new Pose2d(3, 0, new Rotation2d(0)),
+            new Pose2d(1.2, 0, new Rotation2d(0)),
             config);
 
     ProfiledPIDController thetaController =

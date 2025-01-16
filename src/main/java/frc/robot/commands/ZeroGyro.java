@@ -5,20 +5,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.LauncherSub;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class ZeroGyro extends Command {
   /** Creates a new ZeroGyro. */
-  LauncherSub launcherSub;
   private SwerveSubsystem swerveSubsystem;
   /** Creates a new FeedWheelCMD. */
   public ZeroGyro(SwerveSubsystem swerveSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     
     this.swerveSubsystem = swerveSubsystem;
-    addRequirements(launcherSub);
-          
+    addRequirements(swerveSubsystem);
   }
 
   // Called when the command is initially scheduled.

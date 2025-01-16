@@ -12,11 +12,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.config.CTREConfigs;
-import frc.robot.commands.ClimbCMD;
-import frc.robot.commands.LaunchNoteCMD;
-import frc.robot.commands.ParadeCommand;
-import frc.robot.subsystems.ClimberSubsystem;
-import frc.robot.subsystems.LauncherSub;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -29,11 +24,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-  private ClimbCMD climbCMD;
-  private LaunchNoteCMD launchNoteCMD;
-  private ParadeCommand paradeCommand;
-  private ClimberSubsystem climberSubsystem;
-  private LauncherSub launcherSub;
 
   // DutyCycleEncoder encoder;
   /**
@@ -46,7 +36,6 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     ctreConfigs = new CTREConfigs();
     m_robotContainer = new RobotContainer();
-    paradeCommand = new ParadeCommand(climberSubsystem, launcherSub);
 
     DataLogManager.start();
     //URCL.start();
@@ -106,7 +95,6 @@ public class Robot extends TimedRobot {
     // encoder = new DutyCycleEncoder(1);
     //????? -Danica 
     SmartDashboard.putNumber("key", Constants.intake.intakePID.kp);
-    paradeCommand.schedule();
     
   }
 
