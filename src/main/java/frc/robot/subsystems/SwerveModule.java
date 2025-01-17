@@ -4,6 +4,9 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.controller.PIDController;
@@ -18,8 +21,8 @@ import frc.lib.config.CTREConfigs;
 import frc.lib.config.SwerveModuleConstants;
 import frc.lib.util.CANCoderUtil;
 import frc.lib.util.CANCoderUtil.CCUsage;
-import frc.lib.util.CANSparkMaxUtil;
-import frc.lib.util.CANSparkMaxUtil.Usage;
+// import frc.lib.util.CANSparkMaxUtil;
+// import frc.lib.util.CANSparkMaxUtil.Usage;
 import frc.robot.Constants;
 import frc.robot.Constants.Swerve;
 import frc.robot.Constants.Swerve.Mod0;
@@ -44,16 +47,19 @@ public class SwerveModule {
 
     // Used to angle the wheel in the directions we want to drive.
     private SparkMax angleMotor;
+    private SparkMaxConfig angleConfig = new SparkMaxConfig();
 
     // Used to rotate the wheel to move the robot.
     private SparkMax driveMotor;
+    private SparkMaxConfig driveConfig = new SparkMaxConfig();
+
 
     // Used to get the current position and state (velocity) of the drive motor
     private RelativeEncoder driveEncoder;
 
     private double angleMultiplier;
     /**
-     * Currently defined, but not used in any calculations.   I'm assuming this was
+     * Currently defined, but not used in any calculations.   I'm assuming thidAs was
      * first defined to be used for the angle motor, but we are doing that with the 
      * CANCoder (angleEncoder) defined below.
      */
@@ -149,19 +155,19 @@ public class SwerveModule {
         this.driveMotor.setInverted(Swerve.driveInvert);
 
         // // When the motor isn't being used, set to brake mode
-        // this.driveMotor.setIdleMode(IdleMode.kBrake);
+        this.driveConfig.idleMode(IdleMode.kBrake);
 
         // Set the conversion factor for velocity of the encoder. Multiplied by the native output units to give you velocity
-        this.driveEncoder.setVelocityConversionFactor(Swerve.driveConversionVelocityFactor);
+        this.driveConfig.encoder.velocityConversionFactor(Swerve.driveConversionVelocityFactor)
 
         // Set the conversion factor for position of the encoder. Multiplied by the native output units to give you position.
-        this.driveEncoder.setPositionConversionFactor(Swerve.driveConversionPositionFactor);
+        .positionConversionFactor(Swerve.driveConversionPositionFactor);
 
         // Sets the voltage compensation setting for all modes on the SPARK and enables voltage compensation.
-        this.driveMotor.enableVoltageCompensation(Swerve.voltageComp);
+        this.driveConfig.voltageCompensation(Swerve.voltageComp);
 
         // Writes values to the motor firmware
-        this.driveMotor.burnFlash();
+        this.driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         // Set starting position of the drive encoder to 0.0
         this.driveEncoder.setPosition(0.0);
@@ -185,17 +191,17 @@ public class SwerveModule {
         // Invert angle motor (currently, true)
         this.angleMotor.setInverted(Swerve.angleInvert);
 
-        // WHen the motor isn't being used, set to brake mode
-       // this.angleMotor.setIdleMode(IdleMode.kBrake);
+        // When the motor isn't being used, set to brake mode
+        this.angleConfig.idleMode(IdleMode.kBrake);
 
         // Set the conversion factor for position of the encoder. Multiplied by the native output units to give you position.
-        this.integratedAngleEncoder.setPositionConversionFactor(Swerve.angleConversionFactor);
+        //this.integratedAngleEncoder.setPositionConversionFactor(Swerve.angleConversionFactor);
 
         // Sets the voltage compensation setting for all modes on the SPARK and enables voltage compensation.
-        this.angleMotor.enableVoltageCompensation(Swerve.voltageComp);
+        this.angleConfig.voltageCompensation(Swerve.voltageComp);
 
         // Writes values to the motor firmware
-        this.angleMotor.burnFlash();
+        this.angleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /**

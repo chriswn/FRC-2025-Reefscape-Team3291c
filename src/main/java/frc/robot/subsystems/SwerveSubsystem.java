@@ -5,11 +5,13 @@
 package frc.robot.subsystems;
 
 import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
 import com.pathplanner.lib.auto.AutoBuilder;
-
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.controllers.PathFollowingController;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.ReplanningConfig;
+//import com.pathplanner.lib.config.ReplanningConfig; replanning was removed
+import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.math.estimator.KalmanFilter;
 import edu.wpi.first.math.estimator.PoseEstimator;
@@ -25,7 +27,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -56,10 +57,17 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDrivePoseEstimator m_poseEstimator;
 
   public AutoBuilder autoBuilder;
+  public RobotConfig config;
 
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
-    gyro = new AHRS(SerialPort.Port.kUSB);
+    try{
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+    gyro = new AHRS(NavXComType.kUSB1);//forced inclusion of 1
     //accelerometer = new AHRS(SerialPort.Port.kUSB);
 
     zeroGryo();
@@ -87,19 +95,20 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.putData("Field", field);
 
 
-     AutoBuilder.configureHolonomic(
+     AutoBuilder.configure(
             this::getPose, // Robot pose supplier
             //this::resetPoseEstimator, // Method to reset the pose estimator (will be called if your auto has a starting pose)
             this::resetOdometry,// Method to reset odometry (will be called if your auto has a starting pose)
             this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-            new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+            new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
                     new PIDConstants(5.01, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.01, 0.0, 0.0), // Rotation PID constants
-                    Constants.Swerve.maxSpeed, // Max module speed, in m/s
-                    0.38166088514508, // Drive base radius in meters. Distance from robot center to furthest module.
-                    new ReplanningConfig() // Default path replanning config. See the API for the options here
+                    new PIDConstants(5.01, 0.0, 0.0) // Rotation PID constants
+                    //Constants.Swerve.maxSpeed, // Max module speed, in m/s
+                    //0.38166088514508//, // Drive base radius in meters. Distance from robot center to furthest module.
+                    //new ReplanningConfig() // Default path replanning config. See the API for the options here
             ),
+              config,
             () -> {
               // Boolean supplier that controls when the path will be mirrored for the red alliance
               // This will flip the path being followed to the red side of the field.
