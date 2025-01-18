@@ -21,8 +21,8 @@ import frc.lib.config.CTREConfigs;
 import frc.lib.config.SwerveModuleConstants;
 import frc.lib.util.CANCoderUtil;
 import frc.lib.util.CANCoderUtil.CCUsage;
-// import frc.lib.util.CANSparkMaxUtil;
-// import frc.lib.util.CANSparkMaxUtil.Usage;
+import frc.lib.util.CANSparkMaxUtil;
+import frc.lib.util.CANSparkMaxUtil.Usage;
 import frc.robot.Constants;
 import frc.robot.Constants.Swerve;
 import frc.robot.Constants.Swerve.Mod0;
@@ -146,7 +146,7 @@ public class SwerveModule {
         //this.driveMotor.restoreFactoryDefaults();
 
         // This sets the transmission rate of data to all channels to be faster
-        //**could cause error CANSparkMaxUtil.setCANSparkMaxBusUsage(driveMotor, Usage.kAll);
+        CANSparkMaxUtil.setCANSparkMaxBusUsage(driveMotor, Usage.kAll, driveMotor.isFollower());//not sure if boolean value is right
 
         // Sets the current limit to the drive motor in AMPs
        // this.driveMotor.setSmartCurrentLimit(Swerve.driveContinuousCurrentLimit);
@@ -181,7 +181,7 @@ public class SwerveModule {
        // this.angleMotor.restoreFactoryDefaults();
 
         // Sets the transmission rate of the position channel as faster.
-        //**could cause error CANSparkMaxUtil.setCANSparkMaxBusUsage(angleMotor, Usage.kPositionOnly);
+        CANSparkMaxUtil.setCANSparkMaxBusUsage(angleMotor, Usage.kPositionOnly, angleMotor.isFollower());//not sure if boolean value is right
 
         CANCoderUtil.setCANCoderBusUsage(angleEncoder, CCUsage.kMinimal);
 
