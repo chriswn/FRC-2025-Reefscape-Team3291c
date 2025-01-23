@@ -25,6 +25,7 @@ public class SwerveDrive extends Command {
   private final DoubleSupplier rotationSupplier;
   private final BooleanSupplier robotCentricSupplier;
   private final BooleanSupplier backToggleSupplier;
+  private final BooleanSupplier isAuto;
   private int backToggleInt;
   private double rotationVal;
   private double translationVal;
@@ -43,7 +44,8 @@ public class SwerveDrive extends Command {
     DoubleSupplier strafeSupplier,
     DoubleSupplier rotationSupplier,
     BooleanSupplier robotCentricSupplier,
-    BooleanSupplier backToggleSupplier
+    BooleanSupplier backToggleSupplier,
+    BooleanSupplier isAuto
   ) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.visionSubsystem = visionSubsystem;
@@ -55,6 +57,7 @@ public class SwerveDrive extends Command {
     this.rotationSupplier = rotationSupplier;
     this.robotCentricSupplier = robotCentricSupplier;
     this.backToggleSupplier = backToggleSupplier;
+    this.isAuto = isAuto;
   }
 
   // Called when the command is initially scheduled.
@@ -137,6 +140,9 @@ public class SwerveDrive extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    if (isAuto.getAsBoolean() ) {
+      return true;
+    }
     return false;
   }
 }

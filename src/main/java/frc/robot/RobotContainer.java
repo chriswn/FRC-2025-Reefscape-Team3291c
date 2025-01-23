@@ -25,14 +25,14 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.Swerve;
-import frc.robot.commands.ColorChangingCMD;
-import frc.robot.commands.DriveToApriltag;
+//import frc.robot.commands.ColorChangingCMD;
+//import frc.robot.commands.DriveToApriltag;
 import frc.robot.commands.SwerveDrive;
-import frc.robot.commands.Auto.MN_MildAuto;
-import frc.robot.subsystems.PreferencesSubsystem;
+//import frc.robot.commands.Auto.MN_MildAuto;
+//import frc.robot.subsystems.PreferencesSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.ColorChanger;
+//import frc.robot.subsystems.ColorChanger;
 
 
 
@@ -47,7 +47,7 @@ import frc.robot.subsystems.ColorChanger;
 public class RobotContainer {
 
 
-private final SendableChooser<Command> autoChooser;
+  private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
   //controllers
   public CommandJoystick controller0 = new CommandJoystick(0);
   public CommandJoystick controller1 = new CommandJoystick(1);
@@ -61,15 +61,25 @@ private final SendableChooser<Command> autoChooser;
 
 
   //subsystems
-  public PreferencesSubsystem preferencesSubsystem = new PreferencesSubsystem();
-  public VisionSubsystem visionSubsystem = new VisionSubsystem();
-  public ColorChanger colorChanger = new ColorChanger();
+  //public PreferencesSubsystem preferencesSubsystem = new PreferencesSubsystem();
+   public VisionSubsystem visionSubsystem = new VisionSubsystem();
+  //public ColorChanger colorChanger = new ColorChanger();
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
 
   //commands
 
+  public Command driveForward = new SwerveDrive(
+    swerveSubsystem,
+    visionSubsystem,
+    () -> 0.5,
+    () -> 0,
+    () -> 0,
+    () -> false,
+    () -> false,
+    () -
+  );
   //Vision
-  public DriveToApriltag driveToApriltag = new DriveToApriltag(swerveSubsystem, visionSubsystem);
+  //public DriveToApriltag driveToApriltag = new DriveToApriltag(swerveSubsystem, visionSubsystem);
   
  
   //subsystems\\
@@ -80,8 +90,8 @@ private final SendableChooser<Command> autoChooser;
  // Subsystem initialization
     
         // Register Named Commands
-        NamedCommands.registerCommand("ColorChangingCMD", new ColorChangingCMD(colorChanger));
-        NamedCommands.registerCommand("DriveToApriltag", new DriveToApriltag(swerveSubsystem, visionSubsystem));
+        //NamedCommands.registerCommand("ColorChangingCMD", new ColorChangingCMD(colorChanger));
+        //NamedCommands.registerCommand("DriveToApriltag", new DriveToApriltag(swerveSubsystem, visionSubsystem));
 
     configureBindings();
 
@@ -93,10 +103,11 @@ private final SendableChooser<Command> autoChooser;
     //controller1.button(Constants.buttonList.start).whileTrue(driveToApriltag);
    
     //Autonomous
-    autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser.setDefaultOption("Basic Auto", driveForward);
+    //autoChooser = AutoBuilder.buildAutoChooser();
 
     
-  SmartDashboard.putData("AutoChooser", autoChooser);
+    SmartDashboard.putData("AutoChooser", autoChooser);
 
   }
 
@@ -128,10 +139,10 @@ private final SendableChooser<Command> autoChooser;
                                                                                              
   public Command getAutonomousCommand() {
     // TODO Auto-generated method stub
-   
     //return new PathPlannerAuto("Launch Auto");
     return autoChooser.getSelected();
     //return new MildAuto(swerveSubsystem);
+
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
