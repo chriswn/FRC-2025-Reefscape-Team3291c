@@ -28,6 +28,7 @@ import frc.robot.Constants.Swerve;
 import frc.robot.Constants.Swerve.Mod0;
 import frc.lib.Math.SwerveOpt;
 import frc.lib.config.*;
+import edu.wpi.first.wpilibj.Preferences;
 
 public class SwerveModule {
     // Module number identifier
@@ -77,7 +78,9 @@ public class SwerveModule {
 
     //feedforward - def for auto maybe for teleop
     private final SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(Swerve.ffkS, Swerve.ffkV, Swerve.ffkA);
-
+    private double angleKP = Swerve.angleKP;
+    private double angleKI = Swerve.angleKI;
+    private double angleKD = Swerve.angleKD;
 
     /**
      * 
@@ -90,12 +93,15 @@ public class SwerveModule {
 
         // This is the offset of the wheel in relation to the 0 position of the CANCoder.
         this.angleOffset  = moduleConstants.angleOffset;
-
+        
         // Initializing the angle motor PID Controller with PID values
         this.anglePid = new PIDController(
-            Swerve.angleKP,
-            Swerve.angleKI,
-            Swerve.angleKD
+            Preferences.getDouble("angleKP", angleKP),
+            Preferences.getDouble("angleKI", angleKI),
+            Preferences.getDouble("angleKD", angleKD)
+            // Swerve.angleKP,
+            // Swerve.angleKI,
+            // Swerve.angleKD
         );
 
         this.drivePid = new PIDController(
@@ -306,5 +312,35 @@ public class SwerveModule {
         //desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
         boolean invertDriveMotor = setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop, invertDriveMotor);
+    }
+    public void updatePreferences() {
+        if (Preferences.getDouble("angleKP", angleKP) != angleKP) {
+            angleKP = Preferences.getDouble("angleKP", angleKP);
+        } else {
+            Preferences.initDouble("angleKP", angleKP);
+        }
+
+        if (Preferences.getDouble("angleKI", angleKI) != angleKI) {
+            angleKI = Preferences.getDouble("angleKI", angleKI);
+        } else {
+            Preferences.initDouble("angleKI", angleKI);
+        }
+
+        if (Preferences.getDouble("angleKD", angleKD) != angleKD) {
+            angleKD = Preferences.getDouble("angleKD", angleKD);
+        } else {
+            Preferences.initDouble("angleKD", angleKD);
+        }
+
+        this.anglePid = new PIDController(
+            Preferences.getDouble("angleKP", angleKP),
+            Preferences.getDouble("angleKI", angleKI),
+            Preferences.getDouble("angleKD", angleKD)
+            // Swerve.angleKP,
+            // Swerve.angleKI,
+            // Swerve.angleKD
+        );
+        System.out.println("angleKP: ");
+        System.out.println(angleKP);
     }
 }

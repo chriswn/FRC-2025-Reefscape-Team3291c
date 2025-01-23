@@ -13,6 +13,8 @@ import com.pathplanner.lib.config.PIDConstants;
 //import com.pathplanner.lib.config.ReplanningConfig; replanning was removed
 import com.pathplanner.lib.config.RobotConfig;
 
+import edu.wpi.first.wpilibj.Preferences;
+
 import edu.wpi.first.math.estimator.KalmanFilter;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -79,6 +81,7 @@ public class SwerveSubsystem extends SubsystemBase {
       new SwerveModule(0, Swerve.Mod0.constants), //--
     };
 
+    
 
     resetToAbsolute();
 
@@ -291,6 +294,7 @@ public ChassisSpeeds getSpeeds() {
       SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
       SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
       SmartDashboard.putNumber("mod " + mod.moduleNumber + " converted enocder values in meters", mod.getPosition().distanceMeters);
+      mod.updatePreferences();
     }
     SmartDashboard.putNumber(("GYRO"), getYaw().getDegrees());
     SmartDashboard.putNumber("filterGyro", filterGyro().getDegrees());
