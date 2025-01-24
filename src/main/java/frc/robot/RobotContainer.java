@@ -76,7 +76,7 @@ public class RobotContainer {
     () -> 0,
     () -> false,
     () -> false,
-    () -
+    () -> false
   );
   //Vision
   //public DriveToApriltag driveToApriltag = new DriveToApriltag(swerveSubsystem, visionSubsystem);
@@ -131,7 +131,8 @@ public class RobotContainer {
         () -> -controller0.getRawAxis(0),
         () -> controller0.getRawAxis(4),
         () -> robotCentricButton.getAsBoolean(),
-        () -> backToggleButton.getAsBoolean()
+        () -> backToggleButton.getAsBoolean(),
+        () -> false
       )
     );
 

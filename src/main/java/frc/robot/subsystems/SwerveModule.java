@@ -313,29 +313,25 @@ public class SwerveModule {
         boolean invertDriveMotor = setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop, invertDriveMotor);
     }
+    private void updatePreference(String stringVal, Double numVal) {
+        if (Preferences.containsKey(stringVal)) {
+            if (Preferences.getDouble(stringVal, numVal) != numVal) {
+                angleKP = Preferences.getDouble(stringVal, numVal);
+            }
+        } else {
+            Preferences.initDouble(stringVal, numVal);
+        }
+    }
     public void updatePreferences() {
-        if (Preferences.getDouble("angleKP", angleKP) != angleKP) {
-            angleKP = Preferences.getDouble("angleKP", angleKP);
-        } else {
-            Preferences.initDouble("angleKP", angleKP);
-        }
-
-        if (Preferences.getDouble("angleKI", angleKI) != angleKI) {
-            angleKI = Preferences.getDouble("angleKI", angleKI);
-        } else {
-            Preferences.initDouble("angleKI", angleKI);
-        }
-
-        if (Preferences.getDouble("angleKD", angleKD) != angleKD) {
-            angleKD = Preferences.getDouble("angleKD", angleKD);
-        } else {
-            Preferences.initDouble("angleKD", angleKD);
-        }
+        
+        updatePreference("angleKP", angleKP);
+        updatePreference("angleKI", angleKI);
+        updatePreference("angleKD", angleKD);
 
         this.anglePid = new PIDController(
-            Preferences.getDouble("angleKP", angleKP),
-            Preferences.getDouble("angleKI", angleKI),
-            Preferences.getDouble("angleKD", angleKD)
+            angleKP,
+            angleKI,
+            angleKD
             // Swerve.angleKP,
             // Swerve.angleKI,
             // Swerve.angleKD
