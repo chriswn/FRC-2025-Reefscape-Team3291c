@@ -64,7 +64,7 @@ public class RobotContainer {
   //public PreferencesSubsystem preferencesSubsystem = new PreferencesSubsystem();
    public VisionSubsystem visionSubsystem = new VisionSubsystem();
   //public ColorChanger colorChanger = new ColorChanger();
-  private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
 
   //commands
 
@@ -76,7 +76,7 @@ public class RobotContainer {
     () -> 0,
     () -> false,
     () -> false,
-    () -
+    () -> false
   );
   //Vision
   //public DriveToApriltag driveToApriltag = new DriveToApriltag(swerveSubsystem, visionSubsystem);
@@ -94,25 +94,31 @@ public class RobotContainer {
         //NamedCommands.registerCommand("DriveToApriltag", new DriveToApriltag(swerveSubsystem, visionSubsystem));
 
     configureBindings();
-
-    //Controller 0
-
-
-    //Controller1
-
-    //controller1.button(Constants.buttonList.start).whileTrue(driveToApriltag);
-   
-    //Autonomous
-    autoChooser.setDefaultOption("Basic Auto", driveForward);
-    //autoChooser = AutoBuilder.buildAutoChooser();
-
     
-    SmartDashboard.putData("AutoChooser", autoChooser);
-
-  }
-
-
-  /**
+        //Controller 0
+    
+    
+        //Controller1
+    
+        //controller1.button(Constants.buttonList.start).whileTrue(driveToApriltag);
+       
+        //Autonomous
+        //autoChooser.setDefaultOption("Basic Auto", driveForward);
+        //autoChooser = AutoBuilder.buildAutoChooser();
+    
+        
+        SmartDashboard.putData("AutoChooser", autoChooser);
+    
+      }
+    
+    
+      // private void configureBindings() {
+      //   // TODO Auto-generated method stub
+      //   throw new UnsupportedOperationException("Unimplemented method 'configureBindings'");
+      // }
+    
+    
+      /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
    * predicate, or via the named factories in {@link
@@ -122,7 +128,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
+    // Schedule `ExampleCommand` when `exampleCondition` chages to `true`
     swerveSubsystem.setDefaultCommand(
       new SwerveDrive(
         swerveSubsystem,
@@ -131,7 +137,8 @@ public class RobotContainer {
         () -> -controller0.getRawAxis(0),
         () -> controller0.getRawAxis(4),
         () -> robotCentricButton.getAsBoolean(),
-        () -> backToggleButton.getAsBoolean()
+        () -> backToggleButton.getAsBoolean(),
+        () -> false
       )
     );
 
