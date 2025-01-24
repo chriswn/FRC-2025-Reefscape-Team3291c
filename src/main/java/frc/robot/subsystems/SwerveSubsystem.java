@@ -294,7 +294,7 @@ public ChassisSpeeds getSpeeds() {
       SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getState().angle.getDegrees());
       SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
       SmartDashboard.putNumber("mod " + mod.moduleNumber + " converted enocder values in meters", mod.getPosition().distanceMeters);
-      mod.updatePreferences();
+      //mod.updatePreferences();
     }
     SmartDashboard.putNumber(("GYRO"), getYaw().getDegrees());
     SmartDashboard.putNumber("filterGyro", filterGyro().getDegrees());

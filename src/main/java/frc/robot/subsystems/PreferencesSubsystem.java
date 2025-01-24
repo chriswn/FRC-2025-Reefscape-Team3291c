@@ -58,9 +58,9 @@
 //     }
 
 
-    if (Preferences.getDouble("stowAngle", stowAngle) != stowAngle) {
-      stowAngle = Preferences.getDouble("stowAngle", stowAngle);
-    }
+    // if (Preferences.getDouble("stowAngle", stowAngle) != stowAngle) {
+    //   stowAngle = Preferences.getDouble("stowAngle", stowAngle);
+    // }
 
 
 //     if (Preferences.getDouble("sourceAngle", sourceAngle) != sourceAngle) {

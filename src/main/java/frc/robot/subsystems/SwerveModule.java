@@ -95,13 +95,19 @@ public class SwerveModule {
         this.angleOffset  = moduleConstants.angleOffset;
         
         // Initializing the angle motor PID Controller with PID values
+        // this.anglePid = new PIDController(
+        //     // Preferences.getDouble("angleKP", angleKP),
+        //     // Preferences.getDouble("angleKI", angleKI),
+        //     // Preferences.getDouble("angleKD", angleKD)
+        //     // Swerve.angleKP,
+        //     // Swerve.angleKI,
+        //     // Swerve.angleKD
+        // );
+
         this.anglePid = new PIDController(
-            Preferences.getDouble("angleKP", angleKP),
-            Preferences.getDouble("angleKI", angleKI),
-            Preferences.getDouble("angleKD", angleKD)
-            // Swerve.angleKP,
-            // Swerve.angleKI,
-            // Swerve.angleKD
+            Swerve.angleKP,
+            Swerve.angleKI,
+            Swerve.angleKD
         );
 
         this.drivePid = new PIDController(
@@ -313,34 +319,34 @@ public class SwerveModule {
         boolean invertDriveMotor = setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop, invertDriveMotor);
     }
-    public void updatePreferences() {
-        if (Preferences.getDouble("angleKP", angleKP) != angleKP) {
-            angleKP = Preferences.getDouble("angleKP", angleKP);
-        } else {
-            Preferences.initDouble("angleKP", angleKP);
-        }
+    // public void updatePreferences() {
+    //     if (Preferences.getDouble("angleKP", angleKP) != angleKP) {
+    //         angleKP = Preferences.getDouble("angleKP", angleKP);
+    //     } else {
+    //         Preferences.initDouble("angleKP", angleKP);
+    //     }
 
-        if (Preferences.getDouble("angleKI", angleKI) != angleKI) {
-            angleKI = Preferences.getDouble("angleKI", angleKI);
-        } else {
-            Preferences.initDouble("angleKI", angleKI);
-        }
+    //     if (Preferences.getDouble("angleKI", angleKI) != angleKI) {
+    //         angleKI = Preferences.getDouble("angleKI", angleKI);
+    //     } else {
+    //         Preferences.initDouble("angleKI", angleKI);
+    //     }
 
-        if (Preferences.getDouble("angleKD", angleKD) != angleKD) {
-            angleKD = Preferences.getDouble("angleKD", angleKD);
-        } else {
-            Preferences.initDouble("angleKD", angleKD);
-        }
+    //     if (Preferences.getDouble("angleKD", angleKD) != angleKD) {
+    //         angleKD = Preferences.getDouble("angleKD", angleKD);
+    //     } else {
+    //         Preferences.initDouble("angleKD", angleKD);
+    //     }
 
-        this.anglePid = new PIDController(
-            Preferences.getDouble("angleKP", angleKP),
-            Preferences.getDouble("angleKI", angleKI),
-            Preferences.getDouble("angleKD", angleKD)
-            // Swerve.angleKP,
-            // Swerve.angleKI,
-            // Swerve.angleKD
-        );
-        System.out.println("angleKP: ");
-        System.out.println(angleKP);
-    }
+    //     this.anglePid = new PIDController(
+    //         Preferences.getDouble("angleKP", angleKP),
+    //         Preferences.getDouble("angleKI", angleKI),
+    //         Preferences.getDouble("angleKD", angleKD)
+    //         // Swerve.angleKP,
+    //         // Swerve.angleKI,
+    //         // Swerve.angleKD
+    //     );
+    //     System.out.println("angleKP: ");
+    //     System.out.println(angleKP);
+    // }
 }
