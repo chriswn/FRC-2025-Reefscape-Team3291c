@@ -338,15 +338,15 @@ public class SwerveModule {
     //         Preferences.initDouble("angleKD", angleKD);
     //     }
 
-    //     this.anglePid = new PIDController(
-    //         Preferences.getDouble("angleKP", angleKP),
-    //         Preferences.getDouble("angleKI", angleKI),
-    //         Preferences.getDouble("angleKD", angleKD)
-    //         // Swerve.angleKP,
-    //         // Swerve.angleKI,
-    //         // Swerve.angleKD
-    //     );
-    //     System.out.println("angleKP: ");
-    //     System.out.println(angleKP);
-    // }
+        this.anglePid = new PIDController(
+            angleKP,
+            angleKI,
+            angleKD
+            // Swerve.angleKP,
+            // Swerve.angleKI,
+            // Swerve.angleKD
+        );
+        System.out.println("angleKP: ");
+        System.out.println(angleKP);
+    }
 }
