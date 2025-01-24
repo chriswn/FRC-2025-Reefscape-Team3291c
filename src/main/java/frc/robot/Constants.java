@@ -164,9 +164,9 @@ public final class Constants {
     public static final boolean canCoderInvert = false;
 
     // Angle Motor PID Values
-    public static final double angleKP = 0;//0.003; //play around with/tune this later 
+    public static final double angleKP = 0.0004;//0.003; //play around with/tune this later 
     public static final double angleKI = 0;//0.0000001;
-    public static final double angleKD = 0;//0.0001;
+    public static final double angleKD = 0.00001;
     public static final double angleKFF = 0;//0.0;
 
     // Drive Motor PID Values

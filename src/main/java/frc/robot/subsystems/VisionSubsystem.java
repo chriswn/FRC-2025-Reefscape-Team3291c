@@ -35,7 +35,7 @@ public class VisionSubsystem extends SubsystemBase {
     public double dkD = 0.0001;
 
     public PIDController AimvisionPID;
-        public PIDController distancePID;
+    public PIDController distancePID;
 
    // public CANSparkMax testMotor;
 
