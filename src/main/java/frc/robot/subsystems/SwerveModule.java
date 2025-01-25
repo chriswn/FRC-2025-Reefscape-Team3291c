@@ -93,12 +93,14 @@ public class SwerveModule {
 
         // This is the offset of the wheel in relation to the 0 position of the CANCoder.
         this.angleOffset  = moduleConstants.angleOffset;
-        
+        Preferences.initDouble("angleKP", angleKP);
+        Preferences.initDouble("angleKI", angleKI);
+        Preferences.initDouble("angleKD", angleKD);
         // Initializing the angle motor PID Controller with PID values
         this.anglePid = new PIDController(
-            Preferences.getDouble("angleKP", angleKP),
-            Preferences.getDouble("angleKI", angleKI),
-            Preferences.getDouble("angleKD", angleKD)
+            angleKP,
+            angleKI,
+            angleKD
             // Swerve.angleKP,
             // Swerve.angleKI,
             // Swerve.angleKD
@@ -235,6 +237,8 @@ public class SwerveModule {
         // The following logic calculates the the different between the desired angle of the
         // swerve module to the desired angle. The final result will be some number
         // in the range [-180, 180]
+        SmartDashboard.putNumber("SwerveDesiredDegrees", desiredDegrees);
+        SmartDashboard.putNumber("SwerveCurrentDegrees", currentDegrees);
         double diff = (currentDegrees - desiredDegrees + 180) % 360 - 180;
         diff = diff < -180 ? diff + 360 : diff;
         diff = diff > 180 ? diff - 360 : diff;
@@ -313,20 +317,17 @@ public class SwerveModule {
         boolean invertDriveMotor = setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop, invertDriveMotor);
     }
-    private void updatePreference(String stringVal, Double numVal) {
-        if (Preferences.containsKey(stringVal)) {
-            if (Preferences.getDouble(stringVal, numVal) != numVal) {
-                angleKP = Preferences.getDouble(stringVal, numVal);
-            }
-        } else {
-            Preferences.initDouble(stringVal, numVal);
+    private double updatePreference(String stringVal, Double numVal) {
+        if (Preferences.getDouble(stringVal, numVal) != numVal) {
+            numVal = Preferences.getDouble(stringVal, numVal);
         }
+        return numVal;
     }
     public void updatePreferences() {
         
-        updatePreference("angleKP", angleKP);
-        updatePreference("angleKI", angleKI);
-        updatePreference("angleKD", angleKD);
+        angleKP = updatePreference("angleKP", angleKP);
+        angleKI = updatePreference("angleKI", angleKI);
+        angleKD = updatePreference("angleKD", angleKD);
 
         this.anglePid = new PIDController(
             angleKP,
@@ -336,7 +337,8 @@ public class SwerveModule {
             // Swerve.angleKI,
             // Swerve.angleKD
         );
-        System.out.println("angleKP: ");
-        System.out.println(angleKP);
+        SmartDashboard.putNumber("angleKP var", angleKP);
+        SmartDashboard.putNumber("angleKI var", angleKI);
+        SmartDashboard.putNumber("angleKD var", angleKD);
     }
 }

@@ -122,7 +122,7 @@ public class SwerveDrive extends Command {
     }
     swerveSubsystem.drive(
       new Translation2d(-translationVal, strafeVal).times(Swerve.maxSpeed), 
-      this.rotationVal * Swerve.maxAngularVelocity, 
+      this.rotationVal * Swerve.maxAngularVelocity * Swerve.rotationalMultiplier, 
       robotCentricSupplier.getAsBoolean(),
       true
     );
