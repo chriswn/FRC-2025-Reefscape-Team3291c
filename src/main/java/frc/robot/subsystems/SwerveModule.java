@@ -97,6 +97,15 @@ public class SwerveModule {
         Preferences.initDouble("angleKI", angleKI);
         Preferences.initDouble("angleKD", angleKD);
         // Initializing the angle motor PID Controller with PID values
+        // this.anglePid = new PIDController(
+        //     // Preferences.getDouble("angleKP", angleKP),
+        //     // Preferences.getDouble("angleKI", angleKI),
+        //     // Preferences.getDouble("angleKD", angleKD)
+        //     // Swerve.angleKP,
+        //     // Swerve.angleKI,
+        //     // Swerve.angleKD
+        // );
+
         this.anglePid = new PIDController(
             angleKP,
             angleKI,
