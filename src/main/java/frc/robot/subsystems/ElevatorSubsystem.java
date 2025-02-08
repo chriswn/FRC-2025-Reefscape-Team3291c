@@ -33,7 +33,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public DutyCycleEncoder elevatorEncoder;
   public DigitalInput elevatorLimitSwitch;
-  public PIDController pidController;
+  //public PIDController pidController;
   public SparkMax elevatorMotorLeader;
   public SparkMax elevatorMotorFollower;
   public TrapezoidProfile.Constraints trapezoidConstraints;
@@ -85,12 +85,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     // this.pidController.setP(Constants.Elevator.elevatorPID.kp);
 
 
-    this.pidController.enableContinuousInput(0, 360);
+    //this.pidController.enableContinuousInput(0, 360);
    
 
 
-    this.elevatorMotorLeader = new SparkMax(Constants.Elevator.motorFollowerID, SparkLowLevel.MotorType.kBrushless);
-    this.elevatorMotorFollower = new SparkMax(Constants.Elevator.motorLeadID, SparkLowLevel.MotorType.kBrushless);
+    this.elevatorMotorLeader = new SparkMax(Constants.Elevator.motorLeadID, SparkLowLevel.MotorType.kBrushless);
+    this.elevatorMotorFollower = new SparkMax(Constants.Elevator.motorFollowerID, SparkLowLevel.MotorType.kBrushless);
     this.followerConfig = new SparkMaxConfig();
     this.followerConfig.follow(elevatorMotorLeader);
     
@@ -141,9 +141,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("updatedheight", height);
 
     double elevator_floor_voltage = profiledPIDController.calculate(height, desired_height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
-
+    SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
+    SmartDashboard.putNumber("elevator floor voltage", elevator_floor_voltage);
     // If the Floor is at exactly 0.0, it's probably not connected, so disable it
-    SmartDashboard.putNumber("pid output", elevator_floor_voltage);
     System.out.println("error: " + elevator_floor_voltage);
 
     //double adjustedElevatorfloorVoltage = 10 - Math.abs(elevator_floor_voltage);
@@ -207,16 +207,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     System.out.println("height target: " + desired_height);
     System.out.println("final voltage: " + giveVoltage(goal, elevatorEncoder.get()) + "\n\n");
     double voltage = giveVoltage(goal, elevatorEncoder.get());
-    if (elevatorEncoder.get() < 100 && voltage == -Constants.Elevator.maxVoltage) {
-      elevatorMotorLeader.setVoltage(Constants.Elevator.maxVoltage);
-    }
-    else if (elevatorEncoder.get() > 300) {
-      elevatorMotorLeader.setVoltage(-Constants.Elevator.maxVoltage);
 
-
-    } else {
-      elevatorMotorLeader.setVoltage(voltage);
-    }
+    elevatorMotorLeader.setVoltage(voltage);
+    
    
     SmartDashboard.putNumber("getVoltage", voltage);
     System.out.println("s");
