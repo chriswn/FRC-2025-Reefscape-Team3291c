@@ -18,7 +18,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.Elevator;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.ElevatorCMDs.GoToGround;
+import frc.robot.commands.ElevatorCMDs.GoToTop;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -40,6 +44,10 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve3291"));
+
+  private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private final Command elevatorGoToTop = new GoToTop(elevatorSubsystem);
+  private final Command elevatorGoToGround = new GoToGround(elevatorSubsystem);
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -180,6 +188,9 @@ public class RobotContainer {
       driverXbox.leftBumper().onTrue(Commands.none());
       driverXbox.rightBumper().onTrue(Commands.none());
     } else {
+      driverXbox.povDown().whileTrue(elevatorGoToGround);
+      driverXbox.povUp().whileTrue(elevatorGoToTop);
+      
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driverXbox.b().whileTrue(

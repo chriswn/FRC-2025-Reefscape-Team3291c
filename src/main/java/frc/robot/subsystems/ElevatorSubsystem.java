@@ -57,17 +57,23 @@ public class ElevatorSubsystem extends SubsystemBase {
   private double elevatorkp = Constants.Elevator.PID.kp;
   private double elevatorki = Constants.Elevator.PID.ki;
   private double elevatorkd = Constants.Elevator.PID.kd;
+  private double elevatorks = Constants.Elevator.ks;
+  private double elevatorkg = Constants.Elevator.kg;
+  private double elevatorkv = Constants.Elevator.kv;
+  private double elevatorka = Constants.Elevator.ka;
 
 
   SparkMaxConfig followerConfig;
   SparkMaxConfig leaderConfig;
 
   public ElevatorSubsystem() {
-    
-
     Preferences.initDouble("elevatorkp", elevatorkp);
     Preferences.initDouble("elevatorki", elevatorki);
     Preferences.initDouble("elevatorkd", elevatorkd);
+    Preferences.initDouble("elevatorks", elevatorks);
+    Preferences.initDouble("elevatorkg", elevatorkg);
+    Preferences.initDouble("elevatorkv", elevatorkv);
+    Preferences.initDouble("elevatorka", elevatorka);
 
     this.elevatorEncoder = new DutyCycleEncoder(Constants.Elevator.encoderID);
     this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
@@ -85,8 +91,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     this.elevatorMotorLeader = new SparkMax(Constants.Elevator.motorFollowerID, SparkLowLevel.MotorType.kBrushless);
     this.elevatorMotorFollower = new SparkMax(Constants.Elevator.motorLeadID, SparkLowLevel.MotorType.kBrushless);
-    followerConfig = new SparkMaxConfig();
-    followerConfig.follow(elevatorMotorLeader);
+    this.followerConfig = new SparkMaxConfig();
+    this.followerConfig.follow(elevatorMotorLeader);
     
     this.elevatorMotorFollower.configure(followerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -100,21 +106,29 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     this.profiledPIDController = new ProfiledPIDController(Constants.Elevator.PID.kp, Constants.Elevator.PID.ki, Constants.Elevator.PID.kd, this.trapezoidConstraints);
     this.profiledPIDController.setGoal(0);
+    this.profiledPIDController.setTolerance(Constants.Elevator.tolerance);
   }
 
 
   public void loadPreferences() {
+    if (Preferences.getDouble("elevatorka", elevatorka) != elevatorka || Preferences.getDouble("elevatorkv", elevatorkv) != elevatorkv || Preferences.getDouble("elevatorkg", elevatorkg) != elevatorkg || Preferences.getDouble("elevatorks", elevatorks) != elevatorks) {
+      elevatorka = Preferences.getDouble("elevatorka", elevatorka);
+      elevatorkv = Preferences.getDouble("elevatorkv", elevatorkv);
+      elevatorkg = Preferences.getDouble("elevatorkg", elevatorkg);
+      elevatorks = Preferences.getDouble("elevatorks", elevatorks);
+      elevatorFeedforward = new ElevatorFeedforward(elevatorks, elevatorkg, elevatorkv, elevatorka);
+    }
     if (Preferences.getDouble("elevatorkp", elevatorkp) != elevatorkp) {
       elevatorkp = Preferences.getDouble("elevatorkp", elevatorkp);
-      pidController.setP(elevatorkp);
+      profiledPIDController.setP(elevatorkp);
     }
     if (Preferences.getDouble("elevatorki", elevatorki) != elevatorki) {
       elevatorkp = Preferences.getDouble("elevatorki", elevatorki);
-      pidController.setI(elevatorki);
+      profiledPIDController.setI(elevatorki);
     }
     if (Preferences.getDouble("elevatorkd", elevatorkd) != elevatorkd) {
       elevatorkp = Preferences.getDouble("elevatorkd", elevatorkd);
-      pidController.setD(elevatorkd);
+      profiledPIDController.setD(elevatorkd);
     }
   }
 
@@ -134,7 +148,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //double adjustedElevatorfloorVoltage = 10 - Math.abs(elevator_floor_voltage);
     double adjustedElevatorFloorVoltage = elevator_floor_voltage; //error reversed for voltage
-    if (elevatorEncoder.get() == 0.0) {
+    if (!elevatorEncoder.isConnected()) {
       adjustedElevatorFloorVoltage = 0.0;
     }
     if (adjustedElevatorFloorVoltage > Constants.Elevator.maxVoltage) {
@@ -152,7 +166,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorMotorLeader.set(0);
   }
 
-  public double floorTargetToheight(FloorTarget target) {
+  public double floorTargetToHeight(FloorTarget target) {
     switch (target) {
       case GROUND_FLOOR:
         return Constants.Elevator.groundFloor;
@@ -160,36 +174,37 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Constants.Elevator.topFloor;
       default:
         // "Safe" default
-        return 180;
+        return Constants.Elevator.groundFloor;
     }
   }
 
    //check if at floor
   public boolean elevatorAtGroundFloor() {
     boolean value = false;
-    if (elevatorEncoder.get() < Constants.Elevator.groundFloor + Constants.Elevator.groundFloor && elevatorEncoder.get() > Constants.Elevator.groundFloor - Constants.Elevator.groundFloor) {
+    if (elevatorEncoder.get() < Constants.Elevator.groundFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.groundFloor - Constants.Elevator.deadband) {
       value = true;
     }
     return value;
   }
   public boolean elevatorAtTopFloor() {
     boolean value = false;
-    if (elevatorEncoder.get() < Constants.Elevator.topFloor + Constants.Elevator.topFloor && elevatorEncoder.get() > Constants.Elevator.topFloor - Constants.Elevator.topFloor) {
+    if (elevatorEncoder.get() < Constants.Elevator.topFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.topFloor - Constants.Elevator.deadband) {
       value = true;
     }
     return value;
   }
+  public void setTarget(FloorTarget target) {
+    floor_target = target;
+  }
 
-
-  public void goToGround() {
+  public void goToPosition() {
     //  if (getElevatorHasNote()) {
     //   goToStow();
     // }
-    floor_target = FloorTarget.GROUND_FLOOR;
-    double desired_height = Constants.Elevator.groundFloor;
+    double desired_height = floorTargetToHeight(floor_target);
     goal = new TrapezoidProfile.State(desired_height, 0);
 
-    System.out.println("stow height target: " + desired_height);
+    System.out.println("height target: " + desired_height);
     System.out.println("final voltage: " + giveVoltage(goal, elevatorEncoder.get()) + "\n\n");
     double voltage = giveVoltage(goal, elevatorEncoder.get());
     if (elevatorEncoder.get() < 100 && voltage == -Constants.Elevator.maxVoltage) {
@@ -207,13 +222,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     System.out.println("s");
   }
 
-
-
-
-
-
   @Override
   public void periodic() {
+    goToPosition();
     loadPreferences();
     //This method will be called once per scheduler run
     SmartDashboard.putNumber("encoder reading", elevatorEncoder.get());

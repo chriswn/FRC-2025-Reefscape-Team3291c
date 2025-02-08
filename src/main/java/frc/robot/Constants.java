@@ -42,7 +42,7 @@ public final class Constants {
 
   
   public static class Elevator {
-    public static final double deadband = 5;
+    public static final double deadband = 0.02;
 
     public static final double maxVelocity = 0.3;
     public static final double maxAcceleration = 0.3;
@@ -51,15 +51,17 @@ public final class Constants {
     public static final double kv = 0;
     public static final double ka = 0;
 
+    public static final double tolerance = 0.05;
+
     public static class PID {
-      public static final double kp = 0.1;
+      public static final double kp = 0.0;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
     }
 
     //ids
     public static final int encoderID = 0; //Changed due to change
-    public static final int motorLeadID = 20;
+    public static final int motorLeadID = 26;
     public static final int motorFollowerID = 22;
     public static final int topLimitSwitchID = 9;
 
@@ -103,10 +105,10 @@ public final class Constants {
     public static final double k_pivotEncoderOffset = 230;
 
     //angles
-    public static final double groundAngle = 167 - -35;//doesn't like 0
-    public static final double stowAngle = 167 - 164;
-    public static final double sourceAngle = 167 - 55;
-    public static final double ampAngle = 167 - 95;
+    public static final double groundAngle = 167;//doesn't like 0
+    public static final double stowAngle = 167;
+    public static final double sourceAngle = 167;
+    public static final double ampAngle = 95;
 
     public static final double maxPivotVoltage = 5;
 

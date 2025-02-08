@@ -105,7 +105,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
     //double adjustedIntakePivotVoltage = 10 - Math.abs(Intake_pivot_voltage);
     double adjustedIntakePivotVoltage = Intake_pivot_voltage; //error reversed for voltage
-    if (IntakeEncoder.get() == 0.0) {
+    if (!IntakeEncoder.isConnected()) {
       adjustedIntakePivotVoltage = 0.0;
     }
     if (adjustedIntakePivotVoltage > Constants.Intake.maxPivotVoltage) {
@@ -188,7 +188,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     //   goToStow();
     // }
     pivot_target = PivotTarget.GROUND;
-    double pivot_angle = Constants.Intake.groundAngle;
+    double pivot_angle = pivotTargetToAngle(pivot_target);
     System.out.println("stow angle target: " + pivot_angle);
     System.out.println("final voltage: " + giveVoltage(pivot_angle, getCurrentAngle()) + "\n\n");
     double voltage = giveVoltage(pivot_angle, getCurrentAngle());
