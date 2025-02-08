@@ -144,7 +144,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
     SmartDashboard.putNumber("elevator floor voltage", elevator_floor_voltage);
     // If the Floor is at exactly 0.0, it's probably not connected, so disable it
-    System.out.println("error: " + elevator_floor_voltage);
 
     //double adjustedElevatorfloorVoltage = 10 - Math.abs(elevator_floor_voltage);
     double adjustedElevatorFloorVoltage = elevator_floor_voltage; //error reversed for voltage
@@ -158,7 +157,6 @@ public class ElevatorSubsystem extends SubsystemBase {
       adjustedElevatorFloorVoltage = -Constants.Elevator.maxVoltage;
     }
 
-    System.out.println("final voltage: " + adjustedElevatorFloorVoltage);
     return adjustedElevatorFloorVoltage;
   }
  
@@ -204,15 +202,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     double desired_height = floorTargetToHeight(floor_target);
     goal = new TrapezoidProfile.State(desired_height, 0);
 
-    System.out.println("height target: " + desired_height);
-    System.out.println("final voltage: " + giveVoltage(goal, elevatorEncoder.get()) + "\n\n");
     double voltage = giveVoltage(goal, elevatorEncoder.get());
 
     elevatorMotorLeader.setVoltage(voltage);
     
    
     SmartDashboard.putNumber("getVoltage", voltage);
-    System.out.println("s");
   }
 
   @Override
