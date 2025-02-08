@@ -133,14 +133,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  public double giveVoltage(TrapezoidProfile.State desired_height, double current_height) {
+  public double giveVoltage(TrapezoidProfile.State desired_height, double height) {
     // Floor control
-    SmartDashboard.putNumber("originalheight", current_height);
    
-    //double height = Math.abs(360 - current_height); //reverses it
-    double height = current_height;
-    SmartDashboard.putNumber("updatedheight", height);
-
     double elevator_floor_voltage = profiledPIDController.calculate(height, desired_height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
     SmartDashboard.putNumber("elevator floor voltage", elevator_floor_voltage);
@@ -148,9 +143,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //double adjustedElevatorfloorVoltage = 10 - Math.abs(elevator_floor_voltage);
     double adjustedElevatorFloorVoltage = elevator_floor_voltage; //error reversed for voltage
-    if (elevatorEncoder.get() == 0.0) {
-      adjustedElevatorFloorVoltage = 0.0;
-    }
+
     if (adjustedElevatorFloorVoltage > Constants.Elevator.maxVoltage) {
       adjustedElevatorFloorVoltage = Constants.Elevator.maxVoltage;
     }
