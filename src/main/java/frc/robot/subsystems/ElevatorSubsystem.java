@@ -19,6 +19,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -75,7 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     Preferences.initDouble("elevatorkv", elevatorkv);
     Preferences.initDouble("elevatorka", elevatorka);
 
-    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderID);
+    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, false, Encoder.EncodingType.k1X);
     this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
 
 
@@ -147,7 +148,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //double adjustedElevatorfloorVoltage = 10 - Math.abs(elevator_floor_voltage);
     double adjustedElevatorFloorVoltage = elevator_floor_voltage; //error reversed for voltage
-    if (!elevatorEncoder.isConnected()) {
+    if (elevatorEncoder.get() == 0.0) {
       adjustedElevatorFloorVoltage = 0.0;
     }
     if (adjustedElevatorFloorVoltage > Constants.Elevator.maxVoltage) {

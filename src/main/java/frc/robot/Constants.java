@@ -60,7 +60,8 @@ public final class Constants {
     }
 
     //ids
-    public static final int encoderID = 0; //Changed due to change
+    public static final int encoderAID = 0;
+    public static final int encoderBID = 1;
     public static final int motorLeadID = 26;
     public static final int motorFollowerID = 22;
     public static final int topLimitSwitchID = 9;
