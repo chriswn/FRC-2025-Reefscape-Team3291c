@@ -31,7 +31,7 @@ import frc.robot.Constants;
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
 
-  public DutyCycleEncoder elevatorEncoder;
+  public Encoder elevatorEncoder;
   public DigitalInput elevatorLimitSwitch;
   //public PIDController pidController;
   public SparkMax elevatorMotorLeader;
@@ -75,7 +75,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     Preferences.initDouble("elevatorkv", elevatorkv);
     Preferences.initDouble("elevatorka", elevatorka);
 
-    this.elevatorEncoder = new DutyCycleEncoder(Constants.Elevator.encoderID);
+    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderID);
     this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
 
 
