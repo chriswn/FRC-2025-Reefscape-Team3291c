@@ -8,7 +8,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.Constants;
-import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.LimelightHelpers;
 import frc.robot.subsystems.LimelightHelpers.LimelightResults;
 import frc.robot.subsystems.LimelightHelpers.LimelightTarget_Fiducial;
@@ -103,32 +102,32 @@ public double proportionalAiming() {
   }
 
   //formula to get the distance from a certain point, to then use in percise movement (you lowkey could just use the formula above but like this works too)
-  public double getDistanceToSpeaker() {
-    double ty = LimelightHelpers.getTY("limelight");
-    double targetOffsetAngle_Vertical = ty;//offset from the crosshair
+  // public double getDistanceToSpeaker() {
+  //   double ty = LimelightHelpers.getTY("limelight");
+  //   double targetOffsetAngle_Vertical = ty;//offset from the crosshair
 
-    double desiredDistanceInches = Constants.Vision.desiredDistanceSpeakerInches;//the subwoofer + 6 inches 
+  //   double desiredDistanceInches = Constants.Vision.desiredDistanceSpeakerInches;//the subwoofer + 6 inches 
 
-    // how many degrees back is your limelight rotated from perfectly vertical?
-    double limelightMountAngleDegrees = Constants.Vision.limelightMountAngleDegrees;
+  //   // how many degrees back is your limelight rotated from perfectly vertical?
+  //   double limelightMountAngleDegrees = Constants.Vision.limelightMountAngleDegrees;
 
-    // distance from the center of the Limelight lens to the floor
-    double limelightLensHeightInches = Constants.Vision.limelightLensHeightInches;
+  //   // distance from the center of the Limelight lens to the floor
+  //   double limelightLensHeightInches = Constants.Vision.limelightLensHeightInches;
 
-    // distance from the target to the floor
-    double goalHeightInches = Constants.Vision.goalHeightInches; //accounts for the lowest edge of the speaker's hood
+  //   // distance from the target to the floor
+  //   double goalHeightInches = Constants.Vision.goalHeightInches; //accounts for the lowest edge of the speaker's hood
 
-    //mounting angle plus the offset from the crosshair which should maybe be inverted?
-    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+  //   //mounting angle plus the offset from the crosshair which should maybe be inverted?
+  //   double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+  //   double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-    //calculate distance
-    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
-    //calculate motor output to go to desired distance smooooothly (little extra might just need the p but like why not)
-    double distance = distancePID.calculate(distanceFromLimelightToGoalInches, desiredDistanceInches);
-    //return that distance!!!!
-    return distance;
-  }
+  //   //calculate distance
+  //   double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+  //   //calculate motor output to go to desired distance smooooothly (little extra might just need the p but like why not)
+  //   double distance = distancePID.calculate(distanceFromLimelightToGoalInches, desiredDistanceInches);
+  //   //return that distance!!!!
+  //   return distance;
+  // }
   // public double getDistanceToAmp() {
   //   double ty = LimelightHelpers.getTY("limelight");
   //   double targetOffsetAngle_Vertical = ty;//offset from the crosshair
