@@ -76,7 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     Preferences.initDouble("elevatorkv", elevatorkv);
     Preferences.initDouble("elevatorka", elevatorka);
 
-    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, false, Encoder.EncodingType.k1X);
+    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, false, Encoder.EncodingType.k2X);//will reverse with gear box
     this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
 
 
@@ -135,7 +135,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public double giveVoltage(TrapezoidProfile.State desired_height, double height) {
     // Floor control
-   
+    height /= 4096;
+    SmartDashboard.putNumber("adjusted height", height);
     double elevator_floor_voltage = profiledPIDController.calculate(height, desired_height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
     SmartDashboard.putNumber("elevator floor voltage", elevator_floor_voltage);
