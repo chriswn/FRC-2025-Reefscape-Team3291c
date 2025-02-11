@@ -76,7 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     Preferences.initDouble("elevatorkv", elevatorkv);
     Preferences.initDouble("elevatorka", elevatorka);
 
-    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, false, Encoder.EncodingType.k2X);//will reverse with gear box
+    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, true, Encoder.EncodingType.k2X);//will reverse with gear box
     this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
 
 
@@ -133,11 +133,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  public double giveVoltage(TrapezoidProfile.State desired_height, double height) {
+  public double giveVoltage(TrapezoidProfile.State desired_height, double height_in_ticks) {
     // Floor control
-    height /= 4096;
+    double height = height_in_ticks / 4096;
     SmartDashboard.putNumber("adjusted height", height);
-    double elevator_floor_voltage = profiledPIDController.calculate(height, desired_height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
+    double elevator_floor_voltage = profiledPIDController.calculate(height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
     SmartDashboard.putNumber("elevator floor voltage", elevator_floor_voltage);
     // If the Floor is at exactly 0.0, it's probably not connected, so disable it
@@ -196,6 +196,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     // }
     double desired_height = floorTargetToHeight(floor_target);
     goal = new TrapezoidProfile.State(desired_height, 0);
+    profiledPIDController.setGoal(goal);
 
     double voltage = giveVoltage(goal, elevatorEncoder.get());
 

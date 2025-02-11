@@ -3,40 +3,42 @@
 // the WPILib BSD license file in the root directory of this project.
 
 
-package frc.robot.commands.IntakeMotor;
+package frc.robot.commands.IntakeMotorCMDs;
 
 
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 
 
-public class EjectCMD extends Command {
+
+public class IntakeMotorCMD extends Command {
   IntakeMotorSubsystem intakeMotorSubsystem;
- // double startTime = Timer.getFPGATimestamp();
-  /** Creates a new Eject. */
-  public EjectCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
+  /** Creates a new IntakeMotorCMD. */
+  public IntakeMotorCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intakeMotorSubsystem = intakeMotorSubsystem;
+   
     addRequirements(intakeMotorSubsystem);
-    //this.startTime = startTime;
   }
 
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //intakeMotorSubsystem.moveIntakeMotor(-Constants.intake.ejectSpeed);
-   
   }
+ 
 
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intakeMotorSubsystem.moveIntakeMotorReversed(Constants.Intake.ejectSpeed);
+      intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.intakeSpeed);
+
+    // if (!intakeSubsystem.getIntakeHasNote()) {
+    // intakeMotorSubsystem.moveIntakeMotor(-1 * Constants.intake.intakeSpeed);
+
+
   }
 
 
@@ -44,8 +46,8 @@ public class EjectCMD extends Command {
   @Override
   public void end(boolean interrupted) {
     intakeMotorSubsystem.stopIntakeMotorSubsystem();//stops it
-
-
+    //ColorChanger.setGOLD();
+   // ColorChanger.setGOLD();
   }
 
 
@@ -54,7 +56,15 @@ public class EjectCMD extends Command {
   public boolean isFinished() {
     return false;
   }
- }
+}
+
+
+
+
+
+
+
+
 
 
 

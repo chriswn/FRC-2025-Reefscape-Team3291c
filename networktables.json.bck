@@ -82,7 +82,7 @@
   {
     "name": "/Preferences/angleKD",
     "type": "double",
-    "value": 0.0,
+    "value": 1e-08,
     "properties": {
       "persistent": true
     }

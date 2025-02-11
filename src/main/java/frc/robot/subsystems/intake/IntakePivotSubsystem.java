@@ -52,6 +52,10 @@ public class IntakePivotSubsystem extends SubsystemBase {
   private double Intakekp = Constants.Intake.PID.kp;
   private double Intakeki = Constants.Intake.PID.ki;
   private double Intakekd = Constants.Intake.PID.kd;
+  private double Intakeks = Constants.Intake.ks;
+  private double Intakekg = Constants.Intake.kg;
+  private double Intakekv = Constants.Intake.kv;
+  private double Intakeka = Constants.Intake.ka;
 
 
 
@@ -60,9 +64,13 @@ public class IntakePivotSubsystem extends SubsystemBase {
     Preferences.initDouble("Intakekp", Intakekp);
     Preferences.initDouble("Intakeki", Intakeki);
     Preferences.initDouble("Intakekd", Intakekd);
+    Preferences.initDouble("Intakeks", Intakeks);
+    Preferences.initDouble("Intakekg", Intakekg);
+    Preferences.initDouble("Intakekv", Intakekv);
+    Preferences.initDouble("Intakeka", Intakeka);
 
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
-    this.IntakeLimitSwitch = new DigitalInput(Constants.Intake.intakeLimitSwitchID);
+    //this.IntakeLimitSwitch = new DigitalInput(Constants.Intake.intakeLimitSwitchID);
 
     this.trapezoidConstraints = new TrapezoidProfile.Constraints(Constants.Intake.maxVelocity, Constants.Intake.maxAcceleration);
 
@@ -87,6 +95,13 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
    
   public void loadPreferences() {
+    if (Preferences.getDouble("Intakeka", Intakeka) != Intakeka || Preferences.getDouble("Intakekv", Intakekv) != Intakekv || Preferences.getDouble("Intakekg", Intakekg) != Intakekg || Preferences.getDouble("Intakeks", Intakeks) != Intakeks) {
+      Intakeka = Preferences.getDouble("Intakeka", Intakeka);
+      Intakekv = Preferences.getDouble("Intakekv", Intakekv);
+      Intakekg = Preferences.getDouble("Intakekg", Intakekg);
+      Intakeks = Preferences.getDouble("Intakeks", Intakeks);
+      armFeedforward = new ArmFeedforward(Intakeks, Intakekg, Intakekv, Intakeka);
+    }
     if (Preferences.getDouble("Intakekp", Intakekp) != Intakekp) {
       Intakekp = Preferences.getDouble("Intakekp", Intakekp);
       profiledPIDController.setP(Intakekp);
@@ -110,10 +125,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("updatedAngle", angle);
 
     double Intake_pivot_voltage = profiledPIDController.calculate(angle, pivot_angle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
-
-    // If the pivot is at exactly 0.0, it's probably not connected, so disable it
-    SmartDashboard.putNumber("pid output", Intake_pivot_voltage);
-    System.out.println("error: " + Intake_pivot_voltage);
+    SmartDashboard.putNumber("intake setpoint", profiledPIDController.getSetpoint().position);
 
     //double adjustedIntakePivotVoltage = 10 - Math.abs(Intake_pivot_voltage);
     double adjustedIntakePivotVoltage = Intake_pivot_voltage; //error reversed for voltage
@@ -126,10 +138,6 @@ public class IntakePivotSubsystem extends SubsystemBase {
     if (adjustedIntakePivotVoltage < -Constants.Intake.maxPivotVoltage) {
       adjustedIntakePivotVoltage = -Constants.Intake.maxPivotVoltage;
     }
-   if (!ampAtAngle() && !sourceAtAngle() && !stowAtAngle() && !groundAtAngle()) {
-    //adjustedIntakePivotVoltage += Math.cos(167 - angle) * Constants.Intake.IntakePID.kcos; //feedforward
-   }
-    System.out.println("final voltage: " + adjustedIntakePivotVoltage);
     return adjustedIntakePivotVoltage;
   }
  
@@ -194,71 +202,14 @@ public class IntakePivotSubsystem extends SubsystemBase {
     return value;
   }
 
-
-  public void goToGround() {
-    //  if (getIntakeHasNote()) {
-    //   goToStow();
-    // }
-    pivot_target = PivotTarget.GROUND;
+  public void goToPosition(PivotTarget pivotTarget) {
     double pivot_angle = pivotTargetToAngle(pivot_target);
-    System.out.println("stow angle target: " + pivot_angle);
-    System.out.println("final voltage: " + giveVoltage(pivot_angle, getCurrentAngle()) + "\n\n");
-    double voltage = giveVoltage(pivot_angle, getCurrentAngle());
-    if (getCurrentAngle() < 100 && voltage == -Constants.Intake.maxPivotVoltage) {
-      pivotMotor.setVoltage(Constants.Intake.maxPivotVoltage);
-    }
-    else if (getCurrentAngle() > 300) {
-      pivotMotor.setVoltage(-Constants.Intake.maxPivotVoltage);
-
-
-    } else {
-      pivotMotor.setVoltage(voltage);
-    }
-   
-    SmartDashboard.putNumber("getVoltage", voltage);
-    System.out.println("s");
-  }
-
-
-  public void goToSource() {
-    pivot_target = PivotTarget.SOURCE;
-    double pivot_angle = pivotTargetToAngle(pivot_target);
-    System.out.println("stow angle target: " + pivot_angle);
-    System.out.println("final voltage: " + giveVoltage(pivot_angle, getCurrentAngle()) + "\n\n");
     double voltage = giveVoltage(pivot_angle, getCurrentAngle());
     pivotMotor.setVoltage(voltage);
     SmartDashboard.putNumber("getVoltage", voltage);
-    System.out.println("s");
   }
 
-
-  public void goToAmp() {
-    pivot_target = PivotTarget.AMP;
-    double pivot_angle = pivotTargetToAngle(pivot_target);
-    System.out.println("stow angle target: " + pivot_angle);
-    System.out.println("final voltage: " + giveVoltage(pivot_angle, getCurrentAngle()) + "\n\n");
-    double voltage = giveVoltage(pivot_angle, getCurrentAngle());
-    pivotMotor.setVoltage(voltage);
-    SmartDashboard.putNumber("getVoltage", voltage);
-    System.out.println("s");
-  }
-
-
-  public void goToStow() {
-    pivot_target = PivotTarget.STOW;
-    double pivot_angle = pivotTargetToAngle(pivot_target);
-    System.out.println("stow angle target: " + pivot_angle);
-   System.out.println("final voltage: " + giveVoltage(pivot_angle, getCurrentAngle()) + "\n\n");
-    double voltage = giveVoltage(pivot_angle, getCurrentAngle());
-   if (getCurrentAngle() > 90 && voltage == Constants.Intake.maxPivotVoltage) {
-      pivotMotor.setVoltage(-Constants.Intake.maxPivotVoltage);
-    }
-      else {
-        pivotMotor.setVoltage(voltage);
-      }   
-    SmartDashboard.putNumber("getVoltage", voltage);
-    System.out.println("s");
-  }
+ 
 
 
 
@@ -266,7 +217,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public void periodic() {
     loadPreferences();
     //This method will be called once per scheduler run
-    SmartDashboard.putNumber("encoder reading", getCurrentAngle());
+    SmartDashboard.putNumber("intakePivot encoder reading", getCurrentAngle());
     SmartDashboard.putBoolean("atAngleGround", groundAtAngle());
     SmartDashboard.putBoolean("atAngleAmp", ampAtAngle());
     SmartDashboard.putBoolean("atAngleSource", sourceAtAngle());
