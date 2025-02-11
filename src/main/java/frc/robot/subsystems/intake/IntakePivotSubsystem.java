@@ -9,8 +9,11 @@ package frc.robot.subsystems.intake;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 
-
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Preferences;
@@ -27,8 +30,10 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   public DutyCycleEncoder IntakeEncoder;
   public DigitalInput IntakeLimitSwitch;
-  public PIDController pidController;
+  public ProfiledPIDController profiledPIDController;
   public SparkMax pivotMotor;
+  public TrapezoidProfile.Constraints trapezoidConstraints;
+  public ArmFeedforward armFeedforward;
 
  
   public enum PivotTarget {
@@ -44,9 +49,9 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   // Output: Motor set values
 
-  private double Intakekp = Constants.Intake.intakePID.kp;
-  private double Intakeki = Constants.Intake.intakePID.ki;
-  private double Intakekd = Constants.Intake.intakePID.kd;
+  private double Intakekp = Constants.Intake.PID.kp;
+  private double Intakeki = Constants.Intake.PID.ki;
+  private double Intakekd = Constants.Intake.PID.kd;
 
 
 
@@ -59,15 +64,22 @@ public class IntakePivotSubsystem extends SubsystemBase {
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
     this.IntakeLimitSwitch = new DigitalInput(Constants.Intake.intakeLimitSwitchID);
 
+    this.trapezoidConstraints = new TrapezoidProfile.Constraints(Constants.Intake.maxVelocity, Constants.Intake.maxAcceleration);
 
-    this.pidController = new PIDController(Constants.Intake.intakePID.kp, Constants.Intake.intakePID.ki, Constants.Intake.intakePID.kd);
+    this.profiledPIDController = new ProfiledPIDController(Constants.Intake.PID.kp, Constants.Intake.PID.ki, Constants.Intake.PID.kd, this.trapezoidConstraints);
+    this.profiledPIDController.setGoal(0);
+    this.profiledPIDController.setTolerance(Constants.Intake.tolerance);
+
+
     // this.pidController.setD(Constants.Intake.IntakePID.kd);
     // SendableRegistry.addChild("D", d);
     // this.pidController.setI(Constants.Intake.IntakePID.ki);
     // this.pidController.setP(Constants.Intake.IntakePID.kp);
 
 
-    this.pidController.enableContinuousInput(0, 360);
+    this.profiledPIDController.enableContinuousInput(0, 360);
+
+    this.armFeedforward = new ArmFeedforward(Constants.Intake.ks, Constants.Intake.kg, Constants.Intake.kv, Constants.Intake.ka);
    
 
 
@@ -77,15 +89,15 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public void loadPreferences() {
     if (Preferences.getDouble("Intakekp", Intakekp) != Intakekp) {
       Intakekp = Preferences.getDouble("Intakekp", Intakekp);
-      pidController.setP(Intakekp);
+      profiledPIDController.setP(Intakekp);
     }
     if (Preferences.getDouble("Intakeki", Intakeki) != Intakeki) {
       Intakekp = Preferences.getDouble("Intakeki", Intakeki);
-      pidController.setI(Intakeki);
+      profiledPIDController.setI(Intakeki);
     }
     if (Preferences.getDouble("Intakekd", Intakekd) != Intakekd) {
       Intakekp = Preferences.getDouble("Intakekd", Intakekd);
-      pidController.setD(Intakekd);
+      profiledPIDController.setD(Intakekd);
     }
   }
 
@@ -97,7 +109,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     double angle = current_angle;
     SmartDashboard.putNumber("updatedAngle", angle);
 
-    double Intake_pivot_voltage = pidController.calculate(angle, pivot_angle);
+    double Intake_pivot_voltage = profiledPIDController.calculate(angle, pivot_angle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
 
     // If the pivot is at exactly 0.0, it's probably not connected, so disable it
     SmartDashboard.putNumber("pid output", Intake_pivot_voltage);

@@ -77,7 +77,17 @@ public final class Constants {
 
 
   public static class Intake {
+    
     public static final double angleDeadband = 5;
+
+    public static final double maxVelocity = 0.3;
+    public static final double maxAcceleration = 0.3;
+    public static final double ks = 0;
+    public static final double kg = 0;
+    public static final double kv = 0;
+    public static final double ka = 0;
+
+    public static final double tolerance = 0.05;
 
     public static final double kLauncherSubMinOutput = 0;
     public static final double kLauncherSubMaxOutput = 1;
@@ -90,7 +100,7 @@ public final class Constants {
     public static final double kLauncherSubD = 0.0;
     public static final double kLauncherSubFF = 0.0002;
 
-    public static class intakePID {
+    public static class PID {
       public static final double kp = 0.1;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
