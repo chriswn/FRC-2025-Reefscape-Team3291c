@@ -70,6 +70,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     Preferences.initDouble("Intakeka", Intakeka);
 
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
+    this.IntakeEncoder.setInverted(true);
     //this.IntakeLimitSwitch = new DigitalInput(Constants.Intake.intakeLimitSwitchID);
 
     this.trapezoidConstraints = new TrapezoidProfile.Constraints(Constants.Intake.maxVelocity, Constants.Intake.maxAcceleration);
@@ -85,7 +86,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     // this.pidController.setP(Constants.Intake.IntakePID.kp);
 
 
-    this.profiledPIDController.enableContinuousInput(0, 360);
+    //this.profiledPIDController.enableContinuousInput(0, 360);
 
     this.armFeedforward = new ArmFeedforward(Constants.Intake.ks, Constants.Intake.kg, Constants.Intake.kv, Constants.Intake.ka);
    
@@ -116,7 +117,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     }
   }
 
-  public double giveVoltage(double pivot_angle, double current_angle) {
+  public double giveVoltage(double pivotAngle, double current_angle) {
     // Pivot control
     SmartDashboard.putNumber("originalAngle", current_angle);
    
@@ -124,7 +125,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     double angle = current_angle;
     SmartDashboard.putNumber("updatedAngle", angle);
 
-    double Intake_pivot_voltage = profiledPIDController.calculate(angle, pivot_angle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
+    double Intake_pivot_voltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("intake setpoint", profiledPIDController.getSetpoint().position);
 
     //double adjustedIntakePivotVoltage = 10 - Math.abs(Intake_pivot_voltage);
@@ -148,13 +149,13 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public double pivotTargetToAngle(PivotTarget target) {
     switch (target) {
       case GROUND:
-        return Constants.Intake.groundAngle;
+        return Constants.Intake.groundAngle/360;
       case SOURCE:
-        return Constants.Intake.sourceAngle;
+        return Constants.Intake.sourceAngle/360;
       case AMP:
-        return Constants.Intake.ampAngle;
+        return Constants.Intake.ampAngle/360;
       case STOW:
-        return Constants.Intake.stowAngle;
+        return Constants.Intake.stowAngle/360;
       default:
         // "Safe" default
         return 180;
@@ -164,11 +165,11 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   public double getCurrentAngle() {
     double value = IntakeEncoder.get();
-    value *= 360;
-    value += Constants.Intake.k_pivotEncoderOffset;
-    if (value > 360) {
-      value %= 360;
-    }
+    // value *= 360;
+     value += Constants.Intake.k_pivotEncoderOffset;
+    // if (value > 360) {
+    //   value %= 360;
+    // }
     return value;
   }
 
@@ -203,10 +204,10 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
 
   public void goToPosition(PivotTarget pivotTarget) {
-    double pivot_angle = pivotTargetToAngle(pivot_target);
-    double voltage = giveVoltage(pivot_angle, getCurrentAngle());
+    double pivotAngle = pivotTargetToAngle(pivotTarget);
+    double voltage = giveVoltage(pivotAngle, getCurrentAngle());
     pivotMotor.setVoltage(voltage);
-    SmartDashboard.putNumber("getVoltage", voltage);
+    SmartDashboard.putNumber("getIntakeVoltage", voltage);
   }
 
  

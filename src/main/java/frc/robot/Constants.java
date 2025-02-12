@@ -62,7 +62,7 @@ public final class Constants {
     //ids
     public static final int encoderAID = 1;
     public static final int encoderBID = 2;
-    public static final int motorLeadID = 26;
+    public static final int motorLeadID = 27;
     public static final int motorFollowerID = 22;
     public static final int topLimitSwitchID = 9;
 
@@ -80,8 +80,8 @@ public final class Constants {
     
     public static final double angleDeadband = 5;
 
-    public static final double maxVelocity = 0.3 * 360;
-    public static final double maxAcceleration = 0.3 * 360;
+    public static final double maxVelocity = 0.3;
+    public static final double maxAcceleration = 0.3;
     public static final double ks = 0;
     public static final double kg = 0;
     public static final double kv = 0;
@@ -101,23 +101,22 @@ public final class Constants {
     public static final double kLauncherSubFF = 0.0002;
 
     public static class PID {
-      public static final double kp = 0.1;
+      public static final double kp = 0.0;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
-      public static final double kcos = 0.5;
     }
 
     //ids
     public static final int encoderID = 0; //Changed due to change
     public static final int IntakeID = 21;//21
-    public static final int PivotID = 19;//19 
+    public static final int PivotID = 26;//19 
     public static final int intakeLimitSwitchID = 9;
 
-    public static final double k_pivotEncoderOffset = 230;
+    public static final double k_pivotEncoderOffset = 0/360;
 
     //angles
     public static final double groundAngle = 0;//doesn't like 0
-    public static final double stowAngle = 2;
+    public static final double stowAngle = 181;
     public static final double sourceAngle = 167;
     public static final double ampAngle = 95;
 

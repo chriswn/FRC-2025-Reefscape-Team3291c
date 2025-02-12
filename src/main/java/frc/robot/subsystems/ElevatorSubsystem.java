@@ -203,7 +203,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorMotorLeader.setVoltage(voltage);
     
    
-    SmartDashboard.putNumber("getVoltage", voltage);
+    SmartDashboard.putNumber("getElevatorVoltage", voltage);
   }
 
   @Override
