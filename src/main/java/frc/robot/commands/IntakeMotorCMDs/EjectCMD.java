@@ -36,7 +36,7 @@ public class EjectCMD extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intakeMotorSubsystem.moveIntakeMotorReversed(Constants.Intake.ejectSpeed);
+    intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.ejectSpeed);
   }
 
 

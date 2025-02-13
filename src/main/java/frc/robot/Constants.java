@@ -63,7 +63,7 @@ public final class Constants {
     public static final int encoderAID = 1;
     public static final int encoderBID = 2;
     public static final int motorLeadID = 27;
-    public static final int motorFollowerID = 22;
+    public static final int motorFollowerID = 29;
     public static final int topLimitSwitchID = 9;
 
     public static final double encoderOffset = 0;
@@ -108,7 +108,7 @@ public final class Constants {
 
     //ids
     public static final int encoderID = 0; //Changed due to change
-    public static final int IntakeID = 21;//21
+    public static final int IntakeID = 22;//21
     public static final int PivotID = 26;//19 
     public static final int intakeLimitSwitchID = 9;
 
@@ -122,7 +122,7 @@ public final class Constants {
 
     public static final double maxPivotVoltage = 5;
 
-    public static final double ejectSpeed = 0.5 * 5000;
+    public static final double ejectSpeed = -0.5 * 5000;
     public static final double intakeSpeed = 0.7 * 5000;
     public static final int launchNoteTimeInSecs = 1;
     

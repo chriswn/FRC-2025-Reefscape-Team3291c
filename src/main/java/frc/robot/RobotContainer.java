@@ -23,10 +23,13 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ElevatorCMDs.GoToGround;
 import frc.robot.commands.ElevatorCMDs.GoToTop;
 import frc.robot.commands.ElevatorCMDs.ResetElevatorEncoder;
+import frc.robot.commands.IntakeMotorCMDs.EjectCMD;
+import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
 import frc.robot.commands.IntakePivotCMDs.PivotToStow;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -51,11 +54,14 @@ public class RobotContainer {
 
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final IntakePivotSubsystem intakePivotSubsystem = new IntakePivotSubsystem();
+  private final IntakeMotorSubsystem intakeMotorSubsystem = new IntakeMotorSubsystem();
   private final Command elevatorGoToTop = new GoToTop(elevatorSubsystem);
   private final Command elevatorGoToGround = new GoToGround(elevatorSubsystem);
   private final Command ResetElevatorEncoder = new ResetElevatorEncoder(elevatorSubsystem);
   private final Command pivotToGround = new PivotToGround(intakePivotSubsystem);
   private final Command pivotToStow = new PivotToStow(intakePivotSubsystem);
+  private final Command ejectCMD = new EjectCMD(intakeMotorSubsystem);
+  private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -201,7 +207,8 @@ public class RobotContainer {
       driverXbox.a().whileTrue(ResetElevatorEncoder);
       driverXbox.x().whileTrue(pivotToGround);
       driverXbox.b().whileTrue(pivotToStow);
-      
+      driverXbox.povLeft().toggleOnTrue(ejectCMD);
+      driverXbox.povRight().toggleOnTrue(intakeCMD);
     //   driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
     //   driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
     //   driverXbox.b().whileTrue(

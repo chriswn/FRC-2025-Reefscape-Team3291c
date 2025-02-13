@@ -70,7 +70,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     Preferences.initDouble("Intakeka", Intakeka);
 
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
-    this.IntakeEncoder.setInverted(true);
+    this.IntakeEncoder.setInverted(false);
     //this.IntakeLimitSwitch = new DigitalInput(Constants.Intake.intakeLimitSwitchID);
 
     this.trapezoidConstraints = new TrapezoidProfile.Constraints(Constants.Intake.maxVelocity, Constants.Intake.maxAcceleration);

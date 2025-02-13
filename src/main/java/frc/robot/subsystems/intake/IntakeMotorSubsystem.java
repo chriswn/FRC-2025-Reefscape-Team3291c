@@ -12,6 +12,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,19 +34,40 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public SparkMaxConfig config;
 
   public CANrange canRange;
+  public double intakeMotorKp = Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);
+  public double intakeMotorKi = Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI);
+  public double intakeMotorKd = Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
+  public double intakeMotorKff = Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
+
+
+
 
   public IntakeMotorSubsystem() {
     canRange = new CANrange(0);
-    Preferences.initDouble("IntakeSpeed", IntakeSpeed);
-
+    if (!Preferences.containsKey("IntakeSpeed")) {
+      Preferences.initDouble("IntakeSpeed", IntakeSpeed);
+    }
+    if (!Preferences.containsKey("intakeMotorKp")) {
+      Preferences.initDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);
+    }
+    if (!Preferences.containsKey("intakeMotorKi")) {
+      Preferences.initDouble("intakeMotorKi", Constants.Intake.kLauncherSubI);
+    }
+    if (!Preferences.containsKey("intakeMotorKd")) {
+      Preferences.initDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
+    }
+    if (!Preferences.containsKey("intakeMotorKff")) {
+      Preferences.initDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
+    }
+    
     IntakeMotorMotor = new SparkMax(Constants.Intake.IntakeID, MotorType.kBrushless);
    // IntakeMotorMotor.restoreFactoryDefaults();
 
     IntakeMotorPID = IntakeMotorMotor.getClosedLoopController();
     config = new SparkMaxConfig();
     config
-        .inverted(true)
-        .idleMode(IdleMode.kBrake);
+        .inverted(false)
+        .idleMode(IdleMode.kCoast);
     config.closedLoop.p(Constants.Intake.kLauncherSubP);
     config.closedLoop.i(Constants.Intake.kLauncherSubI);
     config.closedLoop.d(Constants.Intake.kLauncherSubD);
@@ -61,16 +83,31 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   }
 
   /*---------------------------------- Custom Public Functions ----------------------------------*/
+  public void updatePreferences() {
+    if (Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP) != Constants.Intake.kLauncherSubP || Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI) != Constants.Intake.kLauncherSubI || Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD) != Constants.Intake.kLauncherSubD || Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF) != Constants.Intake.kLauncherSubFF) {
+      intakeMotorKp = Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);
+      intakeMotorKi = Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI);
+      intakeMotorKd = Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
+      intakeMotorKff = Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
+      config.closedLoop.pidf(intakeMotorKp, intakeMotorKi, intakeMotorKd, intakeMotorKff);
+      IntakeMotorMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+  }
   public void moveIntakeMotor(double rpm) {
-    IntakeMotorMotor.setInverted(true);
+    if (rpm < 0) {
+     // IntakeMotorMotor.setInverted(true);
+      rpm = (-1 * rpm);
+    }
+    // else {
+    //   IntakeMotorMotor.setInverted(false);
+    // }
+    
     double limitedSpeed = mSpeedLimiter.calculate(rpm);
     // this.config.
-    this.IntakeMotorPID.setReference(limitedSpeed, ControlType.kVelocity);
-  }
-  public void moveIntakeMotorReversed(double rpm) {
-    IntakeMotorMotor.setInverted(false);
-    double limitedSpeed = mSpeedLimiter.calculate(rpm);
     IntakeMotorPID.setReference(limitedSpeed, ControlType.kVelocity);
+    SmartDashboard.putNumber("IntakeMotorDesiredSpeed", limitedSpeed);
+    SmartDashboard.putNumber("IntakeMotorVelocity", IntakeMotorEncoder.getVelocity());
+
   }
 
   public void stopIntakeMotorSubsystem() {
@@ -81,6 +118,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   /*---------------------------------- Custom public Functions ---------------------------------*/
   @Override
   public void periodic() {
+    //updatePreferences(); //no more tuning needed
     StatusSignal distance = canRange.getDistance();    
     SmartDashboard.putNumber("canRangeDistance", distance.getValueAsDouble());
   }

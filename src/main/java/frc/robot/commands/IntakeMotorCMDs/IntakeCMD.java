@@ -12,10 +12,10 @@ import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 
 
 
-public class IntakeMotorCMD extends Command {
+public class IntakeCMD extends Command {
   IntakeMotorSubsystem intakeMotorSubsystem;
   /** Creates a new IntakeMotorCMD. */
-  public IntakeMotorCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
+  public IntakeCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intakeMotorSubsystem = intakeMotorSubsystem;
    
