@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.core.CoreCANrange;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;

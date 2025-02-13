@@ -7,11 +7,14 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Intake;
@@ -29,7 +32,10 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public double IntakeSpeed = Constants.Intake.ejectSpeed;
   public SparkMaxConfig config;
 
+  public CANrange canRange;
+
   public IntakeMotorSubsystem() {
+    canRange = new CANrange(0);
     Preferences.initDouble("IntakeSpeed", IntakeSpeed);
 
     IntakeMotorMotor = new SparkMax(Constants.Intake.IntakeID, MotorType.kBrushless);
@@ -73,6 +79,11 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   }
 
   /*---------------------------------- Custom public Functions ---------------------------------*/
+  @Override
+  public void periodic() {
+    StatusSignal distance = canRange.getDistance();    
+    SmartDashboard.putNumber("canRangeDistance", distance.getValueAsDouble());
+  }
 }
 
 
