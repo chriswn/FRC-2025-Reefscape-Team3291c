@@ -149,13 +149,13 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public double pivotTargetToAngle(PivotTarget target) {
     switch (target) {
       case GROUND:
-        return Constants.Intake.groundAngle/360;
+        return Constants.Intake.groundAngle;
       case SOURCE:
-        return Constants.Intake.sourceAngle/360;
+        return Constants.Intake.sourceAngle;
       case AMP:
-        return Constants.Intake.ampAngle/360;
+        return Constants.Intake.ampAngle;
       case STOW:
-        return Constants.Intake.stowAngle/360;
+        return Constants.Intake.stowAngle;
       default:
         // "Safe" default
         return 180;

@@ -111,15 +111,15 @@ public final class Constants {
     public static final int PivotID = 26;//19 
     public static final int intakeLimitSwitchID = 9;
 
-    public static final double k_pivotEncoderOffset = 0/360;
+    public static final double k_pivotEncoderOffset = 11.0/2.0;
 
     //angles
-    public static final double groundAngle = 0;//doesn't like 0
-    public static final double stowAngle = 181;
-    public static final double sourceAngle = 167;
-    public static final double ampAngle = 95;
+    public static final double groundAngle = 0.0/360.0;//doesn't like 0
+    public static final double stowAngle = 181.0/360.0;
+    public static final double sourceAngle = 167.0/360.0;
+    public static final double ampAngle = 95.0/360.0;
 
-    public static final double maxPivotVoltage = 5;
+    public static final double maxPivotVoltage = 5.0;
 
     public static final double ejectSpeed = -0.5 * 5000;
     public static final double intakeSpeed = 0.7 * 5000;

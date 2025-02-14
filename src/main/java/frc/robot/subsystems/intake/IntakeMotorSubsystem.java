@@ -67,7 +67,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
     IntakeMotorPID = IntakeMotorMotor.getClosedLoopController();
     config = new SparkMaxConfig();
     config
-        .inverted(false)
+        .inverted(true)
         .idleMode(IdleMode.kBrake);
     config.closedLoop.p(Constants.Intake.kLauncherSubP);
     config.closedLoop.i(Constants.Intake.kLauncherSubI);
@@ -99,7 +99,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   }
   public void moveIntakeMotor(double rpm) {
     if (rpm < 0) {
-     // IntakeMotorMotor.setInverted(true);
+      IntakeMotorMotor.setInverted(false);
       rpm = (-1 * rpm);
     }
     // else {
