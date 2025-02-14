@@ -69,9 +69,8 @@ public final class Constants {
     public static final double encoderOffset = 0;
 
     //floor pos
-    public static final double groundFloor = 0;//doesn't like 0
-    public static final double topFloor = 3;//needs to be changes
-
+    public static final double groundFloor = 0;
+    public static final double topFloor = 6.69444444444;//6 + (250/360)
     public static final double maxVoltage = 8;
   }
 
@@ -360,4 +359,18 @@ public final class Constants {
   }
 
   public static Object ColorChanger;
+
+  public static class ButtonList {
+    public static final int a = 1;
+    public static final int b = 2; 
+    public static final int x = 3; 
+    public static final int y = 4; 
+    public static final int lb = 5; 
+    public static final int rb = 6; 
+    public static final int back = 7; 
+    public static final int start = 8; 
+    public static final int l3 = 9; 
+    public static final int r3 = 10; 
+
+  }
 }

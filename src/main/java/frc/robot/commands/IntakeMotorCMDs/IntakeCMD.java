@@ -33,7 +33,7 @@ public class IntakeCMD extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-      intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.intakeSpeed);
+      intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed);
 
     // if (!intakeSubsystem.getIntakeHasNote()) {
     // intakeMotorSubsystem.moveIntakeMotor(-1 * Constants.intake.intakeSpeed);
@@ -54,7 +54,7 @@ public class IntakeCMD extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return intakeMotorSubsystem.hasCoral();
   }
 }
 
