@@ -7,7 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "C1 To R"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS From P1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C2 To R"
           }
         }
       ]
