@@ -63,8 +63,8 @@ public final class Constants {
     //ids
     public static final int encoderAID = 1;
     public static final int encoderBID = 2;
-    public static final int motorLeadID = 27;
-    public static final int motorFollowerID = 29;
+    public static final int motorLeadID = 15;
+    public static final int motorFollowerID = 14;
     public static final int topLimitSwitchID = 9;
 
     public static final double encoderOffset = 0;
@@ -72,7 +72,8 @@ public final class Constants {
     //floor pos
     public static final double groundFloor = 0;
     public static final double topFloor = 6.69444444444;//6 + (250/360)
-    public static final double maxVoltage = 8;
+    public static final double halfWayUpFloor = topFloor/2.0;
+    public static final double maxVoltage = 8.0;
   }
 
 
@@ -108,11 +109,13 @@ public final class Constants {
 
     //ids
     public static final int encoderID = 0; //Changed due to change
-    public static final int IntakeID = 22;//21
-    public static final int PivotID = 26;//19 
+    public static final int IntakeID = 21;//21
+    public static final int PivotID = 19;//19 
     public static final int intakeLimitSwitchID = 9;
+    public static final int CANrangeID = 7;
 
-    public static final double k_pivotEncoderOffset = 11.0/2.0;
+
+    public static final double k_pivotEncoderOffset = 0.0;
 
     //angles
     public static final double groundAngle = 0.0/360.0;//doesn't like 0

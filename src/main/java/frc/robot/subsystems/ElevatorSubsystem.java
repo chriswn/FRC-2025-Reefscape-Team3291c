@@ -47,6 +47,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public enum FloorTarget {
     NONE,
     GROUND_FLOOR,
+    MIDDLE_FLOOR,
     TOP_FLOOR
   }
 
@@ -76,7 +77,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     Preferences.initDouble("elevatorkv", elevatorkv);
     Preferences.initDouble("elevatorka", elevatorka);
 
-    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, true, Encoder.EncodingType.k2X);//will reverse with gear box
+    this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, false, Encoder.EncodingType.k2X);//may need reversing
     this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
 
 
@@ -91,9 +92,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
     this.elevatorMotorLeader = new SparkMax(Constants.Elevator.motorLeadID, SparkLowLevel.MotorType.kBrushless);
+    this.elevatorMotorLeader.setInverted(true);
     this.elevatorMotorFollower = new SparkMax(Constants.Elevator.motorFollowerID, SparkLowLevel.MotorType.kBrushless);
     this.followerConfig = new SparkMaxConfig();
     this.followerConfig.follow(elevatorMotorLeader);
+    this.followerConfig.inverted(true);
     
     this.elevatorMotorFollower.configure(followerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -135,7 +138,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public double giveVoltage(TrapezoidProfile.State desired_height, double height_in_ticks) {
     // Floor control
-    double height = height_in_ticks / 4096;
+    double height = height_in_ticks / 2048.0;
     SmartDashboard.putNumber("adjusted height", height);
     double elevator_floor_voltage = profiledPIDController.calculate(height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
@@ -163,6 +166,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     switch (target) {
       case GROUND_FLOOR:
         return Constants.Elevator.groundFloor;
+      case MIDDLE_FLOOR:
+        return Constants.Elevator.halfWayUpFloor;
       case TOP_FLOOR:
         return Constants.Elevator.topFloor;
       default:
@@ -211,9 +216,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     goToPosition();
     loadPreferences();
     //This method will be called once per scheduler run
-    SmartDashboard.putNumber("encoder reading", elevatorEncoder.get());
+    SmartDashboard.putNumber("elevator encoder reading", elevatorEncoder.get());
+    SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/2048.0);
+
     SmartDashboard.putBoolean("elevatorAtGroundFloor", elevatorAtGroundFloor());
     SmartDashboard.putBoolean("elevatorAtTopFloor", elevatorAtTopFloor());
+    SmartDashboard.putNumber("floorTarget", floorTargetToHeight(floor_target));
+    SmartDashboard.putNumber("elevator motor bus voltage", elevatorMotorLeader.getBusVoltage());
 
   }
 }

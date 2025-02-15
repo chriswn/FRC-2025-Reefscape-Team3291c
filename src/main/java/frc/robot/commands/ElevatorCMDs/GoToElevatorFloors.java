@@ -9,6 +9,8 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.FloorTarget;
+import frc.robot.subsystems.intake.IntakePivotSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class GoToElevatorFloors extends Command {
@@ -20,6 +22,7 @@ public class GoToElevatorFloors extends Command {
   Boolean moveFloorUp;
   Boolean moveFloorDown;
   int maxHeight;
+  FloorTarget floorTarget;
   public GoToElevatorFloors(ElevatorSubsystem elevatorSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.pressedUp = pressedUp;
@@ -33,7 +36,7 @@ public class GoToElevatorFloors extends Command {
   public void initialize() {
     floor = 0;
     moveFloorUp = true;
-    maxHeight = 10;
+    maxHeight = 2;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -41,7 +44,7 @@ public class GoToElevatorFloors extends Command {
   public void execute() {
     if (pressedUp.getAsBoolean() && moveFloorUp && floor < maxHeight) {
       moveFloorUp = false;
-      floor ++;
+      floor++;
     }
     else if (!pressedUp.getAsBoolean()) {
       moveFloorUp = true;
@@ -52,6 +55,18 @@ public class GoToElevatorFloors extends Command {
     }
     else if (!pressedDown.getAsBoolean()) {
       moveFloorDown = true;
+    }
+    if (floor == 0) {
+      floorTarget = FloorTarget.GROUND_FLOOR;
+      elevatorSubsystem.setTarget(floorTarget);
+    }
+    if (floor == 1) {
+      floorTarget = FloorTarget.MIDDLE_FLOOR;
+      elevatorSubsystem.setTarget(floorTarget);
+    }
+    if (floor == 2) {
+      floorTarget = FloorTarget.TOP_FLOOR;
+      elevatorSubsystem.setTarget(floorTarget);
     }
     
     SmartDashboard.putNumber("current elevator floor", floor);
