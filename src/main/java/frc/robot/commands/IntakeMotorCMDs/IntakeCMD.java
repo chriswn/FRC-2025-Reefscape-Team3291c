@@ -6,6 +6,7 @@
 package frc.robot.commands.IntakeMotorCMDs;
 
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeMotorSubsystem;
@@ -33,6 +34,7 @@ public class IntakeCMD extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+  
       intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed);
 
     // if (!intakeSubsystem.getIntakeHasNote()) {
@@ -54,6 +56,12 @@ public class IntakeCMD extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    if (intakeMotorSubsystem.hasCoral()){
+Timer.delay(0.052);
+
+//Timer.delay(0.0025);// kintake speed 5000
+
+    }
     return intakeMotorSubsystem.hasCoral();
   }
 }

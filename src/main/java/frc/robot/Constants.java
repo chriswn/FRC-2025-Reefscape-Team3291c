@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.Constants.Lighting.Colors;
 import swervelib.math.Matter;
 
@@ -121,7 +122,7 @@ public final class Constants {
 
     public static final double maxPivotVoltage = 5.0;
 
-    public static final double ejectSpeed = -0.5 * 5000;
+    public static final double ejectSpeed = 0.25 * 5000;
     public static final double intakeSpeed = 0.7 * 5000;
     public static final int launchNoteTimeInSecs = 1;
     

@@ -39,6 +39,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public double intakeMotorKd = Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
   public double intakeMotorKff = Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
   public double intakeSpeed = Preferences.getDouble("intakeSpeed", Constants.Intake.intakeSpeed);
+  public double ejectSpeed = Preferences.getDouble("ejectSpeed", Constants.Intake.ejectSpeed);
 
 
 
@@ -87,6 +88,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public void updatePreferences() {
     if (Preferences.getDouble("intakeSpeed", intakeSpeed) != intakeSpeed) {
       intakeSpeed = Preferences.getDouble("intakeSpeed", intakeSpeed);
+      ejectSpeed = Preferences.getDouble("ejectSpeed",ejectSpeed);
     }
     if (Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP) != Constants.Intake.kLauncherSubP || Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI) != Constants.Intake.kLauncherSubI || Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD) != Constants.Intake.kLauncherSubD || Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF) != Constants.Intake.kLauncherSubFF) {
       intakeMotorKp = Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);

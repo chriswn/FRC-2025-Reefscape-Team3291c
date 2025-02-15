@@ -51,9 +51,14 @@ public class EjectCMD extends Command {
 
   // Returns true when the command should end.
   @Override
-  public boolean isFinished() {
-    return false;
-  }
+    public boolean isFinished() {
+      if (!intakeMotorSubsystem.hasCoral()){
+        Timer.delay(0.052);
+
+  //Timer.delay(0.0025);
+      }
+      return !intakeMotorSubsystem.hasCoral();
+    }
  }
 
 
