@@ -13,11 +13,11 @@ import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 
 
-public class EjectCMD extends Command {
+public class ESpit extends Command {
   IntakeMotorSubsystem intakeMotorSubsystem;
  // double startTime = Timer.getFPGATimestamp();
   /** Creates a new Eject. */
-  public EjectCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
+  public ESpit(IntakeMotorSubsystem intakeMotorSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intakeMotorSubsystem = intakeMotorSubsystem;
     addRequirements(intakeMotorSubsystem);
@@ -36,7 +36,7 @@ public class EjectCMD extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.ejectSpeed);
+    intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.eSpitSpeed, false);
   }
 
 
@@ -44,22 +44,14 @@ public class EjectCMD extends Command {
   @Override
   public void end(boolean interrupted) {
     intakeMotorSubsystem.stopIntakeMotorSubsystem();//stops it
-
-
   }
 
 
   // Returns true when the command should end.
   @Override
     public boolean isFinished() {
-      if (!intakeMotorSubsystem.hasCoral()){
-        Timer.delay(0.052);
+      return false;
+  }
 
-  //Timer.delay(0.0025);
-      }
-      return !intakeMotorSubsystem.hasCoral();
-    }
- }
-
-
+}
 

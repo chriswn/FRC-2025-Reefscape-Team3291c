@@ -216,7 +216,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    loadPreferences();
+    //loadPreferences();
     //This method will be called once per scheduler run
     SmartDashboard.putNumber("intakePivot encoder reading", getCurrentAngle());
     SmartDashboard.putBoolean("atAngleGround", groundAtAngle());

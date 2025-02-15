@@ -48,8 +48,8 @@ public final class Constants {
     public static final double maxVelocity = 0.3;
     public static final double maxAcceleration = 0.3;
     public static final double ks = 0;
-    public static final double kg = 0;
-    public static final double kv = 0;
+    public static final double kg = 0.2364;
+    public static final double kv = 2.06;
     public static final double ka = 0;
 
     public static final double tolerance = 0.05;
@@ -71,7 +71,7 @@ public final class Constants {
 
     //floor pos
     public static final double groundFloor = 0;
-    public static final double topFloor = 6.69444444444;//6 + (250/360)
+    public static final double topFloor = 6.0 + (250.0/360.0);
     public static final double halfWayUpFloor = topFloor/2.0;
     public static final double maxVoltage = 8.0;
   }
@@ -79,14 +79,14 @@ public final class Constants {
 
   public static class Intake {
     
-    public static final double angleDeadband = 5;
+    public static final double angleDeadband = 5.0;
 
     public static final double maxVelocity = 0.3;
     public static final double maxAcceleration = 0.3;
-    public static final double ks = 0;
-    public static final double kg = 0;
-    public static final double kv = 0;
-    public static final double ka = 0;
+    public static final double ks = 0.0;
+    public static final double kg = 0.0;
+    public static final double kv = 0.0;
+    public static final double ka = 0.0;
 
     public static final double tolerance = 0.05;
 
@@ -96,10 +96,14 @@ public final class Constants {
     public static final int kLauncherSubLeftMotorId = 18;
     public static final int kLauncherSubRightMotorId = 14;
 
-    public static final double kLauncherSubP = 0.00005;
+    public static final double kLauncherSubP = 0.0001;
     public static final double kLauncherSubI = 0.0;
     public static final double kLauncherSubD = 0.0;
-    public static final double kLauncherSubFF = 0.0002;
+    public static final double kLauncherSubS = 0.0;
+    public static final double kLauncherSubV = 0.002142;
+    public static final double intakeMotorMaxAcceleration = 0.3;
+    public static final double intakeMotorMaxVelocity = 0.3;
+
 
     public static class PID {
       public static final double kp = 0.0;
@@ -109,7 +113,7 @@ public final class Constants {
 
     //ids
     public static final int encoderID = 0; //Changed due to change
-    public static final int IntakeID = 21;//21
+    public static final int IntakeID = 22;//21
     public static final int PivotID = 19;//19 
     public static final int intakeLimitSwitchID = 9;
     public static final int CANrangeID = 7;
@@ -125,8 +129,11 @@ public final class Constants {
 
     public static final double maxPivotVoltage = 5.0;
 
-    public static final double ejectSpeed = 0.25 * 5000;
-    public static final double intakeSpeed = 0.7 * 5000;
+    public static final boolean reverseIntakeMotor = true;
+
+    public static final double eSpitSpeed = -0.25 * 5000.0;
+    public static final double ejectSpeed = 0.25 * 5000.0;
+    public static final double intakeSpeed = 0.7 * 5000.0;
     public static final int launchNoteTimeInSecs = 1;
     
   }

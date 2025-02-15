@@ -29,7 +29,7 @@ import frc.robot.commands.ElevatorCMDs.GoToElevatorFloors;
 import frc.robot.commands.ElevatorCMDs.GoToGround;
 import frc.robot.commands.ElevatorCMDs.GoToTop;
 import frc.robot.commands.ElevatorCMDs.ResetElevatorEncoder;
-import frc.robot.commands.IntakeMotorCMDs.EjectCMD;
+import frc.robot.commands.IntakeMotorCMDs.ESpit;
 import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
 import frc.robot.commands.IntakePivotCMDs.PivotToStow;
@@ -68,7 +68,7 @@ public class RobotContainer {
   private final Command ResetElevatorEncoder = new ResetElevatorEncoder(elevatorSubsystem);
   private final Command pivotToGround = new PivotToGround(intakePivotSubsystem);
   private final Command pivotToStow = new PivotToStow(intakePivotSubsystem);
-  private final Command ejectCMD = new EjectCMD(intakeMotorSubsystem);
+  private final Command ejectCMD = new ESpit(intakeMotorSubsystem);
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
   private final GoToElevatorFloors goToElevatorFloors = new GoToElevatorFloors(elevatorSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.pov(180).getAsBoolean());
 

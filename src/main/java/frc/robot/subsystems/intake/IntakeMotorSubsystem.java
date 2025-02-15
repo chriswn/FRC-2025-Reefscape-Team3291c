@@ -13,23 +13,32 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Intake;
+import frc.robot.Constants.Elevator.PID;
 
 public class IntakeMotorSubsystem extends SubsystemBase {
 
   /*-------------------------------- public instance variables ---------------------------------*/
   public SparkMax IntakeMotorMotor;
 
-  public SparkClosedLoopController IntakeMotorPID;
+  public PIDController PIDController;
+  public TrapezoidProfile.Constraints tConstraints;
+  public SimpleMotorFeedforward simpleMotorFeedforward;
+
+  public TrapezoidProfile.State goal;
 
   public RelativeEncoder IntakeMotorEncoder;
 
-  public SlewRateLimiter mSpeedLimiter = new SlewRateLimiter(1000);
+  //public SlewRateLimiter mSpeedLimiter = new SlewRateLimiter(1000);
   public SparkMaxConfig config;
 
   public CANrange canRange;
@@ -37,7 +46,12 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public double intakeMotorKp = Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);
   public double intakeMotorKi = Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI);
   public double intakeMotorKd = Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
-  public double intakeMotorKff = Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
+  public double intakeMotorKv = Preferences.getDouble("intakeMotorKv", Constants.Intake.kLauncherSubV);
+  public double intakeMotorKs = Preferences.getDouble("intakeMotorKs", Constants.Intake.kLauncherSubS);
+
+  public double intakeMotorMaxAcceleration = Preferences.getDouble("intakeMotorMaxAcceleration", Constants.Intake.intakeMotorMaxAcceleration);
+  public double intakeMotorMaxVelocity = Preferences.getDouble("intakeMotorMaxVelocity", Constants.Intake.intakeMotorMaxVelocity);
+
   public double intakeSpeed = Preferences.getDouble("intakeSpeed", Constants.Intake.intakeSpeed);
   public double ejectSpeed = Preferences.getDouble("ejectSpeed", Constants.Intake.ejectSpeed);
 
@@ -45,9 +59,23 @@ public class IntakeMotorSubsystem extends SubsystemBase {
 
 
   public IntakeMotorSubsystem() {
-    canRange = new CANrange(0);
+    this.simpleMotorFeedforward = new SimpleMotorFeedforward(intakeMotorKs, intakeMotorKv);
+    this.tConstraints = new TrapezoidProfile.Constraints(intakeMotorMaxVelocity, intakeMotorMaxAcceleration);
+    this.PIDController= new PIDController(intakeMotorKp, intakeMotorKi, intakeMotorKd);
+
+    this.canRange = new CANrange(Constants.Intake.CANrangeID);
+
+    if (!Preferences.containsKey("ejectSpeed")) {
+      Preferences.initDouble("ejectSpeed", ejectSpeed);
+    }
     if (!Preferences.containsKey("intakeSpeed")) {
       Preferences.initDouble("intakeSpeed", intakeSpeed);
+    }
+    if (!Preferences.containsKey("intakeMotorMaxAcceleration")) {
+      Preferences.initDouble("intakeMotorMaxAcceleration", Constants.Intake.intakeMotorMaxAcceleration);
+    }
+    if (!Preferences.containsKey("intakeMotorMaxVelocity")) {
+      Preferences.initDouble("intakeMotorMaxVelocity", Constants.Intake.intakeMotorMaxVelocity);
     }
     if (!Preferences.containsKey("intakeMotorKp")) {
       Preferences.initDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);
@@ -58,26 +86,22 @@ public class IntakeMotorSubsystem extends SubsystemBase {
     if (!Preferences.containsKey("intakeMotorKd")) {
       Preferences.initDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
     }
-    if (!Preferences.containsKey("intakeMotorKff")) {
-      Preferences.initDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
+    if (!Preferences.containsKey("intakeMotorKs")) {
+      Preferences.initDouble("intakeMotorKs", Constants.Intake.kLauncherSubS);
+    }
+    if (!Preferences.containsKey("intakeMotorKv")) {
+      Preferences.initDouble("intakeMotorKv", Constants.Intake.kLauncherSubV);
     }
     
-    IntakeMotorMotor = new SparkMax(Constants.Intake.IntakeID, MotorType.kBrushless);
+    this.IntakeMotorMotor = new SparkMax(Constants.Intake.IntakeID, MotorType.kBrushless);
    // IntakeMotorMotor.restoreFactoryDefaults();
 
-    IntakeMotorPID = IntakeMotorMotor.getClosedLoopController();
-    config = new SparkMaxConfig();
-    config
-        .inverted(true)
+    this.config = new SparkMaxConfig();
+    this.config
+        .inverted(Constants.Intake.reverseIntakeMotor)
         .idleMode(IdleMode.kBrake);
-    config.closedLoop.p(Constants.Intake.kLauncherSubP);
-    config.closedLoop.i(Constants.Intake.kLauncherSubI);
-    config.closedLoop.d(Constants.Intake.kLauncherSubD);
-    config.closedLoop.pidf(Constants.Intake.kLauncherSubP, Constants.Intake.kLauncherSubI, 
-    Constants.Intake.kLauncherSubD, Constants.Intake.kLauncherSubFF);
-    config.closedLoop.outputRange(Constants.Intake.kLauncherSubMinOutput, Constants.Intake.kLauncherSubMaxOutput);
-    IntakeMotorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    IntakeMotorEncoder = IntakeMotorMotor.getEncoder();
+    this.IntakeMotorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.IntakeMotorEncoder = this.IntakeMotorMotor.getEncoder();
 
   //  IntakeMotorMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
 
@@ -88,37 +112,55 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public void updatePreferences() {
     if (Preferences.getDouble("intakeSpeed", intakeSpeed) != intakeSpeed) {
       intakeSpeed = Preferences.getDouble("intakeSpeed", intakeSpeed);
-      ejectSpeed = Preferences.getDouble("ejectSpeed",ejectSpeed);
     }
-    if (Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP) != Constants.Intake.kLauncherSubP || Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI) != Constants.Intake.kLauncherSubI || Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD) != Constants.Intake.kLauncherSubD || Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF) != Constants.Intake.kLauncherSubFF) {
+    if (Preferences.getDouble("ejectSpeed", ejectSpeed) != ejectSpeed) {
+      ejectSpeed = Preferences.getDouble("ejectSpeed", ejectSpeed);
+    }
+    // if (Preferences.getDouble("intakeMotorMaxAcceleration", Constants.Intake.intakeMotorMaxAcceleration) != intakeMotorMaxAcceleration) {
+    //   intakeMotorMaxAcceleration = Preferences.getDouble("intakeMotorMaxAcceleration", Constants.Intake.intakeMotorMaxAcceleration);
+    //    PIDController= new ProfiledPIDController(intakeMotorKp, intakeMotorKi, intakeMotorKd, new TrapezoidProfile.Constraints(intakeMotorMaxVelocity, intakeMotorMaxAcceleration));
+
+    // }
+    // if (Preferences.getDouble("intakeMotorMaxVelocity", Constants.Intake.intakeMotorMaxVelocity) != intakeMotorMaxVelocity) {
+    //   intakeMotorMaxVelocity = Preferences.getDouble("intakeMotorMaxVelocity", Constants.Intake.intakeMotorMaxVelocity);
+    //    PIDController= new ProfiledPIDController(intakeMotorKp, intakeMotorKi, intakeMotorKd, new TrapezoidProfile.Constraints(intakeMotorMaxVelocity, intakeMotorMaxAcceleration));
+    // }
+    if (Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP) != Constants.Intake.kLauncherSubP || Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI) != Constants.Intake.kLauncherSubI || Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD) != Constants.Intake.kLauncherSubD) {
       intakeMotorKp = Preferences.getDouble("intakeMotorKp", Constants.Intake.kLauncherSubP);
       intakeMotorKi = Preferences.getDouble("intakeMotorKi", Constants.Intake.kLauncherSubI);
       intakeMotorKd = Preferences.getDouble("intakeMotorKd", Constants.Intake.kLauncherSubD);
-      intakeMotorKff = Preferences.getDouble("intakeMotorKff", Constants.Intake.kLauncherSubFF);
-      config.closedLoop.pidf(intakeMotorKp, intakeMotorKi, intakeMotorKd, intakeMotorKff);
-      IntakeMotorMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+       PIDController= new PIDController(intakeMotorKp, intakeMotorKi, intakeMotorKd);
+    }
+    if (Preferences.getDouble("intakeMotorKs", Constants.Intake.kLauncherSubS) != Constants.Intake.kLauncherSubS || Preferences.getDouble("intakeMotorKv", Constants.Intake.kLauncherSubV) != Constants.Intake.kLauncherSubV) {
+      intakeMotorKs = Preferences.getDouble("intakeMotorKs", Constants.Intake.kLauncherSubS);
+      intakeMotorKv = Preferences.getDouble("intakeMotorKv", Constants.Intake.kLauncherSubV);
+      simpleMotorFeedforward = new SimpleMotorFeedforward(intakeMotorKs, intakeMotorKv);
     }
   }
-  public void moveIntakeMotor(double rpm) {
-    if (rpm < 0) {
-      IntakeMotorMotor.setInverted(false);
-      rpm = (-1 * rpm);
+
+  public void moveIntakeMotor(double rpm, boolean isInversed) {
+    double isNegative;
+    if (isInversed) {
+      isNegative = -1.0;
     }
-    // else {
-    //   IntakeMotorMotor.setInverted(false);
-    // }
+    else {
+      isNegative = 1.0;
+    }
     
-    double limitedSpeed = mSpeedLimiter.calculate(rpm);
-    // this.config.
-    IntakeMotorPID.setReference(limitedSpeed, ControlType.kVelocity);
-    SmartDashboard.putNumber("IntakeMotorDesiredSpeed", limitedSpeed);
+    double power;
+    power = PIDController.calculate(IntakeMotorEncoder.getVelocity(), rpm) + simpleMotorFeedforward.calculate(rpm);
+    power *= isNegative;
+    IntakeMotorMotor.setVoltage(power);
+    SmartDashboard.putNumber("IntakeMotorVoltage", power);
+
+    SmartDashboard.putNumber("IntakeMotorDesiredSpeed", rpm);
     SmartDashboard.putNumber("IntakeMotorVelocity", IntakeMotorEncoder.getVelocity());
 
   }
 
   public void stopIntakeMotorSubsystem() {
     //double limitedSpeed = mSpeedLimiter.calculate(0);
-    IntakeMotorPID.setReference(0, ControlType.kVelocity);
+    IntakeMotorMotor.set(0);
   }
 
 

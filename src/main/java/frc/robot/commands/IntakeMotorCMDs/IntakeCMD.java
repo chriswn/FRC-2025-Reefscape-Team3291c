@@ -15,6 +15,7 @@ import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 
 public class IntakeCMD extends Command {
   IntakeMotorSubsystem intakeMotorSubsystem;
+  Boolean hadCoral;
   /** Creates a new IntakeMotorCMD. */
   public IntakeCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -27,6 +28,12 @@ public class IntakeCMD extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    if (intakeMotorSubsystem.hasCoral()) {
+      hadCoral = true;
+    }
+    else {
+      hadCoral = false;
+    }
   }
  
 
@@ -34,8 +41,12 @@ public class IntakeCMD extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-  
-      intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed);
+      if (hadCoral) {
+        intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.ejectSpeed, false);
+      }
+      else if (!hadCoral) {
+        intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed, false);
+      }
 
     // if (!intakeSubsystem.getIntakeHasNote()) {
     // intakeMotorSubsystem.moveIntakeMotor(-1 * Constants.intake.intakeSpeed);
@@ -56,12 +67,17 @@ public class IntakeCMD extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (intakeMotorSubsystem.hasCoral()){
-
-Timer.delay(0.0025);// kintake speed 5000
-
+    if (!hadCoral && intakeMotorSubsystem.hasCoral()){
+      Timer.delay(0.0025);// kintake speed 5000
+      return true;
     }
-    return intakeMotorSubsystem.hasCoral();
+    else if (hadCoral && !intakeMotorSubsystem.hasCoral()) {
+      Timer.delay(0.052);
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 }
 
