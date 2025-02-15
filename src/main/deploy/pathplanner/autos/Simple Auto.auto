@@ -7,7 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Place Coral1M"
+            "pathName": "C1 To R"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunMotor"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS From P1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C2 To R"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RunMotor"
           }
         }
       ]
