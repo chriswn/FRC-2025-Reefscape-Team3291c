@@ -7,25 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "C1 To R"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RunMotor"
+            "pathName": "M To R"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "CS From P1"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
           }
         },
         {
@@ -43,7 +31,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }
