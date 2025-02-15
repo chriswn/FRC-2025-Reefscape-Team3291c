@@ -57,9 +57,8 @@ public class IntakeCMD extends Command {
   @Override
   public boolean isFinished() {
     if (intakeMotorSubsystem.hasCoral()){
-Timer.delay(0.052);
 
-//Timer.delay(0.0025);// kintake speed 5000
+Timer.delay(0.0025);// kintake speed 5000
 
     }
     return intakeMotorSubsystem.hasCoral();
