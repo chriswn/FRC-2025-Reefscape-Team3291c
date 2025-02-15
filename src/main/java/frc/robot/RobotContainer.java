@@ -16,9 +16,12 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.RunMotorCommand;
+import frc.robot.subsystems.RunMotorSub;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -35,11 +38,18 @@ import swervelib.SwerveInputStream;
 public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandXboxController driverXbox = new CommandXboxController(0);
+  public CommandJoystick controller0 = new CommandJoystick(1);
   public VisionSubsystem visionSubsystem = new VisionSubsystem();
+  public RunMotorSub runMotorSub = new RunMotorSub();
   // public ColorChanger colorChanger = new ColorChanger();
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve3291"));
+
+    private final RunMotorCommand runMotorCommand = new RunMotorCommand(
+        runMotorSub,
+        () -> 2 // Example: Getting speed from joystick Y-axis
+);
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -128,9 +138,13 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Configure the trigger bindings
+
+    NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
+
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+    controller0.button(2).whileTrue(runMotorCommand);
   }
 
   /**
@@ -195,6 +209,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
+    //return drivebase.getAutonomousCommand("Simple Command");
     return drivebase.getAutonomousCommand("Simple Auto");
   }
 
