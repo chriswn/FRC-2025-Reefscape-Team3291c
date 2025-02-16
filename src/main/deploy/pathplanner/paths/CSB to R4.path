@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 3.739346590909091,
-        "y": 2.768579545454545
+        "x": 3.771710526315789,
+        "y": 2.793421052631579
       },
       "prevControl": {
-        "x": 2.616404826291938,
-        "y": 1.878792628910765
+        "x": 2.648768761698636,
+        "y": 1.903634136087799
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CSB to R4 End"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 60.7
+    "rotation": 60.69779251786129
   },
   "reversed": false,
   "folder": null,
