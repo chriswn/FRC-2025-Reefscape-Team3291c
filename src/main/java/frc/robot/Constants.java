@@ -6,8 +6,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Preferences;
-import frc.robot.Constants.Lighting.Colors;
 import swervelib.math.Matter;
 
 /**
@@ -23,14 +21,14 @@ import swervelib.math.Matter;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final double ROBOT_MASS = (148 - 20.3) * 0.453592; // 32lbs * kg per pound
+  public static final double ROBOT_MASS = (148.0 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
   public static final double MAX_SPEED = Units.feetToMeters(14.5);
 
   public static final class DrivebaseConstants {
     // Hold time on motor brakes when disabled
-    public static final double WHEEL_LOCK_TIME = 10; // seconds
+    public static final double WHEEL_LOCK_TIME = 10.0; // seconds
   }
 
   public static class OperatorConstants {
@@ -38,7 +36,7 @@ public final class Constants {
     public static final double DEADBAND = 0.1;
     public static final double LEFT_Y_DEADBAND = 0.1;
     public static final double RIGHT_X_DEADBAND = 0.1;
-    public static final double TURN_CONSTANT = 6;
+    public static final double TURN_CONSTANT = 6.0;
   }
 
   
@@ -47,10 +45,10 @@ public final class Constants {
 
     public static final double maxVelocity = 0.3;
     public static final double maxAcceleration = 0.3;
-    public static final double ks = 0;
+    public static final double ks = 0.0;
     public static final double kg = 0.2364;
     public static final double kv = 2.06;
-    public static final double ka = 0;
+    public static final double ka = 0.0;
 
     public static final double tolerance = 0.05;
 
@@ -66,11 +64,12 @@ public final class Constants {
     public static final int motorLeadID = 15;
     public static final int motorFollowerID = 14;
     public static final int topLimitSwitchID = 9;
+    public static final int bottomLimitSwitchID = 8;
 
-    public static final double encoderOffset = 0;
+    public static final double encoderOffset = 0.0;
 
     //floor pos
-    public static final double groundFloor = 0;
+    public static final double groundFloor = 0.0;
     public static final double topFloor = 6.0 + (250.0/360.0);
     public static final double halfWayUpFloor = topFloor/2.0;
     public static final double maxVoltage = 8.0;
@@ -79,7 +78,7 @@ public final class Constants {
 
   public static class Intake {
     
-    public static final double angleDeadband = 5.0;
+    public static final double angleDeadband = 5.0/360.0;
 
     public static final double maxVelocity = 0.3;
     public static final double maxAcceleration = 0.3;
@@ -90,20 +89,11 @@ public final class Constants {
 
     public static final double tolerance = 0.05;
 
-    public static final double kLauncherSubMinOutput = 0;
-    public static final double kLauncherSubMaxOutput = 1;
-
-    public static final int kLauncherSubLeftMotorId = 18;
-    public static final int kLauncherSubRightMotorId = 14;
-
-    public static final double kLauncherSubP = 0.0001;
-    public static final double kLauncherSubI = 0.0;
-    public static final double kLauncherSubD = 0.0;
-    public static final double kLauncherSubS = 0.0;
-    public static final double kLauncherSubV = 0.002142;
-    public static final double intakeMotorMaxAcceleration = 0.3;
-    public static final double intakeMotorMaxVelocity = 0.3;
-
+    public static final double intakeMotorKp = 0.0001;
+    public static final double intakeMotorKi = 0.0;
+    public static final double intakeMotorKd = 0.0;
+    public static final double intakeMotorKs = 0.0;
+    public static final double intakeMotorKv = 0.002142;
 
     public static class PID {
       public static final double kp = 0.0;
@@ -119,7 +109,7 @@ public final class Constants {
     public static final int CANrangeID = 7;
 
 
-    public static final double k_pivotEncoderOffset = 0.0;
+    public static final double pivotEncoderOffset = 0.0;
 
     //angles
     public static final double groundAngle = 0.0/360.0;//doesn't like 0
@@ -134,8 +124,8 @@ public final class Constants {
     public static final double eSpitSpeed = -0.25 * 5000.0;
     public static final double ejectSpeed = 0.25 * 5000.0;
     public static final double intakeSpeed = 0.7 * 5000.0;
-    public static final int launchNoteTimeInSecs = 1;
     
+    public static final double distanceSensorPointBlankRange = 0.1;
   }
   
 

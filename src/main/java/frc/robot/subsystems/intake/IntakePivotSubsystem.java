@@ -2,16 +2,12 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-
 package frc.robot.subsystems.intake;
-
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -20,10 +16,6 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-
-
-
-
 
 public class IntakePivotSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
@@ -44,10 +36,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     STOW
   }
 
-  // Input: Desired state
   public PivotTarget pivot_target = PivotTarget.STOW;
-
-  // Output: Motor set values
 
   private double Intakekp = Constants.Intake.PID.kp;
   private double Intakeki = Constants.Intake.PID.ki;
@@ -57,45 +46,67 @@ public class IntakePivotSubsystem extends SubsystemBase {
   private double Intakekv = Constants.Intake.kv;
   private double Intakeka = Constants.Intake.ka;
 
-
+  private double IntakeMaxAcceleration = Constants.Intake.maxAcceleration;
+  private double IntakeMaxVelocity = Constants.Intake.maxVelocity;
 
 
   public IntakePivotSubsystem() {
-    Preferences.initDouble("Intakekp", Intakekp);
-    Preferences.initDouble("Intakeki", Intakeki);
-    Preferences.initDouble("Intakekd", Intakekd);
-    Preferences.initDouble("Intakeks", Intakeks);
-    Preferences.initDouble("Intakekg", Intakekg);
-    Preferences.initDouble("Intakekv", Intakekv);
-    Preferences.initDouble("Intakeka", Intakeka);
+    if (!Preferences.containsKey("Intakekp")) {
+      Preferences.initDouble("Intakekp", Intakekp);
+  }
+  
+  if (!Preferences.containsKey("Intakeki")) {
+      Preferences.initDouble("Intakeki", Intakeki);
+  }
+  
+  if (!Preferences.containsKey("Intakekd")) {
+      Preferences.initDouble("Intakekd", Intakekd);
+  }
+  
+  if (!Preferences.containsKey("Intakeks")) {
+      Preferences.initDouble("Intakeks", Intakeks);
+  }
+  
+  if (!Preferences.containsKey("Intakekg")) {
+      Preferences.initDouble("Intakekg", Intakekg);
+  }
+  
+  if (!Preferences.containsKey("Intakekv")) {
+      Preferences.initDouble("Intakekv", Intakekv);
+  }
+  
+  if (!Preferences.containsKey("Intakeka")) {
+      Preferences.initDouble("Intakeka", Intakeka);
+  }
+  
+  if (!Preferences.containsKey("IntakeMaxAccleration")) {
+      Preferences.initDouble("IntakeMaxAccleration", IntakeMaxAcceleration);
+  }
+  
+  if (!Preferences.containsKey("IntakeMaxVelocity")) {
+      Preferences.initDouble("IntakeMaxVelocity", IntakeMaxVelocity);
+  }
+  
+
 
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
     this.IntakeEncoder.setInverted(false);
-    //this.IntakeLimitSwitch = new DigitalInput(Constants.Intake.intakeLimitSwitchID);
 
     this.trapezoidConstraints = new TrapezoidProfile.Constraints(Constants.Intake.maxVelocity, Constants.Intake.maxAcceleration);
-
     this.profiledPIDController = new ProfiledPIDController(Constants.Intake.PID.kp, Constants.Intake.PID.ki, Constants.Intake.PID.kd, this.trapezoidConstraints);
-    this.profiledPIDController.setGoal(0);
     this.profiledPIDController.setTolerance(Constants.Intake.tolerance);
-
-
-    // this.pidController.setD(Constants.Intake.IntakePID.kd);
-    // SendableRegistry.addChild("D", d);
-    // this.pidController.setI(Constants.Intake.IntakePID.ki);
-    // this.pidController.setP(Constants.Intake.IntakePID.kp);
-
-
-    //this.profiledPIDController.enableContinuousInput(0, 360);
-
     this.armFeedforward = new ArmFeedforward(Constants.Intake.ks, Constants.Intake.kg, Constants.Intake.kv, Constants.Intake.ka);
-   
-
 
     this.pivotMotor = new SparkMax(Constants.Intake.PivotID, SparkLowLevel.MotorType.kBrushless);
   }
    
   public void loadPreferences() {
+    if (Preferences.getDouble("IntakeMaxAccleration", IntakeMaxAcceleration) != IntakeMaxAcceleration || Preferences.getDouble("IntakeMaxVelocity", IntakeMaxVelocity) != IntakeMaxVelocity) {
+      IntakeMaxAcceleration = Preferences.getDouble("IntakeMaxAccleration", IntakeMaxAcceleration);
+      IntakeMaxVelocity = Preferences.getDouble("IntakeMaxVelocity", IntakeMaxVelocity);
+      trapezoidConstraints = new TrapezoidProfile.Constraints(IntakeMaxVelocity, IntakeMaxAcceleration);
+      profiledPIDController = new ProfiledPIDController(Intakekp, Intakeki, Intakekd, trapezoidConstraints);
+    }
     if (Preferences.getDouble("Intakeka", Intakeka) != Intakeka || Preferences.getDouble("Intakekv", Intakekv) != Intakekv || Preferences.getDouble("Intakekg", Intakekg) != Intakekg || Preferences.getDouble("Intakeks", Intakeks) != Intakeks) {
       Intakeka = Preferences.getDouble("Intakeka", Intakeka);
       Intakekv = Preferences.getDouble("Intakekv", Intakekv);
@@ -125,20 +136,15 @@ public class IntakePivotSubsystem extends SubsystemBase {
     double angle = current_angle;
     SmartDashboard.putNumber("updatedAngle", angle);
 
-    double Intake_pivot_voltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
+    double intakePivotVoltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("intake setpoint", profiledPIDController.getSetpoint().position);
 
-    //double adjustedIntakePivotVoltage = 10 - Math.abs(Intake_pivot_voltage);
-    double adjustedIntakePivotVoltage = Intake_pivot_voltage; //error reversed for voltage
+    //double adjustedIntakePivotVoltage = 10 - Math.abs(intakePivotVoltage);
+    double adjustedIntakePivotVoltage = intakePivotVoltage; //error reversed for voltage
     if (!IntakeEncoder.isConnected()) {
       adjustedIntakePivotVoltage = 0.0;
     }
-    if (adjustedIntakePivotVoltage > Constants.Intake.maxPivotVoltage) {
-      adjustedIntakePivotVoltage = Constants.Intake.maxPivotVoltage;
-    }
-    if (adjustedIntakePivotVoltage < -Constants.Intake.maxPivotVoltage) {
-      adjustedIntakePivotVoltage = -Constants.Intake.maxPivotVoltage;
-    }
+
     return adjustedIntakePivotVoltage;
   }
  
@@ -162,14 +168,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
     }
   }
 
-
   public double getCurrentAngle() {
     double value = IntakeEncoder.get();
-    // value *= 360;
-     value += Constants.Intake.k_pivotEncoderOffset;
-    // if (value > 360) {
-    //   value %= 360;
-    // }
+     value += Constants.Intake.pivotEncoderOffset;
+    if (value > 1) {
+      value %= 1;
+    }
     return value;
   }
 
@@ -210,15 +214,11 @@ public class IntakePivotSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("getIntakeVoltage", voltage);
   }
 
- 
-
-
-
   @Override
   public void periodic() {
-    //loadPreferences();
-    //This method will be called once per scheduler run
+    loadPreferences();//to be commented out
     SmartDashboard.putNumber("intakePivot encoder reading", getCurrentAngle());
+    SmartDashboard.putNumber("intakePivot adjusted encoder reading", getCurrentAngle() * 360.0);
     SmartDashboard.putBoolean("atAngleGround", groundAtAngle());
     SmartDashboard.putBoolean("atAngleAmp", ampAtAngle());
     SmartDashboard.putBoolean("atAngleSource", sourceAtAngle());

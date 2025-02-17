@@ -5,7 +5,6 @@
 
 package frc.robot.subsystems;
 
-
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -13,12 +12,10 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,15 +23,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 
-
-
-
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
 
   public Encoder elevatorEncoder;
-  public DigitalInput elevatorLimitSwitch;
-  //public PIDController pidController;
+  public DigitalInput topElevatorLimitSwitch;
+  public DigitalInput bottomElevatorLimitSwitch;
+
   public SparkMax elevatorMotorLeader;
   public SparkMax elevatorMotorFollower;
   public TrapezoidProfile.Constraints trapezoidConstraints;
@@ -64,40 +59,60 @@ public class ElevatorSubsystem extends SubsystemBase {
   private double elevatorkv = Constants.Elevator.kv;
   private double elevatorka = Constants.Elevator.ka;
 
+  private double elevatorMaxAcceleration = Constants.Elevator.maxAcceleration;
+  private double elevatorMaxVelocity = Constants.Elevator.maxVelocity;
 
   SparkMaxConfig followerConfig;
   SparkMaxConfig leaderConfig;
 
   public ElevatorSubsystem() {
-    Preferences.initDouble("elevatorkp", elevatorkp);
-    Preferences.initDouble("elevatorki", elevatorki);
-    Preferences.initDouble("elevatorkd", elevatorkd);
-    Preferences.initDouble("elevatorks", elevatorks);
-    Preferences.initDouble("elevatorkg", elevatorkg);
-    Preferences.initDouble("elevatorkv", elevatorkv);
-    Preferences.initDouble("elevatorka", elevatorka);
+    if (!Preferences.containsKey("elevatorkp")) {
+      Preferences.initDouble("elevatorkp", elevatorkp);
+  }
+  
+  if (!Preferences.containsKey("elevatorki")) {
+      Preferences.initDouble("elevatorki", elevatorki);
+  }
+  
+  if (!Preferences.containsKey("elevatorkd")) {
+      Preferences.initDouble("elevatorkd", elevatorkd);
+  }
+  
+  if (!Preferences.containsKey("elevatorks")) {
+      Preferences.initDouble("elevatorks", elevatorks);
+  }
+  
+  if (!Preferences.containsKey("elevatorkg")) {
+      Preferences.initDouble("elevatorkg", elevatorkg);
+  }
+  
+  if (!Preferences.containsKey("elevatorkv")) {
+      Preferences.initDouble("elevatorkv", elevatorkv);
+  }
+  
+  if (!Preferences.containsKey("elevatorka")) {
+      Preferences.initDouble("elevatorka", elevatorka);
+  }
+  
+  if (!Preferences.containsKey("elevatorMaxAccleration")) {
+      Preferences.initDouble("elevatorMaxAccleration", elevatorMaxAcceleration);
+  }
+  
+  if (!Preferences.containsKey("elevatorMaxVelocity")) {
+      Preferences.initDouble("elevatorMaxVelocity", elevatorMaxVelocity);
+  }
 
     this.elevatorEncoder = new Encoder(Constants.Elevator.encoderAID, Constants.Elevator.encoderBID, false, Encoder.EncodingType.k2X);//may need reversing
-    this.elevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
-
-
-    // this.pidController.setD(Constants.Elevator.elevatorPID.kd);
-    // SendableRegistry.addChild("D", d);
-    // this.pidController.setI(Constants.Elevator.elevatorPID.ki);
-    // this.pidController.setP(Constants.Elevator.elevatorPID.kp);
-
-
-    //this.pidController.enableContinuousInput(0, 360);
-   
-
+    this.topElevatorLimitSwitch = new DigitalInput(Constants.Elevator.topLimitSwitchID);
+    this.topElevatorLimitSwitch = new DigitalInput(Constants.Elevator.bottomLimitSwitchID);
 
     this.elevatorMotorLeader = new SparkMax(Constants.Elevator.motorLeadID, SparkLowLevel.MotorType.kBrushless);
     this.elevatorMotorLeader.setInverted(true);
+
     this.elevatorMotorFollower = new SparkMax(Constants.Elevator.motorFollowerID, SparkLowLevel.MotorType.kBrushless);
     this.followerConfig = new SparkMaxConfig();
     this.followerConfig.follow(elevatorMotorLeader);
     this.followerConfig.inverted(true);
-    
     this.elevatorMotorFollower.configure(followerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     this.trapezoidConstraints = 
@@ -115,6 +130,12 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
   public void loadPreferences() {
+    if (Preferences.getDouble("elevatorMaxAccleration", elevatorMaxAcceleration) != elevatorMaxAcceleration || Preferences.getDouble("elevatorMaxVelocity", elevatorMaxVelocity) != elevatorMaxVelocity) {
+      elevatorMaxAcceleration = Preferences.getDouble("elevatorMaxAccleration", elevatorMaxAcceleration);
+      elevatorMaxVelocity = Preferences.getDouble("elevatorMaxVelocity", elevatorMaxVelocity);
+      trapezoidConstraints = new TrapezoidProfile.Constraints(elevatorMaxVelocity, elevatorMaxAcceleration);
+      profiledPIDController = new ProfiledPIDController(elevatorkp, elevatorki, elevatorkd, trapezoidConstraints);
+    }
     if (Preferences.getDouble("elevatorka", elevatorka) != elevatorka || Preferences.getDouble("elevatorkv", elevatorkv) != elevatorkv || Preferences.getDouble("elevatorkg", elevatorkg) != elevatorkg || Preferences.getDouble("elevatorks", elevatorks) != elevatorks) {
       elevatorka = Preferences.getDouble("elevatorka", elevatorka);
       elevatorkv = Preferences.getDouble("elevatorkv", elevatorkv);
@@ -140,22 +161,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     // Floor control
     double height = height_in_ticks / 2048.0;
     SmartDashboard.putNumber("adjusted height", height);
-    double elevator_floor_voltage = profiledPIDController.calculate(height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
+
+    double elevatorFloorVoltage = profiledPIDController.calculate(height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
-    SmartDashboard.putNumber("elevator floor voltage", elevator_floor_voltage);
-    // If the Floor is at exactly 0.0, it's probably not connected, so disable it
+    SmartDashboard.putNumber("elevator floor voltage", elevatorFloorVoltage);
 
-    //double adjustedElevatorfloorVoltage = 10 - Math.abs(elevator_floor_voltage);
-    double adjustedElevatorFloorVoltage = elevator_floor_voltage; //error reversed for voltage
-
-    if (adjustedElevatorFloorVoltage > Constants.Elevator.maxVoltage) {
-      adjustedElevatorFloorVoltage = Constants.Elevator.maxVoltage;
-    }
-    if (adjustedElevatorFloorVoltage < -Constants.Elevator.maxVoltage) {
-      adjustedElevatorFloorVoltage = -Constants.Elevator.maxVoltage;
-    }
-
-    return adjustedElevatorFloorVoltage;
+    return elevatorFloorVoltage;
   }
  
   public void stopElevator() {
@@ -184,6 +195,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     return value;
   }
+  public boolean elevatorAtHalfWayUpFloor() {
+    boolean value = false;
+    if (elevatorEncoder.get() < Constants.Elevator.halfWayUpFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.halfWayUpFloor - Constants.Elevator.deadband) {
+      value = true;
+    }
+    return value;
+  }
   public boolean elevatorAtTopFloor() {
     boolean value = false;
     if (elevatorEncoder.get() < Constants.Elevator.topFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.topFloor - Constants.Elevator.deadband) {
@@ -196,34 +214,28 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void goToPosition() {
-    //  if (getElevatorHasNote()) {
-    //   goToStow();
-    // }
     double desired_height = floorTargetToHeight(floor_target);
     goal = new TrapezoidProfile.State(desired_height, 0);
     profiledPIDController.setGoal(goal);
 
     double voltage = giveVoltage(goal, elevatorEncoder.get());
-
     elevatorMotorLeader.setVoltage(voltage);
-    
-   
     SmartDashboard.putNumber("getElevatorVoltage", voltage);
   }
 
   @Override
   public void periodic() {
     goToPosition();
-    loadPreferences();
+    loadPreferences();//to be commented out
     //This method will be called once per scheduler run
     SmartDashboard.putNumber("elevator encoder reading", elevatorEncoder.get());
     SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/2048.0);
 
     SmartDashboard.putBoolean("elevatorAtGroundFloor", elevatorAtGroundFloor());
+    SmartDashboard.putBoolean("elevatorAtHalfWayUpFloor", elevatorAtHalfWayUpFloor());
     SmartDashboard.putBoolean("elevatorAtTopFloor", elevatorAtTopFloor());
     SmartDashboard.putNumber("floorTarget", floorTargetToHeight(floor_target));
     SmartDashboard.putNumber("elevator motor bus voltage", elevatorMotorLeader.getBusVoltage());
-
   }
 }
  
