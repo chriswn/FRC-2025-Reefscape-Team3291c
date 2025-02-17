@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 60.69779251786129
+    "rotation": -37.37948833842909
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 56.58093104753626
+    "rotation": -41.15672986657369
   },
   "useDefaultConstraints": true
 }
