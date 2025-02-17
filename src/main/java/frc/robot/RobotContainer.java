@@ -170,16 +170,17 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
 
-    NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+    NamedCommands.registerCommand("goToThirdFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.povDown().getAsBoolean(), 2).until(() -> elevatorSubsystem.ifAtFloor(Elevator.thirdFloor)));
+    //NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
-    controller0.button(2).whileTrue(runMotorCommand);
+    controller0.button(Constants.ButtonList.b).whileTrue(runMotorCommand);
   }
 
   /**
@@ -228,13 +229,13 @@ public class RobotContainer {
       controller0.button(Constants.ButtonList.back).whileTrue(drivebase.centerModulesCommand());
     } else {
       // controller0.pov(0).whileTrue(elevatorGoToGround);
-      // controller0.povUp().whileTrue(elevatorGoToTop);
+      controller0.button(Constants.ButtonList.l3).whileTrue(new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.povDown().getAsBoolean(), 2));
       controller0.button(Constants.ButtonList.a).whileTrue(ResetElevatorEncoder);
       controller0.button(Constants.ButtonList.x).whileTrue(pivotToGround);
       controller0.button(Constants.ButtonList.b).whileTrue(pivotToStow);
       controller0.povLeft().toggleOnTrue(ejectCMD);
       controller0.povRight().toggleOnTrue(intakeCMD);
-      elevatorSubsystem.setDefaultCommand(goToFloor);
+      //elevatorSubsystem.setDefaultCommand(goToFloor);
       intakePivotSubsystem.setDefaultCommand(goToFloor);
       controller0.button(Constants.ButtonList.a).onTrue((Commands.runOnce(drivebase::zeroGyro)));
       controller0.button(Constants.ButtonList.x).onTrue(Commands.runOnce(drivebase::addFakeVisionReading));

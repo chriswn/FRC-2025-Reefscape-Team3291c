@@ -19,10 +19,10 @@ public class GoToFloor extends Command {
   IntakePivotSubsystem intakePivotSubsystem;
   BooleanSupplier pressedUp;
   BooleanSupplier pressedDown;
-  int floor;
+  int floor = 0;
   Boolean moveFloorUp;
   Boolean moveFloorDown;
-  int maxHeight;
+  int maxHeight = 3;
   FloorTarget floorTarget;
   public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown) {
     this.elevatorSubsystem = elevatorSubsystem;
@@ -33,13 +33,16 @@ public class GoToFloor extends Command {
     addRequirements(intakePivotSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, int floor) {
+    this(elevatorSubsystem, intakePivotSubsystem, pressedUp, pressedDown);
+    this.floor = floor;
+  }
+
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    floor = 0;
     moveFloorUp = true;
-    maxHeight = 3;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -78,11 +81,11 @@ public class GoToFloor extends Command {
       intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
     }
     
-    // SmartDashboard.putNumber("current elevator floor", floor);
-    // SmartDashboard.putBoolean("pressed up", pressedUp.getAsBoolean());
-    // SmartDashboard.putBoolean("pressed down", pressedDown.getAsBoolean());
-    // SmartDashboard.putBoolean("moveFloorDown", moveFloorDown);
-    // SmartDashboard.putBoolean("moveFloorUp", moveFloorUp);
+    SmartDashboard.putNumber("current elevator floor", floor);
+    SmartDashboard.putBoolean("pressed up", pressedUp.getAsBoolean());
+    SmartDashboard.putBoolean("pressed down", pressedDown.getAsBoolean());
+    SmartDashboard.putBoolean("moveFloorDown", moveFloorDown);
+    SmartDashboard.putBoolean("moveFloorUp", moveFloorUp);
   
   }
 

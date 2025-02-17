@@ -196,7 +196,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    //check if at floor
   public boolean ifAtFloor(Double target) {
     boolean value = false;
-    if (elevatorEncoder.get() < target + Constants.Elevator.deadband && elevatorEncoder.get() > target - Constants.Elevator.deadband) {
+    if (elevatorEncoder.get()/2048.0 < target + Constants.Elevator.deadband && elevatorEncoder.get()/2048.0 > target - Constants.Elevator.deadband) {
       value = true;
     }
     return value;
@@ -225,6 +225,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/2048.0);
 
     SmartDashboard.putBoolean("elevatorAtGroundFloor", ifAtFloor(Constants.Elevator.groundFloor));
+    SmartDashboard.putBoolean("elevatorAtSecondFloor", ifAtFloor(Constants.Elevator.secondFloor));
+    SmartDashboard.putBoolean("elevatorAtThirdFloor", ifAtFloor(Constants.Elevator.thirdFloor));
+    SmartDashboard.putBoolean("elevatorAtFourthFloor", ifAtFloor(Constants.Elevator.fourthFloor));
+
     SmartDashboard.putBoolean("elevatorAtTopFloor", ifAtFloor(Constants.Elevator.topFloor));
     SmartDashboard.putNumber("floorTarget", floorTargetToHeight(floor_target));
     SmartDashboard.putNumber("elevator motor bus voltage", elevatorMotorLeader.getBusVoltage());
