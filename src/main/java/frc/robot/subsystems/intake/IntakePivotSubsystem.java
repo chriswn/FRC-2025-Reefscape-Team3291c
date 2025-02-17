@@ -31,100 +31,100 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public enum PivotTarget {
     NONE,
     GROUND,
-    SOURCE,
-    AMP,
-    STOW
+    STOW,
+    MIDLEVELS,
+    CHUTE,
+    TOPLEVEL
   }
 
   public PivotTarget pivot_target = PivotTarget.STOW;
 
-  private double Intakekp = Constants.Intake.PID.kp;
-  private double Intakeki = Constants.Intake.PID.ki;
-  private double Intakekd = Constants.Intake.PID.kd;
-  private double Intakeks = Constants.Intake.ks;
-  private double Intakekg = Constants.Intake.kg;
-  private double Intakekv = Constants.Intake.kv;
-  private double Intakeka = Constants.Intake.ka;
+  private double pivotKp = Constants.Intake.PID.kp;
+  private double pivotKi = Constants.Intake.PID.ki;
+  private double pivotKd = Constants.Intake.PID.kd;
+  private double pivotKs = Constants.Intake.pivotKs;
+  private double pivotKg = Constants.Intake.pivotKg;
+  private double pivotKv = Constants.Intake.pivotKv;
+  private double pivotKa = Constants.Intake.pivotKa;
 
-  private double IntakeMaxAcceleration = Constants.Intake.maxAcceleration;
-  private double IntakeMaxVelocity = Constants.Intake.maxVelocity;
+  private double pivotMaxAcceleration = Constants.Intake.pivotMaxAcceleration;
+  private double pivotMaxVelocity = Constants.Intake.pivotMaxVelocity;
 
 
   public IntakePivotSubsystem() {
-    if (!Preferences.containsKey("Intakekp")) {
-      Preferences.initDouble("Intakekp", Intakekp);
+    if (!Preferences.containsKey("pivotKp")) {
+      Preferences.initDouble("pivotKp", pivotKp);
   }
   
-  if (!Preferences.containsKey("Intakeki")) {
-      Preferences.initDouble("Intakeki", Intakeki);
+  if (!Preferences.containsKey("pivotKi")) {
+      Preferences.initDouble("pivotKi", pivotKi);
   }
   
-  if (!Preferences.containsKey("Intakekd")) {
-      Preferences.initDouble("Intakekd", Intakekd);
+  if (!Preferences.containsKey("pivotKd")) {
+      Preferences.initDouble("pivotKd", pivotKd);
   }
   
-  if (!Preferences.containsKey("Intakeks")) {
-      Preferences.initDouble("Intakeks", Intakeks);
+  if (!Preferences.containsKey("pivotKs")) {
+      Preferences.initDouble("pivotKs", pivotKs);
   }
   
-  if (!Preferences.containsKey("Intakekg")) {
-      Preferences.initDouble("Intakekg", Intakekg);
+  if (!Preferences.containsKey("pivotKg")) {
+      Preferences.initDouble("pivotKg", pivotKg);
   }
   
-  if (!Preferences.containsKey("Intakekv")) {
-      Preferences.initDouble("Intakekv", Intakekv);
+  if (!Preferences.containsKey("pivotKv")) {
+      Preferences.initDouble("pivotKv", pivotKv);
   }
   
-  if (!Preferences.containsKey("Intakeka")) {
-      Preferences.initDouble("Intakeka", Intakeka);
+  if (!Preferences.containsKey("pivotKa")) {
+      Preferences.initDouble("pivotKa", pivotKa);
   }
   
-  if (!Preferences.containsKey("IntakeMaxAccleration")) {
-      Preferences.initDouble("IntakeMaxAccleration", IntakeMaxAcceleration);
+  if (!Preferences.containsKey("pivotMaxAcceleration")) {
+      Preferences.initDouble("pivotMaxAcceleration", pivotMaxAcceleration);
   }
   
-  if (!Preferences.containsKey("IntakeMaxVelocity")) {
-      Preferences.initDouble("IntakeMaxVelocity", IntakeMaxVelocity);
+  if (!Preferences.containsKey("pivotMaxVelocity")) {
+      Preferences.initDouble("pivotMaxVelocity", pivotMaxVelocity);
   }
-  
 
 
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
     this.IntakeEncoder.setInverted(false);
 
-    this.trapezoidConstraints = new TrapezoidProfile.Constraints(Constants.Intake.maxVelocity, Constants.Intake.maxAcceleration);
-    this.profiledPIDController = new ProfiledPIDController(Constants.Intake.PID.kp, Constants.Intake.PID.ki, Constants.Intake.PID.kd, this.trapezoidConstraints);
+    this.trapezoidConstraints = new TrapezoidProfile.Constraints(pivotMaxVelocity, pivotMaxAcceleration);
+    this.profiledPIDController = new ProfiledPIDController(pivotKp, pivotKi, pivotKd, this.trapezoidConstraints);
     this.profiledPIDController.setTolerance(Constants.Intake.tolerance);
-    this.armFeedforward = new ArmFeedforward(Constants.Intake.ks, Constants.Intake.kg, Constants.Intake.kv, Constants.Intake.ka);
+    this.armFeedforward = new ArmFeedforward(Constants.Intake.pivotKs, Constants.Intake.pivotKg, Constants.Intake.pivotKv, Constants.Intake.pivotKa);
 
     this.pivotMotor = new SparkMax(Constants.Intake.PivotID, SparkLowLevel.MotorType.kBrushless);
   }
    
   public void loadPreferences() {
-    if (Preferences.getDouble("IntakeMaxAccleration", IntakeMaxAcceleration) != IntakeMaxAcceleration || Preferences.getDouble("IntakeMaxVelocity", IntakeMaxVelocity) != IntakeMaxVelocity) {
-      IntakeMaxAcceleration = Preferences.getDouble("IntakeMaxAccleration", IntakeMaxAcceleration);
-      IntakeMaxVelocity = Preferences.getDouble("IntakeMaxVelocity", IntakeMaxVelocity);
-      trapezoidConstraints = new TrapezoidProfile.Constraints(IntakeMaxVelocity, IntakeMaxAcceleration);
-      profiledPIDController = new ProfiledPIDController(Intakekp, Intakeki, Intakekd, trapezoidConstraints);
+    if (Preferences.getDouble("pivotMaxAcceleration", pivotMaxAcceleration) != pivotMaxAcceleration || Preferences.getDouble("pivotMaxVelocity", pivotMaxVelocity) != pivotMaxVelocity) {
+      pivotMaxAcceleration = Preferences.getDouble("pivotMaxAcceleration", pivotMaxAcceleration);
+      pivotMaxVelocity = Preferences.getDouble("pivotMaxVelocity", pivotMaxVelocity);
+      trapezoidConstraints = new TrapezoidProfile.Constraints(pivotMaxVelocity, pivotMaxAcceleration);
+      profiledPIDController = new ProfiledPIDController(pivotKp, pivotKi, pivotKd, trapezoidConstraints);
     }
-    if (Preferences.getDouble("Intakeka", Intakeka) != Intakeka || Preferences.getDouble("Intakekv", Intakekv) != Intakekv || Preferences.getDouble("Intakekg", Intakekg) != Intakekg || Preferences.getDouble("Intakeks", Intakeks) != Intakeks) {
-      Intakeka = Preferences.getDouble("Intakeka", Intakeka);
-      Intakekv = Preferences.getDouble("Intakekv", Intakekv);
-      Intakekg = Preferences.getDouble("Intakekg", Intakekg);
-      Intakeks = Preferences.getDouble("Intakeks", Intakeks);
-      armFeedforward = new ArmFeedforward(Intakeks, Intakekg, Intakekv, Intakeka);
+    if (Preferences.getDouble("pivotKa", pivotKa) != pivotKa || Preferences.getDouble("pivotKv", pivotKv) != pivotKv || Preferences.getDouble("pivotKg", pivotKg) != pivotKg || Preferences.getDouble("pivotKs", pivotKs) != pivotKs) {
+      pivotKa = Preferences.getDouble("pivotKa", pivotKa);
+      pivotKv = Preferences.getDouble("pivotKv", pivotKv);
+      pivotKg = Preferences.getDouble("pivotKg", pivotKg);
+      pivotKs = Preferences.getDouble("pivotKs", pivotKs);
+      armFeedforward = new ArmFeedforward(pivotKs, pivotKg, pivotKv, pivotKa);
     }
-    if (Preferences.getDouble("Intakekp", Intakekp) != Intakekp) {
-      Intakekp = Preferences.getDouble("Intakekp", Intakekp);
-      profiledPIDController.setP(Intakekp);
+    if (Preferences.getDouble("pivotKp", pivotKp) != pivotKp) {
+      pivotKp = Preferences.getDouble("pivotKp", pivotKp);
+      profiledPIDController.setP(pivotKp);
     }
-    if (Preferences.getDouble("Intakeki", Intakeki) != Intakeki) {
-      Intakekp = Preferences.getDouble("Intakeki", Intakeki);
-      profiledPIDController.setI(Intakeki);
+    if (Preferences.getDouble("pivotKi", pivotKi) != pivotKi) {
+      pivotKp = Preferences.getDouble("pivotKi", pivotKi);
+      profiledPIDController.setI(pivotKi);
     }
-    if (Preferences.getDouble("Intakekd", Intakekd) != Intakekd) {
-      Intakekp = Preferences.getDouble("Intakekd", Intakekd);
-      profiledPIDController.setD(Intakekd);
+    if (Preferences.getDouble("pivotKd", pivotKd) != pivotKd) {
+      pivotKp = Preferences.getDouble("pivotKd", pivotKd);
+      profiledPIDController.setD(pivotKd);
     }
   }
 
@@ -136,16 +136,16 @@ public class IntakePivotSubsystem extends SubsystemBase {
     double angle = current_angle;
     SmartDashboard.putNumber("updatedAngle", angle);
 
-    double intakePivotVoltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
+    double pivotVoltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("intake setpoint", profiledPIDController.getSetpoint().position);
 
-    //double adjustedIntakePivotVoltage = 10 - Math.abs(intakePivotVoltage);
-    double adjustedIntakePivotVoltage = intakePivotVoltage; //error reversed for voltage
+    //double adjustedpivotVoltage = 10 - Math.abs(pivotVoltage);
+    double adjustedpivotVoltage = pivotVoltage; //error reversed for voltage
     if (!IntakeEncoder.isConnected()) {
-      adjustedIntakePivotVoltage = 0.0;
+      adjustedpivotVoltage = 0.0;
     }
 
-    return adjustedIntakePivotVoltage;
+    return adjustedpivotVoltage;
   }
  
   public void stopIntake() {
@@ -156,15 +156,15 @@ public class IntakePivotSubsystem extends SubsystemBase {
     switch (target) {
       case GROUND:
         return Constants.Intake.groundAngle;
-      case SOURCE:
-        return Constants.Intake.sourceAngle;
-      case AMP:
-        return Constants.Intake.ampAngle;
       case STOW:
         return Constants.Intake.stowAngle;
+      case MIDLEVELS:
+        return Constants.Intake.midLevelsAngle;
+      case TOPLEVEL:
+        return Constants.Intake.topLevelAngle;
       default:
         // "Safe" default
-        return 180;
+        return Constants.Intake.stowAngle;
     }
   }
 
@@ -178,30 +178,9 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
 
    //check if at angle
-  public boolean ampAtAngle() {
+  public boolean ifAtAngle(double targetAngle) {
     boolean value = false;
-    if (getCurrentAngle() < Constants.Intake.ampAngle + Constants.Intake.angleDeadband && getCurrentAngle() > Constants.Intake.ampAngle - Constants.Intake.angleDeadband) {
-      value = true;
-    }
-    return value;
-  }
-  public boolean groundAtAngle() {
-    boolean value = false;
-    if (getCurrentAngle() < Constants.Intake.groundAngle + Constants.Intake.angleDeadband && getCurrentAngle() > Constants.Intake.groundAngle - Constants.Intake.angleDeadband) {
-      value = true;
-    }
-    return value;
-  }
-  public boolean stowAtAngle() {
-    boolean value = false;
-    if (getCurrentAngle() < Constants.Intake.stowAngle + Constants.Intake.angleDeadband && getCurrentAngle() > Constants.Intake.stowAngle - Constants.Intake.angleDeadband) {
-      value = true;
-    }
-    return value;
-  }
-  public boolean sourceAtAngle() {
-    boolean value = false;
-    if (getCurrentAngle() < Constants.Intake.sourceAngle + Constants.Intake.angleDeadband && getCurrentAngle() > Constants.Intake.sourceAngle - Constants.Intake.angleDeadband) {
+    if (getCurrentAngle() < targetAngle + Constants.Intake.angleDeadband && getCurrentAngle() > targetAngle - Constants.Intake.angleDeadband) {
       value = true;
     }
     return value;
@@ -209,6 +188,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   public void goToPosition(PivotTarget pivotTarget) {
     double pivotAngle = pivotTargetToAngle(pivotTarget);
+    SmartDashboard.putNumber("pivotAngle", pivotAngle);
+    if (pivotTarget == PivotTarget.STOW && ifAtAngle(Constants.Intake.stowAngle)) {
+      pivotMotor.set(0);
+      SmartDashboard.putNumber("getIntakeVoltage", 0);
+      return;
+    }
     double voltage = giveVoltage(pivotAngle, getCurrentAngle());
     pivotMotor.setVoltage(voltage);
     SmartDashboard.putNumber("getIntakeVoltage", voltage);
@@ -217,12 +202,14 @@ public class IntakePivotSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     loadPreferences();//to be commented out
-    SmartDashboard.putNumber("intakePivot encoder reading", getCurrentAngle());
-    SmartDashboard.putNumber("intakePivot adjusted encoder reading", getCurrentAngle() * 360.0);
-    SmartDashboard.putBoolean("atAngleGround", groundAtAngle());
-    SmartDashboard.putBoolean("atAngleAmp", ampAtAngle());
-    SmartDashboard.putBoolean("atAngleSource", sourceAtAngle());
-    SmartDashboard.putBoolean("atAngleStow", stowAtAngle());
+    goToPosition(pivot_target);
+    SmartDashboard.putString("pivot target", pivot_target.toString());
+    SmartDashboard.putNumber("pivot encoder reading", getCurrentAngle());
+    SmartDashboard.putNumber("pivot adjusted encoder reading", getCurrentAngle() * 360.0);
+    SmartDashboard.putBoolean("atAngleGround", ifAtAngle(Constants.Intake.groundAngle));
+    SmartDashboard.putBoolean("atAngleStow", ifAtAngle(Constants.Intake.stowAngle));
+    SmartDashboard.putBoolean("atAngleMidLevels", ifAtAngle(Constants.Intake.midLevelsAngle));
+    SmartDashboard.putBoolean("atAngleTopLevel", ifAtAngle(Constants.Intake.topLevelAngle));
   }
 }
  

@@ -47,11 +47,6 @@ public class IntakeCMD extends Command {
       else if (!hadCoral) {
         intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed);
       }
-
-    // if (!intakeSubsystem.getIntakeHasNote()) {
-    // intakeMotorSubsystem.moveIntakeMotor(-1 * Constants.intake.intakeSpeed);
-
-
   }
 
 
@@ -59,8 +54,6 @@ public class IntakeCMD extends Command {
   @Override
   public void end(boolean interrupted) {
     intakeMotorSubsystem.stopIntakeMotorSubsystem();//stops it
-    //ColorChanger.setGOLD();
-   // ColorChanger.setGOLD();
   }
 
 
@@ -68,11 +61,11 @@ public class IntakeCMD extends Command {
   @Override
   public boolean isFinished() {
     if (!hadCoral && intakeMotorSubsystem.hasCoral()){
-      Timer.delay(0.0025);// kintake speed 5000
+      Timer.delay(Constants.Intake.intakeTimeToStop);
       return true;
     }
     else if (hadCoral && !intakeMotorSubsystem.hasCoral()) {
-      Timer.delay(0.052);
+      Timer.delay(Constants.Intake.ejectTimeToStop);
       return true;
     }
     else {

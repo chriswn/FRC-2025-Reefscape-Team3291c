@@ -69,31 +69,37 @@ public final class Constants {
     public static final double encoderOffset = 0.0;
 
     //floor pos
+    //inch measurements
+    public static final double distanceOffGround = 15.0 + (3.0/8.0);
+    public static final double distanceToLevel2 = 23.0 + (7.0/8.0) - distanceOffGround;
+    public static final double distanceToLevel3 = 40 + (4.0/8.0) - distanceOffGround;
+    public static final double distanceToLevel4 = 70 - distanceOffGround;
+
+    public static final double maxHeightInches = 81.0 + (1.0/4.0) - distanceOffGround;
+    public static final double maxHeightRotation = 6.0 + (250.0/360.0);
+    public static final double inchesToRotations = maxHeightRotation/maxHeightInches;
+
     public static final double groundFloor = 0.0;
+    public static final double secondFloor = distanceToLevel2 * inchesToRotations;
+    public static final double thirdFloor = distanceToLevel3 * inchesToRotations;
+    public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
     public static final double topFloor = 6.0 + (250.0/360.0);
-    public static final double halfWayUpFloor = topFloor/2.0;
-    public static final double maxVoltage = 8.0;
   }
 
 
   public static class Intake {
-    
-    public static final double angleDeadband = 5.0/360.0;
+    public static final double pivotMaxVelocity = 0.3;
+    public static final double pivotMaxAcceleration = 0.3;
+    public static final double pivotKs = 0.0;
+    public static final double pivotKg = 0.0;
+    public static final double pivotKv = 0.0;
+    public static final double pivotKa = 0.0;
 
-    public static final double maxVelocity = 0.3;
-    public static final double maxAcceleration = 0.3;
-    public static final double ks = 0.0;
-    public static final double kg = 0.0;
-    public static final double kv = 0.0;
-    public static final double ka = 0.0;
-
-    public static final double tolerance = 0.05;
-
-    public static final double intakeMotorKp = 0.0001;
+    public static final double intakeMotorKp = 0.00001;
     public static final double intakeMotorKi = 0.0;
     public static final double intakeMotorKd = 0.0;
-    public static final double intakeMotorKs = 0.0;
-    public static final double intakeMotorKv = 0.002142;
+    public static final double intakeMotorKs = 0.15;
+    public static final double intakeMotorKv = 0.002114;
 
     public static class PID {
       public static final double kp = 0.0;
@@ -112,20 +118,25 @@ public final class Constants {
     public static final double pivotEncoderOffset = 0.0;
 
     //angles
-    public static final double groundAngle = 0.0/360.0;//doesn't like 0
-    public static final double stowAngle = 181.0/360.0;
-    public static final double sourceAngle = 167.0/360.0;
-    public static final double ampAngle = 95.0/360.0;
+    public static final double stowAngle = 17.4/360.0;
+    public static final double midLevelsFallingOffset = 3.0/360.0;
+    public static final double midLevelsAngle = 35.0/360.0 + midLevelsFallingOffset;
+    public static final double topLevelAngle = 90.0/360.0;
+    public static final double groundAngle = 180.0/360.0;//not currently in use
 
-    public static final double maxPivotVoltage = 5.0;
+    public static final double angleDeadband = 5.0/360.0;
+    public static final double tolerance = angleDeadband;
 
     public static final boolean reverseIntakeMotor = true;
 
-    public static final double eSpitSpeed = -0.25 * 5000.0;
-    public static final double ejectSpeed = 0.25 * 5000.0;
-    public static final double intakeSpeed = 0.7 * 5000.0;
+    public static final double eSpitSpeed = -1000.0;
+    public static final double ejectSpeed = 1000.0;
+    public static final double intakeSpeed = 1000.0;
     
     public static final double distanceSensorPointBlankRange = 0.1;
+
+    public static final double intakeTimeToStop = 0.0025;
+    public static final double ejectTimeToStop = 0.052;
   }
   
 

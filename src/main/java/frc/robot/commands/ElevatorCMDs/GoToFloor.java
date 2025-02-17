@@ -13,9 +13,10 @@ import frc.robot.subsystems.ElevatorSubsystem.FloorTarget;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class GoToElevatorFloors extends Command {
+public class GoToFloor extends Command {
   /** Creates a new GoToElevatorFloors. */
   ElevatorSubsystem elevatorSubsystem;
+  IntakePivotSubsystem intakePivotSubsystem;
   BooleanSupplier pressedUp;
   BooleanSupplier pressedDown;
   int floor;
@@ -23,11 +24,13 @@ public class GoToElevatorFloors extends Command {
   Boolean moveFloorDown;
   int maxHeight;
   FloorTarget floorTarget;
-  public GoToElevatorFloors(ElevatorSubsystem elevatorSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown) {
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown) {
     this.elevatorSubsystem = elevatorSubsystem;
+    this.intakePivotSubsystem = intakePivotSubsystem;
     this.pressedUp = pressedUp;
     this.pressedDown = pressedDown;
     addRequirements(elevatorSubsystem);
+    addRequirements(intakePivotSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -36,7 +39,7 @@ public class GoToElevatorFloors extends Command {
   public void initialize() {
     floor = 0;
     moveFloorUp = true;
-    maxHeight = 2;
+    maxHeight = 3;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -49,6 +52,7 @@ public class GoToElevatorFloors extends Command {
     else if (!pressedUp.getAsBoolean()) {
       moveFloorUp = true;
     }
+
     if (pressedDown.getAsBoolean() && moveFloorDown && floor > 0) {
       moveFloorDown = false;
       floor--;
@@ -56,26 +60,30 @@ public class GoToElevatorFloors extends Command {
     else if (!pressedDown.getAsBoolean()) {
       moveFloorDown = true;
     }
-    if (floor == 0) {
-      floorTarget = FloorTarget.GROUND_FLOOR;
-      elevatorSubsystem.setTarget(floorTarget);
-    }
-    if (floor == 1) {
-      floorTarget = FloorTarget.MIDDLE_FLOOR;
-      elevatorSubsystem.setTarget(floorTarget);
-    }
-    if (floor == 2) {
-      floorTarget = FloorTarget.TOP_FLOOR;
-      elevatorSubsystem.setTarget(floorTarget);
-    }
-    
-    SmartDashboard.putNumber("current elevator floor", floor);
-    SmartDashboard.putBoolean("pressed up", pressedUp.getAsBoolean());
-    SmartDashboard.putBoolean("pressed down", pressedDown.getAsBoolean());
-    SmartDashboard.putBoolean("moveFloorDown", moveFloorDown);
-    SmartDashboard.putBoolean("moveFloorUp", moveFloorUp);
 
+    if (floor == 0) {
+      elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+    }
+    else if (floor == 1) {
+      elevatorSubsystem.setTarget(FloorTarget.SECOND_FLOOR);
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+    }
+    else if (floor == 2) {
+      elevatorSubsystem.setTarget(FloorTarget.THIRD_FLOOR);
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+    }
+    else if (floor == 3) {
+      elevatorSubsystem.setTarget(FloorTarget.FOURTH_FLOOR);
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
+    }
     
+    // SmartDashboard.putNumber("current elevator floor", floor);
+    // SmartDashboard.putBoolean("pressed up", pressedUp.getAsBoolean());
+    // SmartDashboard.putBoolean("pressed down", pressedDown.getAsBoolean());
+    // SmartDashboard.putBoolean("moveFloorDown", moveFloorDown);
+    // SmartDashboard.putBoolean("moveFloorUp", moveFloorUp);
+  
   }
 
   // Called once the command ends or is interrupted.

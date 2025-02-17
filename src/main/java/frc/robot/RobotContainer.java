@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Elevator;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.ElevatorCMDs.GoToElevatorFloors;
+import frc.robot.commands.ElevatorCMDs.GoToFloor;
 import frc.robot.commands.ElevatorCMDs.GoToGround;
 import frc.robot.commands.ElevatorCMDs.GoToTop;
 import frc.robot.commands.ElevatorCMDs.ResetElevatorEncoder;
@@ -70,7 +70,7 @@ public class RobotContainer {
   private final Command pivotToStow = new PivotToStow(intakePivotSubsystem);
   private final Command ejectCMD = new ESpit(intakeMotorSubsystem);
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
-  private final GoToElevatorFloors goToElevatorFloors = new GoToElevatorFloors(elevatorSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.pov(180).getAsBoolean());
+  private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.pov(180).getAsBoolean());
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -218,7 +218,8 @@ public class RobotContainer {
       controller0.button(Constants.ButtonList.b).whileTrue(pivotToStow);
       controller0.povLeft().toggleOnTrue(ejectCMD);
       controller0.povRight().toggleOnTrue(intakeCMD);
-      elevatorSubsystem.setDefaultCommand(goToElevatorFloors);
+      elevatorSubsystem.setDefaultCommand(goToFloor);
+      intakePivotSubsystem.setDefaultCommand(goToFloor);
     //   controller0.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
     //   controller0.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
     //   controller0.b().whileTrue(

@@ -42,7 +42,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   public enum FloorTarget {
     NONE,
     GROUND_FLOOR,
-    MIDDLE_FLOOR,
+    SECOND_FLOOR,
+    THIRD_FLOOR,
+    FOURTH_FLOOR,
     TOP_FLOOR
   }
 
@@ -177,8 +179,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     switch (target) {
       case GROUND_FLOOR:
         return Constants.Elevator.groundFloor;
-      case MIDDLE_FLOOR:
-        return Constants.Elevator.halfWayUpFloor;
+      case SECOND_FLOOR:
+        return Constants.Elevator.secondFloor;
+      case THIRD_FLOOR:
+        return Constants.Elevator.thirdFloor;
+      case FOURTH_FLOOR:
+        return Constants.Elevator.fourthFloor;
       case TOP_FLOOR:
         return Constants.Elevator.topFloor;
       default:
@@ -188,27 +194,14 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
    //check if at floor
-  public boolean elevatorAtGroundFloor() {
+  public boolean ifAtFloor(Double target) {
     boolean value = false;
-    if (elevatorEncoder.get() < Constants.Elevator.groundFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.groundFloor - Constants.Elevator.deadband) {
+    if (elevatorEncoder.get() < target + Constants.Elevator.deadband && elevatorEncoder.get() > target - Constants.Elevator.deadband) {
       value = true;
     }
     return value;
   }
-  public boolean elevatorAtHalfWayUpFloor() {
-    boolean value = false;
-    if (elevatorEncoder.get() < Constants.Elevator.halfWayUpFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.halfWayUpFloor - Constants.Elevator.deadband) {
-      value = true;
-    }
-    return value;
-  }
-  public boolean elevatorAtTopFloor() {
-    boolean value = false;
-    if (elevatorEncoder.get() < Constants.Elevator.topFloor + Constants.Elevator.deadband && elevatorEncoder.get() > Constants.Elevator.topFloor - Constants.Elevator.deadband) {
-      value = true;
-    }
-    return value;
-  }
+ 
   public void setTarget(FloorTarget target) {
     floor_target = target;
   }
@@ -231,9 +224,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("elevator encoder reading", elevatorEncoder.get());
     SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/2048.0);
 
-    SmartDashboard.putBoolean("elevatorAtGroundFloor", elevatorAtGroundFloor());
-    SmartDashboard.putBoolean("elevatorAtHalfWayUpFloor", elevatorAtHalfWayUpFloor());
-    SmartDashboard.putBoolean("elevatorAtTopFloor", elevatorAtTopFloor());
+    SmartDashboard.putBoolean("elevatorAtGroundFloor", ifAtFloor(Constants.Elevator.groundFloor));
+    SmartDashboard.putBoolean("elevatorAtTopFloor", ifAtFloor(Constants.Elevator.topFloor));
     SmartDashboard.putNumber("floorTarget", floorTargetToHeight(floor_target));
     SmartDashboard.putNumber("elevator motor bus voltage", elevatorMotorLeader.getBusVoltage());
   }
