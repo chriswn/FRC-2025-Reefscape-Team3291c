@@ -3,47 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.159602272727272,
-        "y": 1.6517613636363626
+        "x": 1.45,
+        "y": 1.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.720602272727272,
-        "y": 1.6517613636363626
+        "x": 2.983347175740553,
+        "y": 2.2235064830543294
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "R2 to CSB end"
     },
     {
       "anchor": {
-        "x": 4.079166666666667,
-        "y": 2.7341540404040403
+        "x": 3.739346590909091,
+        "y": 2.768579545454545
       },
       "prevControl": {
-        "x": 3.8598240430326056,
-        "y": 3.0432330164883523
+        "x": 2.616404826291938,
+        "y": 1.878792628910765
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1,
-      "rotationDegrees": -59.99999999999999
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -54,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -23.198590513648284
+    "rotation": 60.7
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 56.58093104753626
   },
   "useDefaultConstraints": true
 }
