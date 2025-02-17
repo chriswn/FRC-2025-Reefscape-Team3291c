@@ -290,7 +290,7 @@
   {
     "name": "/Preferences/pivotKg",
     "type": "double",
-    "value": 1.0,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
