@@ -6,7 +6,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants.Lighting.Colors;
 import swervelib.math.Matter;
 
 /**
@@ -22,14 +21,14 @@ import swervelib.math.Matter;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final double ROBOT_MASS = (148 - 20.3) * 0.453592; // 32lbs * kg per pound
+  public static final double ROBOT_MASS = (148.0 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
   public static final double MAX_SPEED = Units.feetToMeters(14.5);
 
   public static final class DrivebaseConstants {
     // Hold time on motor brakes when disabled
-    public static final double WHEEL_LOCK_TIME = 10; // seconds
+    public static final double WHEEL_LOCK_TIME = 10.0; // seconds
   }
 
   public static class OperatorConstants {
@@ -37,8 +36,109 @@ public final class Constants {
     public static final double DEADBAND = 0.1;
     public static final double LEFT_Y_DEADBAND = 0.1;
     public static final double RIGHT_X_DEADBAND = 0.1;
-    public static final double TURN_CONSTANT = 6;
+    public static final double TURN_CONSTANT = 6.0;
   }
+
+  
+  public static class Elevator {
+    public static final double deadband = 0.02;
+
+    public static final double maxVelocity = 0.3;
+    public static final double maxAcceleration = 0.3;
+    public static final double ks = 0.0;
+    public static final double kg = 0.2364;
+    public static final double kv = 2.06;
+    public static final double ka = 0.0;
+
+    public static final double tolerance = 0.05;
+
+    public static class PID {
+      public static final double kp = 0.0;
+      public static final double ki = 0.0;
+      public static final double kd = 0.0;
+    }
+
+    //ids
+    public static final int encoderAID = 1;
+    public static final int encoderBID = 2;
+    public static final int motorLeadID = 15;
+    public static final int motorFollowerID = 14;
+    public static final int topLimitSwitchID = 9;
+    public static final int bottomLimitSwitchID = 8;
+
+    public static final double encoderOffset = 0.0;
+
+    //floor pos
+    //inch measurements
+    public static final double distanceOffGround = 15.0 + (3.0/8.0);
+    public static final double distanceToLevel2 = 23.0 + (7.0/8.0) - distanceOffGround;
+    public static final double distanceToLevel3 = 40 + (4.0/8.0) - distanceOffGround;
+    public static final double distanceToLevel4 = 70 - distanceOffGround;
+
+    public static final double maxHeightInches = 81.0 + (1.0/4.0) - distanceOffGround;
+    public static final double maxHeightRotation = 6.0 + (250.0/360.0);
+    public static final double inchesToRotations = maxHeightRotation/maxHeightInches;
+
+    public static final double groundFloor = 0.0;
+    public static final double secondFloor = distanceToLevel2 * inchesToRotations;
+    public static final double thirdFloor = distanceToLevel3 * inchesToRotations;
+    public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
+    public static final double topFloor = 6.0 + (250.0/360.0);
+  }
+
+
+  public static class Intake {
+    public static final double pivotMaxVelocity = 0.3;
+    public static final double pivotMaxAcceleration = 0.3;
+    public static final double pivotKs = 0.0;
+    public static final double pivotKg = 0.0;
+    public static final double pivotKv = 0.0;
+    public static final double pivotKa = 0.0;
+
+    public static final double intakeMotorKp = 0.00001;
+    public static final double intakeMotorKi = 0.0;
+    public static final double intakeMotorKd = 0.0;
+    public static final double intakeMotorKs = 0.15;
+    public static final double intakeMotorKv = 0.002114;
+
+    public static class PID {
+      public static final double kp = 0.0;
+      public static final double ki = 0.0;
+      public static final double kd = 0.0;
+    }
+
+    //ids
+    public static final int encoderID = 0; //Changed due to change
+    public static final int IntakeID = 22;//21
+    public static final int PivotID = 19;//19 
+    public static final int intakeLimitSwitchID = 9;
+    public static final int CANrangeID = 7;
+
+
+    public static final double pivotEncoderOffset = 0.0;
+
+    //angles
+    public static final double stowAngle = 17.4/360.0;
+    public static final double midLevelsFallingOffset = 3.0/360.0;
+    public static final double midLevelsAngle = 35.0/360.0 + midLevelsFallingOffset;
+    public static final double topLevelAngle = 90.0/360.0;
+    public static final double groundAngle = 180.0/360.0;//not currently in use
+
+    public static final double angleDeadband = 5.0/360.0;
+    public static final double tolerance = angleDeadband;
+
+    public static final boolean reverseIntakeMotor = true;
+
+    public static final double eSpitSpeed = -1000.0;
+    public static final double ejectSpeed = 1000.0;
+    public static final double intakeSpeed = 1000.0;
+    
+    public static final double distanceSensorPointBlankRange = 0.1;
+
+    public static final double intakeTimeToStop = 0.0025;
+    public static final double ejectTimeToStop = 0.052;
+  }
+  
 
   public final static class Lighting {
     public final static int lightingPort = 2;
@@ -271,4 +371,18 @@ public final class Constants {
   }
 
   public static Object ColorChanger;
+
+  public static class ButtonList {
+    public static final int a = 1;
+    public static final int b = 2; 
+    public static final int x = 3; 
+    public static final int y = 4; 
+    public static final int lb = 5; 
+    public static final int rb = 6; 
+    public static final int back = 7; 
+    public static final int start = 8; 
+    public static final int l3 = 9; 
+    public static final int r3 = 10; 
+
+  }
 }
