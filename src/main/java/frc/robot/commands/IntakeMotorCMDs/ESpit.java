@@ -36,7 +36,7 @@ public class ESpit extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.eSpitSpeed, false);
+    intakeMotorSubsystem.moveIntakeMotor(Constants.Intake.eSpitSpeed);
   }
 
 

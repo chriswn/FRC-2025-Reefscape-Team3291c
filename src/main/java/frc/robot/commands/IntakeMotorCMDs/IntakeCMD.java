@@ -42,10 +42,10 @@ public class IntakeCMD extends Command {
   @Override
   public void execute() {
       if (hadCoral) {
-        intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.ejectSpeed, false);
+        intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.ejectSpeed);
       }
       else if (!hadCoral) {
-        intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed, false);
+        intakeMotorSubsystem.moveIntakeMotor(intakeMotorSubsystem.intakeSpeed);
       }
 
     // if (!intakeSubsystem.getIntakeHasNote()) {
