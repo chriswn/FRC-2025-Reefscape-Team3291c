@@ -13,11 +13,11 @@ import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 
 
-public class ESpit extends Command {
+public class ESpitCMD extends Command {
   IntakeMotorSubsystem intakeMotorSubsystem;
  // double startTime = Timer.getFPGATimestamp();
   /** Creates a new Eject. */
-  public ESpit(IntakeMotorSubsystem intakeMotorSubsystem) {
+  public ESpitCMD(IntakeMotorSubsystem intakeMotorSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intakeMotorSubsystem = intakeMotorSubsystem;
     addRequirements(intakeMotorSubsystem);

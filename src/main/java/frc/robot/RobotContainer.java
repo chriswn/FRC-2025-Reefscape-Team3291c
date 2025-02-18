@@ -33,7 +33,7 @@ import frc.robot.commands.ElevatorCMDs.GoToFloor;
 import frc.robot.commands.ElevatorCMDs.GoToGround;
 import frc.robot.commands.ElevatorCMDs.GoToTop;
 import frc.robot.commands.ElevatorCMDs.ResetElevatorEncoder;
-import frc.robot.commands.IntakeMotorCMDs.ESpit;
+import frc.robot.commands.IntakeMotorCMDs.ESpitCMD;
 import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
 import frc.robot.commands.IntakePivotCMDs.PivotToStow;
@@ -73,7 +73,7 @@ public class RobotContainer {
   private final Command ResetElevatorEncoder = new ResetElevatorEncoder(elevatorSubsystem);
   private final Command pivotToGround = new PivotToGround(intakePivotSubsystem);
   private final Command pivotToStow = new PivotToStow(intakePivotSubsystem);
-  private final Command ejectCMD = new ESpit(intakeMotorSubsystem);
+  private final Command eSpitCMD = new ESpitCMD(intakeMotorSubsystem);
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
   private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.pov(180).getAsBoolean());
 
@@ -174,7 +174,14 @@ public class RobotContainer {
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+    NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.povDown().getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
+    NamedCommands.registerCommand("goToSecondFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.povDown().getAsBoolean(), 1).until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));
     NamedCommands.registerCommand("goToThirdFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.povDown().getAsBoolean(), 2).until(() -> elevatorSubsystem.ifAtFloor(Elevator.thirdFloor)));
+    NamedCommands.registerCommand("goToFourthFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller0.povUp().getAsBoolean(), () -> controller0.povDown().getAsBoolean(), 3).until(() -> elevatorSubsystem.ifAtFloor(Elevator.fourthFloor)));
+    NamedCommands.registerCommand("intakeCMD", intakeCMD);
+    NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
+    
+
     //NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 
     // Build an auto chooser. This will use Commands.none() as the default option.
@@ -233,9 +240,9 @@ public class RobotContainer {
       controller0.button(Constants.ButtonList.a).whileTrue(ResetElevatorEncoder);
       controller0.button(Constants.ButtonList.x).whileTrue(pivotToGround);
       controller0.button(Constants.ButtonList.b).whileTrue(pivotToStow);
-      controller0.povLeft().toggleOnTrue(ejectCMD);
+      controller0.povLeft().toggleOnTrue(eSpitCMD);
       controller0.povRight().toggleOnTrue(intakeCMD);
-      //elevatorSubsystem.setDefaultCommand(goToFloor);
+      elevatorSubsystem.setDefaultCommand(goToFloor);
       intakePivotSubsystem.setDefaultCommand(goToFloor);
       controller0.button(Constants.ButtonList.a).onTrue((Commands.runOnce(drivebase::zeroGyro)));
       controller0.button(Constants.ButtonList.x).onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
