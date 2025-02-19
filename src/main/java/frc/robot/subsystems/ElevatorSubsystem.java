@@ -52,6 +52,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   public FloorTarget floor_target = FloorTarget.GROUND_FLOOR;
 
   // Output: Motor set values
+  double secondFloor = Constants.Elevator.secondFloor;
+  double thirdFloor = Constants.Elevator.thirdFloor;
+  double fourthFloor = Constants.Elevator.fourthFloor;
 
   private double elevatorkp = Constants.Elevator.PID.kp;
   private double elevatorki = Constants.Elevator.PID.ki;
@@ -68,6 +71,15 @@ public class ElevatorSubsystem extends SubsystemBase {
   SparkMaxConfig leaderConfig;
 
   public ElevatorSubsystem() {
+    if (!Preferences.containsKey("elevatorSecondFloorHeight")) {
+        Preferences.initDouble("elevatorSecondFloorHeight", secondFloor);
+    }
+    if (!Preferences.containsKey("elevatorThirdFloorHeight")) {
+        Preferences.initDouble("elevatorThirdFloorHeight", thirdFloor);
+    }
+    if (!Preferences.containsKey("elevatorFourthFloorHeight")) {
+        Preferences.initDouble("elevatorFourthFloorHeight", fourthFloor);
+    }
     if (!Preferences.containsKey("elevatorkp")) {
       Preferences.initDouble("elevatorkp", elevatorkp);
   }
@@ -132,6 +144,15 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
   public void loadPreferences() {
+    if (Preferences.getDouble("elevatorSecondFloorHeight", secondFloor) != secondFloor) {
+      secondFloor = Preferences.getDouble("elevatorSecondFloorHeight", secondFloor);
+    }
+    if (Preferences.getDouble("elevatorThirdFloorHeight", thirdFloor) != thirdFloor) {
+      thirdFloor = Preferences.getDouble("elevatorThirdFloorHeight", thirdFloor);
+    }
+    if (Preferences.getDouble("elevatorFourthFloorHeight", fourthFloor) != fourthFloor) {
+      fourthFloor = Preferences.getDouble("elevatorFourthFloorHeight", fourthFloor);
+    }
     if (Preferences.getDouble("elevatorMaxAccleration", elevatorMaxAcceleration) != elevatorMaxAcceleration || Preferences.getDouble("elevatorMaxVelocity", elevatorMaxVelocity) != elevatorMaxVelocity) {
       elevatorMaxAcceleration = Preferences.getDouble("elevatorMaxAccleration", elevatorMaxAcceleration);
       elevatorMaxVelocity = Preferences.getDouble("elevatorMaxVelocity", elevatorMaxVelocity);
@@ -178,13 +199,13 @@ public class ElevatorSubsystem extends SubsystemBase {
   public double floorTargetToHeight(FloorTarget target) {
     switch (target) {
       case GROUND_FLOOR:
-        return Constants.Elevator.groundFloor;
+        return Constants.Elevator.groundFloor; //ground floor and top floor shouldn't be changed
       case SECOND_FLOOR:
-        return Constants.Elevator.secondFloor;
+        return secondFloor;
       case THIRD_FLOOR:
-        return Constants.Elevator.thirdFloor;
+        return thirdFloor;
       case FOURTH_FLOOR:
-        return Constants.Elevator.fourthFloor;
+        return fourthFloor;
       case TOP_FLOOR:
         return Constants.Elevator.topFloor;
       default:

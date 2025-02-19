@@ -58,16 +58,17 @@ public class IntakePivotSubsystem extends SubsystemBase {
     if (!Preferences.containsKey("pivotAngleGround")) {
       Preferences.initDouble("pivotAngleGround", groundAngle);
     }
-      if (!Preferences.containsKey("pivotAngleStow")) {
+    if (!Preferences.containsKey("pivotAngleStow")) {
         Preferences.initDouble("pivotAngleStow", stowAngle);
     }
-      if (!Preferences.containsKey("pivotAngleMidLevels")) {
+    if (!Preferences.containsKey("pivotAngleMidLevels")) {
         Preferences.initDouble("pivotAngleMidLevels", midLevelsAngle);
     }
-      if (!Preferences.containsKey("pivotAngleTopLevel")) {
+    if (!Preferences.containsKey("pivotAngleTopLevel")) {
         Preferences.initDouble("pivotAngleTopLevel", topLevelAngle);
     }
-      if (!Preferences.containsKey("pivotKp")) {
+
+    if (!Preferences.containsKey("pivotKp")) {
         Preferences.initDouble("pivotKp", pivotKp);
     }
     
