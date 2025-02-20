@@ -36,9 +36,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public ElevatorFeedforward elevatorFeedforward;
   public ProfiledPIDController profiledPIDController;
   public TrapezoidProfile.State goal;
-  public TrapezoidProfile.State setpoint;
 
- 
   public enum FloorTarget {
     NONE,
     GROUND_FLOOR,
@@ -133,7 +131,6 @@ public class ElevatorSubsystem extends SubsystemBase {
       new TrapezoidProfile.Constraints(Constants.Elevator.maxVelocity, Constants.Elevator.maxAcceleration);
 
     this.goal = new TrapezoidProfile.State();
-    this.setpoint = new TrapezoidProfile.State();
 
     this.elevatorFeedforward = new ElevatorFeedforward(Constants.Elevator.ks, Constants.Elevator.kg, Constants.Elevator.kv, Constants.Elevator.ka);
 

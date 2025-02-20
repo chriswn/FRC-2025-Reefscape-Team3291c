@@ -120,7 +120,7 @@ public final class Constants {
     //angles
     public static final double stowAngle = 17.4/360.0;
     public static final double midLevelsFallingOffset = 3.0/360.0;
-    public static final double midLevelsAngle = 35.0/360.0 + midLevelsFallingOffset;
+    public static final double midLevelsAngle = 35.0/360.0 - midLevelsFallingOffset;
     public static final double topLevelAngle = 90.0/360.0;
     public static final double groundAngle = 180.0/360.0;//not currently in use
 

@@ -52,9 +52,11 @@ public class GoToFloor extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (startButton.getAsBoolean() && startButtonReady) {
-      startButtonPressed = !startButtonPressed;
-      startButtonReady = false;
+    if (startButton.getAsBoolean()) {
+      if (startButtonReady) {
+        startButtonPressed = !startButtonPressed;
+        startButtonReady = false;
+      }
     }
     else {
       startButtonReady = true;
@@ -77,27 +79,28 @@ public class GoToFloor extends Command {
     }
 
     if (floor == 0) {
-      elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
       if (!startButtonPressed) {
-        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+      elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
       }
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+      
     }
     else if (floor == 1) {
-      elevatorSubsystem.setTarget(FloorTarget.SECOND_FLOOR);
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
       if (!startButtonPressed) {
-        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+        elevatorSubsystem.setTarget(FloorTarget.SECOND_FLOOR);
       }    
     }
     else if (floor == 2) {
-      elevatorSubsystem.setTarget(FloorTarget.THIRD_FLOOR);
-      if (!startButtonPressed) {
-          intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      if (!startButtonPressed) {      
+        elevatorSubsystem.setTarget(FloorTarget.THIRD_FLOOR);
         } 
      }
     else if (floor == 3) {
-      elevatorSubsystem.setTarget(FloorTarget.FOURTH_FLOOR);
+      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
       if (!startButtonPressed) {
-        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
+        elevatorSubsystem.setTarget(FloorTarget.FOURTH_FLOOR);
       } 
     }
     
@@ -106,6 +109,9 @@ public class GoToFloor extends Command {
     SmartDashboard.putBoolean("pressed down", pressedDown.getAsBoolean());
     SmartDashboard.putBoolean("moveFloorDown", moveFloorDown);
     SmartDashboard.putBoolean("moveFloorUp", moveFloorUp);
+    SmartDashboard.putBoolean("startButton", startButton.getAsBoolean());
+    SmartDashboard.putBoolean("startButtonPressed", startButtonPressed);
+    SmartDashboard.putBoolean("startButtonReady", startButtonReady);
   
   }
 
