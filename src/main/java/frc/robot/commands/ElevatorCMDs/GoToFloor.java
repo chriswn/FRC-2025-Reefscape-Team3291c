@@ -20,6 +20,7 @@ public class GoToFloor extends Command {
   BooleanSupplier pressedUp;
   BooleanSupplier pressedDown;
   BooleanSupplier startButton;
+  Boolean startButtonReady = true;
   Boolean startButtonPressed = false;
   int floor = 0;
   Boolean moveFloorUp;
@@ -36,7 +37,7 @@ public class GoToFloor extends Command {
     addRequirements(intakePivotSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
-  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSuplier startButton, int floor) {
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSupplier startButton, int floor) {
     this(elevatorSubsystem, intakePivotSubsystem, pressedUp, pressedDown, startButton);
     this.floor = floor;
   }
@@ -51,12 +52,14 @@ public class GoToFloor extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (startButton.getAsBoolean() && !startButtonPressed) {
+    if (startButton.getAsBoolean() && startButtonReady) {
+      startButtonPressed = !startButtonPressed;
       startButtonReady = false;
     }
     else {
       startButtonReady = true;
     }
+
     if (pressedUp.getAsBoolean() && moveFloorUp && floor < maxHeight) {
       moveFloorUp = false;
       floor++;
@@ -75,19 +78,27 @@ public class GoToFloor extends Command {
 
     if (floor == 0) {
       elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+      if (!startButtonPressed) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+      }
     }
     else if (floor == 1) {
       elevatorSubsystem.setTarget(FloorTarget.SECOND_FLOOR);
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      if (!startButtonPressed) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      }    
     }
     else if (floor == 2) {
       elevatorSubsystem.setTarget(FloorTarget.THIRD_FLOOR);
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
-    }
+      if (!startButtonPressed) {
+          intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+        } 
+     }
     else if (floor == 3) {
       elevatorSubsystem.setTarget(FloorTarget.FOURTH_FLOOR);
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
+      if (!startButtonPressed) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
+      } 
     }
     
     SmartDashboard.putNumber("current elevator floor", floor);
