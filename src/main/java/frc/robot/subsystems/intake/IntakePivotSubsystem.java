@@ -33,7 +33,6 @@ public class IntakePivotSubsystem extends SubsystemBase {
     GROUND,
     STOW,
     MIDLEVELS,
-    CHUTE,
     TOPLEVEL
   }
 
@@ -50,43 +49,60 @@ public class IntakePivotSubsystem extends SubsystemBase {
   private double pivotMaxAcceleration = Constants.Intake.pivotMaxAcceleration;
   private double pivotMaxVelocity = Constants.Intake.pivotMaxVelocity;
 
+  public double groundAngle = Constants.Intake.groundAngle;
+  public double stowAngle = Constants.Intake.stowAngle;
+  public double midLevelsAngle = Constants.Intake.midLevelsAngle;
+  public double topLevelAngle = Constants.Intake.topLevelAngle;
 
   public IntakePivotSubsystem() {
+    if (!Preferences.containsKey("pivotAngleGround")) {
+      Preferences.initDouble("pivotAngleGround", groundAngle);
+    }
+    if (!Preferences.containsKey("pivotAngleStow")) {
+        Preferences.initDouble("pivotAngleStow", stowAngle);
+    }
+    if (!Preferences.containsKey("pivotAngleMidLevels")) {
+        Preferences.initDouble("pivotAngleMidLevels", midLevelsAngle);
+    }
+    if (!Preferences.containsKey("pivotAngleTopLevel")) {
+        Preferences.initDouble("pivotAngleTopLevel", topLevelAngle);
+    }
+
     if (!Preferences.containsKey("pivotKp")) {
-      Preferences.initDouble("pivotKp", pivotKp);
-  }
-  
-  if (!Preferences.containsKey("pivotKi")) {
-      Preferences.initDouble("pivotKi", pivotKi);
-  }
-  
-  if (!Preferences.containsKey("pivotKd")) {
-      Preferences.initDouble("pivotKd", pivotKd);
-  }
-  
-  if (!Preferences.containsKey("pivotKs")) {
-      Preferences.initDouble("pivotKs", pivotKs);
-  }
-  
-  if (!Preferences.containsKey("pivotKg")) {
-      Preferences.initDouble("pivotKg", pivotKg);
-  }
-  
-  if (!Preferences.containsKey("pivotKv")) {
-      Preferences.initDouble("pivotKv", pivotKv);
-  }
-  
-  if (!Preferences.containsKey("pivotKa")) {
-      Preferences.initDouble("pivotKa", pivotKa);
-  }
-  
-  if (!Preferences.containsKey("pivotMaxAcceleration")) {
-      Preferences.initDouble("pivotMaxAcceleration", pivotMaxAcceleration);
-  }
-  
-  if (!Preferences.containsKey("pivotMaxVelocity")) {
-      Preferences.initDouble("pivotMaxVelocity", pivotMaxVelocity);
-  }
+        Preferences.initDouble("pivotKp", pivotKp);
+    }
+    
+    if (!Preferences.containsKey("pivotKi")) {
+        Preferences.initDouble("pivotKi", pivotKi);
+    }
+    
+    if (!Preferences.containsKey("pivotKd")) {
+        Preferences.initDouble("pivotKd", pivotKd);
+    }
+    
+    if (!Preferences.containsKey("pivotKs")) {
+        Preferences.initDouble("pivotKs", pivotKs);
+    }
+    
+    if (!Preferences.containsKey("pivotKg")) {
+        Preferences.initDouble("pivotKg", pivotKg);
+    }
+    
+    if (!Preferences.containsKey("pivotKv")) {
+        Preferences.initDouble("pivotKv", pivotKv);
+    }
+    
+    if (!Preferences.containsKey("pivotKa")) {
+        Preferences.initDouble("pivotKa", pivotKa);
+    }
+    
+    if (!Preferences.containsKey("pivotMaxAcceleration")) {
+        Preferences.initDouble("pivotMaxAcceleration", pivotMaxAcceleration);
+    }
+    
+    if (!Preferences.containsKey("pivotMaxVelocity")) {
+        Preferences.initDouble("pivotMaxVelocity", pivotMaxVelocity);
+    }
 
 
     this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
@@ -101,6 +117,18 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
    
   public void loadPreferences() {
+    if (Preferences.getDouble("pivotAngleGround", groundAngle) != groundAngle) {
+      groundAngle = Preferences.getDouble("pivotAngleGround", groundAngle);
+    }
+    if (Preferences.getDouble("pivotAngleStow", stowAngle) != stowAngle) {
+      stowAngle = Preferences.getDouble("pivotAngleStow", stowAngle);
+    }
+    if (Preferences.getDouble("pivotAngleMidLevels", midLevelsAngle) != midLevelsAngle) {
+      midLevelsAngle = Preferences.getDouble("pivotAngleMidLevels", midLevelsAngle);
+    }
+    if (Preferences.getDouble("pivotAngleTopLevel", topLevelAngle) != topLevelAngle) {
+      topLevelAngle = Preferences.getDouble("pivotAngleTopLevel", topLevelAngle);
+    }
     if (Preferences.getDouble("pivotMaxAcceleration", pivotMaxAcceleration) != pivotMaxAcceleration || Preferences.getDouble("pivotMaxVelocity", pivotMaxVelocity) != pivotMaxVelocity) {
       pivotMaxAcceleration = Preferences.getDouble("pivotMaxAcceleration", pivotMaxAcceleration);
       pivotMaxVelocity = Preferences.getDouble("pivotMaxVelocity", pivotMaxVelocity);
@@ -155,16 +183,16 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public double pivotTargetToAngle(PivotTarget target) {
     switch (target) {
       case GROUND:
-        return Constants.Intake.groundAngle;
+        return groundAngle;
       case STOW:
-        return Constants.Intake.stowAngle;
+        return stowAngle;
       case MIDLEVELS:
-        return Constants.Intake.midLevelsAngle;
+        return midLevelsAngle;
       case TOPLEVEL:
-        return Constants.Intake.topLevelAngle;
+        return topLevelAngle;
       default:
         // "Safe" default
-        return Constants.Intake.stowAngle;
+        return stowAngle;
     }
   }
 
