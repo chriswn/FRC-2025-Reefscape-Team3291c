@@ -19,22 +19,25 @@ public class GoToFloor extends Command {
   IntakePivotSubsystem intakePivotSubsystem;
   BooleanSupplier pressedUp;
   BooleanSupplier pressedDown;
+  BooleanSupplier startButton;
+  Boolean startButtonPressed = false;
   int floor = 0;
   Boolean moveFloorUp;
   Boolean moveFloorDown;
   int maxHeight = 3;
   FloorTarget floorTarget;
-  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown) {
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSupplier startButton) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.intakePivotSubsystem = intakePivotSubsystem;
     this.pressedUp = pressedUp;
     this.pressedDown = pressedDown;
+    this.startButton = startButton;
     addRequirements(elevatorSubsystem);
     addRequirements(intakePivotSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
-  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, int floor) {
-    this(elevatorSubsystem, intakePivotSubsystem, pressedUp, pressedDown);
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSuplier startButton, int floor) {
+    this(elevatorSubsystem, intakePivotSubsystem, pressedUp, pressedDown, startButton);
     this.floor = floor;
   }
 
@@ -48,6 +51,12 @@ public class GoToFloor extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (startButton.getAsBoolean() && !startButtonPressed) {
+      startButtonReady = false;
+    }
+    else {
+      startButtonReady = true;
+    }
     if (pressedUp.getAsBoolean() && moveFloorUp && floor < maxHeight) {
       moveFloorUp = false;
       floor++;
