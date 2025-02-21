@@ -54,7 +54,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public double midLevelsAngle = Constants.Intake.midLevelsAngle;
   public double topLevelAngle = Constants.Intake.topLevelAngle;
 
+  public double encoderOffset = Constants.Intake.pivotEncoderOffset;
+
   public IntakePivotSubsystem() {
+    if (!Preferences.containsKey("encoderOffset")) {
+      Preferences.initDouble("encoderOffset", encoderOffset);
+    }
     if (!Preferences.containsKey("pivotAngleGround")) {
       Preferences.initDouble("pivotAngleGround", groundAngle);
     }
@@ -117,6 +122,9 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
    
   public void loadPreferences() {
+    if (Preferences.getDouble("encoderOffset", encoderOffset) != encoderOffset) {
+      encoderOffset = Preferences.getDouble("encoderOffset", encoderOffset);
+    }
     if (Preferences.getDouble("pivotAngleGround", groundAngle) != groundAngle) {
       groundAngle = Preferences.getDouble("pivotAngleGround", groundAngle);
     }
@@ -198,7 +206,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   public double getCurrentAngle() {
     double value = IntakeEncoder.get();
-     value += Constants.Intake.pivotEncoderOffset;
+     value += encoderOffset;
     if (value > 1) {
       value %= 1;
     }
