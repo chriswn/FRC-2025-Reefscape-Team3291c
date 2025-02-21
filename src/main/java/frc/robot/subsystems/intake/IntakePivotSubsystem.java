@@ -165,10 +165,10 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
 
   public double giveVoltage(double pivotAngle, double current_angle) {
-    // Pivot control
+    // pivot control
     SmartDashboard.putNumber("originalAngle", current_angle);
    
-    //double angle = Math.abs(360 - current_angle); //reverses it
+    //double angle = Math.abs(3600 - current_angle); //reverses it
     double angle = current_angle;
     SmartDashboard.putNumber("updatedAngle", angle);
 
