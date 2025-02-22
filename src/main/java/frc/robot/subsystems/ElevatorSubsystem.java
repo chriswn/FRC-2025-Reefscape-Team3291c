@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.intake.IntakePivotSubsystem.PivotTarget;
 
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -187,7 +188,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  public double giveVoltage(TrapezoidProfile.State desired_height, double height_in_ticks) {
+  public double giveVoltage(double height_in_ticks) {
     // Floor control
     double height = height_in_ticks / Constants.Elevator.encoderTicksPerRotation;
     SmartDashboard.putNumber("adjusted height", height);
@@ -236,13 +237,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void goToPosition() {
     double desired_height = floorTargetToHeight(floor_target);
-    if (algaeMode) {
+    if (algaeMode && (floor_target == FloorTarget.SECOND_FLOOR || floor_target == FloorTarget.THIRD_FLOOR)) {
       desired_height += algaeOffset;
     }
+    SmartDashboard.putNumber("desired_height", desired_height);
     goal = new TrapezoidProfile.State(desired_height, 0);
     profiledPIDController.setGoal(goal);
 
-    double voltage = giveVoltage(goal, elevatorEncoder.get());
+    double voltage = giveVoltage(elevatorEncoder.get());
     elevatorMotorLeader.setVoltage(voltage);
     SmartDashboard.putNumber("getElevatorVoltage", voltage);
   }

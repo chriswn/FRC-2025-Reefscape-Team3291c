@@ -118,7 +118,7 @@ public class GoToFloor extends Command {
       if (aButtonPressed) {
         intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.GROUND;
       } 
-      else if (intakePivotSubsystem.midLevelsAngle < Constants.Elevator.angleToAvoidHeadBang && elevatorSubsystem.elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < Constants.Elevator.heightOfHeadBang) {
+      else if (intakePivotSubsystem.midLevelsAngle < Constants.Intake.angleToAvoidHeadBang && elevatorSubsystem.elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < Constants.Elevator.heightOfHeadBang) {
         intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
       }
       else {

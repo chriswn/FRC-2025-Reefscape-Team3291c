@@ -88,8 +88,7 @@ public final class Constants {
     public static final double topFloor = 6.0 + (250.0/360.0);
 
     public static final double heightOfHeadBang = 25.5 * inchesToRotations;
-    public static final double algaeOffset = 5.0 * inchesToRotations;
-    public static final double angleToAvoidHeadBang = 0.13;
+    public static final double algaeOffset = 2.0 * inchesToRotations;
   }
 
 
@@ -128,7 +127,9 @@ public final class Constants {
     public static final double midLevelsFallingOffset = 3.0/360.0;
     public static final double midLevelsAngle = 0.13;//35.0/360.0 - midLevelsFallingOffset;
     public static final double topLevelAngle = 90.0/360.0;
-    public static final double groundAngle = 180.0/360.0;//not currently in use
+    public static final double groundAngle = 180.0/360.0;//for algae
+    public static final double angleToAvoidHeadBang = 0.13;
+
 
     public static final double angleDeadband = 5.0/360.0;
     public static final double tolerance = angleDeadband;
