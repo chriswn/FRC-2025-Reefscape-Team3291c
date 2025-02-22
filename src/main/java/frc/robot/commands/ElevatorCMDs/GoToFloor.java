@@ -21,7 +21,7 @@ public class GoToFloor extends Command {
   BooleanSupplier pressedDown;
   BooleanSupplier startButton;
   Boolean startButtonReady = true;
-  Boolean startButtonPressed = true;
+  Boolean startButtonPressed = false;
   int floor = 0;
   Boolean moveFloorUp;
   Boolean moveFloorDown;
