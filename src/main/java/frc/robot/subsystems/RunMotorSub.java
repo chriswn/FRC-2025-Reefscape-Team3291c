@@ -8,13 +8,14 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.LimelightHelpers;
 import frc.robot.subsystems.LimelightHelpers.LimelightResults;
+import frc.robot.Constants;
 
 public class RunMotorSub extends SubsystemBase {
 
     private final SparkMax motor;
 
     public RunMotorSub() {
-        motor = new SparkMax(23, MotorType.kBrushless);
+        motor = new SparkMax(Constants.runMotorID, MotorType.kBrushless);
     }
 
     @Override

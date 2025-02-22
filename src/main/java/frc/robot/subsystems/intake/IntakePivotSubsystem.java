@@ -20,7 +20,7 @@ import frc.robot.Constants;
 public class IntakePivotSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
 
-  public DutyCycleEncoder IntakeEncoder;
+  public DutyCycleEncoder intakeEncoder;
   public DigitalInput IntakeLimitSwitch;
   public ProfiledPIDController profiledPIDController;
   public SparkMax pivotMotor;
@@ -110,8 +110,8 @@ public class IntakePivotSubsystem extends SubsystemBase {
     }
 
 
-    this.IntakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
-    this.IntakeEncoder.setInverted(false);
+    this.intakeEncoder = new DutyCycleEncoder(Constants.Intake.encoderID);
+    this.intakeEncoder.setInverted(true);
 
     this.trapezoidConstraints = new TrapezoidProfile.Constraints(pivotMaxVelocity, pivotMaxAcceleration);
     this.profiledPIDController = new ProfiledPIDController(pivotKp, pivotKi, pivotKd, this.trapezoidConstraints);
@@ -119,6 +119,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
     this.armFeedforward = new ArmFeedforward(Constants.Intake.pivotKs, Constants.Intake.pivotKg, Constants.Intake.pivotKv, Constants.Intake.pivotKa);
 
     this.pivotMotor = new SparkMax(Constants.Intake.PivotID, SparkLowLevel.MotorType.kBrushless);
+    this.pivotMotor.setInverted(false);
   }
    
   public void loadPreferences() {
@@ -172,12 +173,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
     double angle = current_angle;
     SmartDashboard.putNumber("updatedAngle", angle);
 
-    double pivotVoltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle), profiledPIDController.getSetpoint().velocity);
+    double pivotVoltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle * 360.0 + 40.0), profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("intake setpoint", profiledPIDController.getSetpoint().position);
 
     //double adjustedpivotVoltage = 10 - Math.abs(pivotVoltage);
     double adjustedpivotVoltage = pivotVoltage; //error reversed for voltage
-    if (!IntakeEncoder.isConnected()) {
+    if (!intakeEncoder.isConnected()) {
       adjustedpivotVoltage = 0.0;
     }
 
@@ -205,7 +206,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
   }
 
   public double getCurrentAngle() {
-    double value = IntakeEncoder.get();
+    double value = intakeEncoder.get();
      value += encoderOffset;
     if (value > 1) {
       value %= 1;
@@ -225,12 +226,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
   public void goToPosition(PivotTarget pivotTarget) {
     double pivotAngle = pivotTargetToAngle(pivotTarget);
     SmartDashboard.putNumber("pivotAngle", pivotAngle);
+    double voltage = giveVoltage(pivotAngle, getCurrentAngle());
     if (pivotTarget == PivotTarget.STOW && ifAtAngle(Constants.Intake.stowAngle)) {
       pivotMotor.set(0);
       SmartDashboard.putNumber("getIntakeVoltage", 0);
       return;
     }
-    double voltage = giveVoltage(pivotAngle, getCurrentAngle());
     pivotMotor.setVoltage(voltage);
     SmartDashboard.putNumber("getIntakeVoltage", voltage);
   }

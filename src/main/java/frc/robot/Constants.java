@@ -21,6 +21,8 @@ import swervelib.math.Matter;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final int runMotorID = 39;
+
   public static final double ROBOT_MASS = (148.0 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
@@ -109,8 +111,8 @@ public final class Constants {
 
     //ids
     public static final int encoderID = 0; //Changed due to change
-    public static final int IntakeID = 22;//21
-    public static final int PivotID = 19;//19 
+    public static final int IntakeID = 23;//21
+    public static final int PivotID = 27;//19 
     public static final int intakeLimitSwitchID = 9;
     public static final int CANrangeID = 7;
 
@@ -131,7 +133,7 @@ public final class Constants {
 
     public static final double eSpitSpeed = -1000.0;
     public static final double ejectSpeed = 1000.0;
-    public static final double intakeSpeed = 1000.0;
+    public static final double intakeSpeed = 2000.0;
     
     public static final double distanceSensorPointBlankRange = 0.1;
 
