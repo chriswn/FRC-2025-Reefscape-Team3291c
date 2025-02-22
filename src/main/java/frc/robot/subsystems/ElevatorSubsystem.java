@@ -37,6 +37,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   public ProfiledPIDController profiledPIDController;
   public TrapezoidProfile.State goal;
 
+  public Boolean algaeMode = false;
+
   public enum FloorTarget {
     NONE,
     GROUND_FLOOR,
@@ -65,10 +67,15 @@ public class ElevatorSubsystem extends SubsystemBase {
   private double elevatorMaxAcceleration = Constants.Elevator.maxAcceleration;
   private double elevatorMaxVelocity = Constants.Elevator.maxVelocity;
 
+  private double algaeOffset = Constants.Elevator.algaeOffset;
+
   SparkMaxConfig followerConfig;
   SparkMaxConfig leaderConfig;
 
   public ElevatorSubsystem() {
+    if (!Preferences.containsKey("algaeOffset")) {
+      Preferences.initDouble("algaeOffset", algaeOffset);
+    }
     if (!Preferences.containsKey("elevatorSecondFloorHeight")) {
         Preferences.initDouble("elevatorSecondFloorHeight", secondFloor);
     }
@@ -141,6 +148,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
   public void loadPreferences() {
+    if (Preferences.getDouble("algaeOffset", algaeOffset) != algaeOffset) {
+      algaeOffset = Preferences.getDouble("algaeOffset", algaeOffset);
+    }
     if (Preferences.getDouble("elevatorSecondFloorHeight", secondFloor) != secondFloor) {
       secondFloor = Preferences.getDouble("elevatorSecondFloorHeight", secondFloor);
     }
@@ -226,6 +236,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void goToPosition() {
     double desired_height = floorTargetToHeight(floor_target);
+    if (algaeMode) {
+      desired_height += algaeOffset;
+    }
     goal = new TrapezoidProfile.State(desired_height, 0);
     profiledPIDController.setGoal(goal);
 

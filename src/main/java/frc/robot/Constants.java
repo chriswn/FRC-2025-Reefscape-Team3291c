@@ -88,6 +88,8 @@ public final class Constants {
     public static final double topFloor = 6.0 + (250.0/360.0);
 
     public static final double heightOfHeadBang = 25.5 * inchesToRotations;
+    public static final double algaeOffset = 5.0 * inchesToRotations;
+    public static final double angleToAvoidHeadBang = 0.13;
   }
 
 

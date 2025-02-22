@@ -23,23 +23,27 @@ public class GoToFloor extends Command {
   BooleanSupplier startButton;
   Boolean startButtonReady = true;
   Boolean startButtonPressed = false;
+  BooleanSupplier aButton;
+  Boolean aButtonReady = true;
+  Boolean aButtonPressed = false;
   int floor = 0;
   Boolean moveFloorUp;
   Boolean moveFloorDown;
   int maxHeight = 3;
   FloorTarget floorTarget;
-  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSupplier startButton) {
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSupplier startButton, BooleanSupplier aButton) {
     this.elevatorSubsystem = elevatorSubsystem;
     this.intakePivotSubsystem = intakePivotSubsystem;
     this.pressedUp = pressedUp;
     this.pressedDown = pressedDown;
     this.startButton = startButton;
+    this.aButton = aButton;
     addRequirements(elevatorSubsystem);
     addRequirements(intakePivotSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
-  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSupplier startButton, int floor) {
-    this(elevatorSubsystem, intakePivotSubsystem, pressedUp, pressedDown, startButton);
+  public GoToFloor(ElevatorSubsystem elevatorSubsystem, IntakePivotSubsystem intakePivotSubsystem, BooleanSupplier pressedUp, BooleanSupplier pressedDown, BooleanSupplier startButton, BooleanSupplier aButton, int floor) {
+    this(elevatorSubsystem, intakePivotSubsystem, pressedUp, pressedDown, startButton, aButton);
     this.floor = floor;
   }
 
@@ -63,6 +67,16 @@ public class GoToFloor extends Command {
       startButtonReady = true;
     }
 
+    if (aButton.getAsBoolean()) {
+      if (aButtonReady) {
+        aButtonPressed = !aButtonPressed;
+        aButtonReady = false;
+      }
+    }
+    else {
+      aButtonReady = true;
+    }
+
     if (pressedUp.getAsBoolean() && moveFloorUp && floor < maxHeight) {
       moveFloorUp = false;
       floor++;
@@ -79,6 +93,8 @@ public class GoToFloor extends Command {
       moveFloorDown = true;
     }
 
+    elevatorSubsystem.algaeMode = aButtonPressed;
+
     if (floor == 0) {
       if (!startButtonPressed) {
       elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
@@ -89,13 +105,20 @@ public class GoToFloor extends Command {
       
     }
     else if (floor == 1) {
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      if (aButtonPressed) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.GROUND;
+      } else {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      }
       if (!startButtonPressed) {
         elevatorSubsystem.setTarget(FloorTarget.SECOND_FLOOR);
       }    
     }
     else if (floor == 2) {
-      if (elevatorSubsystem.elevatorEncoder.get()/2048.0 < Constants.Elevator.thirdFloor) {
+      if (aButtonPressed) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.GROUND;
+      } 
+      else if (intakePivotSubsystem.midLevelsAngle < Constants.Elevator.angleToAvoidHeadBang && elevatorSubsystem.elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < Constants.Elevator.heightOfHeadBang) {
         intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
       }
       else {
