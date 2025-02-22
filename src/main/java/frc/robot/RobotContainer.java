@@ -236,7 +236,7 @@ public class RobotContainer {
       controller0.button(Constants.ButtonList.start).onTrue((Commands.runOnce(drivebase::zeroGyro)));
       controller0.button(Constants.ButtonList.back).whileTrue(drivebase.centerModulesCommand());
     } else {
-      controller0.button(Constants.ButtonList.r3).whileTrue(ResetElevatorEncoder);//should be commented out after testing
+      controller1.button(Constants.ButtonList.r3).whileTrue(ResetElevatorEncoder);//should be commented out after testing
       controller0.button(Constants.ButtonList.x).whileTrue(pivotToGround);
       controller0.button(Constants.ButtonList.b).whileTrue(pivotToStow);
       controller1.povLeft().toggleOnTrue(eSpitCMD);

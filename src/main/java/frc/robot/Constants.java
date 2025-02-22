@@ -21,6 +21,8 @@ import swervelib.math.Matter;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final int runMotorID = 39;
+
   public static final double ROBOT_MASS = (148.0 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
@@ -43,17 +45,17 @@ public final class Constants {
   public static class Elevator {
     public static final double deadband = 0.02;
 
-    public static final double maxVelocity = 0.3;
-    public static final double maxAcceleration = 0.3;
+    public static final double maxVelocity = 1.0;
+    public static final double maxAcceleration = 0.5;
     public static final double ks = 0.0;
-    public static final double kg = 0.2364;
-    public static final double kv = 2.06;
+    public static final double kg = 0.138;
+    public static final double kv = 1.78;
     public static final double ka = 0.0;
 
     public static final double tolerance = 0.05;
 
     public static class PID {
-      public static final double kp = 0.0;
+      public static final double kp = 5.0;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
     }
@@ -66,7 +68,7 @@ public final class Constants {
     public static final int topLimitSwitchID = 9;
     public static final int bottomLimitSwitchID = 8;
 
-    public static final double encoderOffset = 0.0;
+    public static final double encoderTicksPerRotation = 2048.0;
 
     //floor pos
     //inch measurements
@@ -91,8 +93,8 @@ public final class Constants {
     public static final double pivotMaxVelocity = 0.3;
     public static final double pivotMaxAcceleration = 0.3;
     public static final double pivotKs = 0.0;
-    public static final double pivotKg = 0.0;
-    public static final double pivotKv = 0.0;
+    public static final double pivotKg = 0.5;
+    public static final double pivotKv = 6.1;
     public static final double pivotKa = 0.0;
 
     public static final double intakeMotorKp = 0.00001;
@@ -102,20 +104,20 @@ public final class Constants {
     public static final double intakeMotorKv = 0.002114;
 
     public static class PID {
-      public static final double kp = 0.0;
+      public static final double kp = 0.8;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
     }
 
     //ids
     public static final int encoderID = 0; //Changed due to change
-    public static final int IntakeID = 22;//21
-    public static final int PivotID = 19;//19 
+    public static final int IntakeID = 23;//21
+    public static final int PivotID = 27;//19 
     public static final int intakeLimitSwitchID = 9;
     public static final int CANrangeID = 7;
 
 
-    public static final double pivotEncoderOffset = 0.0;
+    public static final double pivotEncoderOffset = 0.715;
 
     //angles
     public static final double stowAngle = 17.4/360.0;
@@ -131,7 +133,7 @@ public final class Constants {
 
     public static final double eSpitSpeed = -1000.0;
     public static final double ejectSpeed = 1000.0;
-    public static final double intakeSpeed = 1000.0;
+    public static final double intakeSpeed = 2000.0;
     
     public static final double distanceSensorPointBlankRange = 0.1;
 

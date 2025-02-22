@@ -125,7 +125,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    //updatePreferences(); //to be commented out
+    updatePreferences(); //to be commented out
 
     SmartDashboard.putNumber("canrange is detected", canRange.getIsDetected().getValueAsDouble());
     SmartDashboard.putNumber("canRangeDistance", canRange.getDistance().getValueAsDouble());
