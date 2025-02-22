@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.FloorTarget;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
@@ -92,7 +93,12 @@ public class GoToFloor extends Command {
       }    
     }
     else if (floor == 2) {
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      if (elevatorSubsystem.elevatorEncoder.get()/2048.0 < Constants.Elevator.thirdFloor) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.TOPLEVEL;
+      }
+      else {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.MIDLEVELS;
+      }
       if (!startButtonPressed) {      
         elevatorSubsystem.setTarget(FloorTarget.THIRD_FLOOR);
         } 
