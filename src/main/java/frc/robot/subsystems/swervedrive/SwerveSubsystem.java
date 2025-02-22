@@ -194,7 +194,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
             var alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
-              return alliance.get() == DriverStation.Alliance.Red;
+              return alliance.get() == DriverStation.Alliance.Blue;
             }
             return false;
           },
@@ -207,7 +207,7 @@ public class SwerveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
 
-    // Preload PathPlanner Path finding
+    // Preload PathPlanner Path findingp
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
     PathfindingCommand.warmupCommand().schedule();
   }
