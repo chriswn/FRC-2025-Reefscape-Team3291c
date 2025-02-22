@@ -68,7 +68,7 @@ public final class Constants {
     public static final int topLimitSwitchID = 9;
     public static final int bottomLimitSwitchID = 8;
 
-    public static final double encoderOffset = 0.0;
+    public static final double encoderTicksPerRotation = 2048.0;
 
     //floor pos
     //inch measurements

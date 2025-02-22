@@ -179,7 +179,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public double giveVoltage(TrapezoidProfile.State desired_height, double height_in_ticks) {
     // Floor control
-    double height = height_in_ticks / 2048.0;
+    double height = height_in_ticks / Constants.Elevator.encoderTicksPerRotation;
     SmartDashboard.putNumber("adjusted height", height);
 
     double elevatorFloorVoltage = profiledPIDController.calculate(height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
@@ -214,7 +214,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    //check if at floor
   public boolean ifAtFloor(Double target) {
     boolean value = false;
-    if (elevatorEncoder.get()/2048.0 < target + Constants.Elevator.deadband && elevatorEncoder.get()/2048.0 > target - Constants.Elevator.deadband) {
+    if (elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < target + Constants.Elevator.deadband && elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation > target - Constants.Elevator.deadband) {
       value = true;
     }
     return value;
@@ -240,7 +240,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     loadPreferences();//to be commented out
     //This method will be called once per scheduler run
     SmartDashboard.putNumber("elevator encoder reading", elevatorEncoder.get());
-    SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/2048.0);
+    SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation);
 
     SmartDashboard.putBoolean("elevatorAtGroundFloor", ifAtFloor(Constants.Elevator.groundFloor));
     SmartDashboard.putBoolean("elevatorAtSecondFloor", ifAtFloor(Constants.Elevator.secondFloor));
