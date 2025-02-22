@@ -86,6 +86,8 @@ public final class Constants {
     public static final double thirdFloor = distanceToLevel3 * inchesToRotations;
     public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
     public static final double topFloor = 6.0 + (250.0/360.0);
+
+    public static final double heightOfHeadBang = 25.5 * inchesToRotations;
   }
 
 
