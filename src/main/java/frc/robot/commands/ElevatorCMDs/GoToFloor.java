@@ -22,7 +22,7 @@ public class GoToFloor extends Command {
   BooleanSupplier pressedDown;
   BooleanSupplier startButton;
   Boolean startButtonReady = true;
-  Boolean startButtonPressed = true;
+  Boolean startButtonPressed = false;
   int floor = 0;
   Boolean moveFloorUp;
   Boolean moveFloorDown;
@@ -83,7 +83,9 @@ public class GoToFloor extends Command {
       if (!startButtonPressed) {
       elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
       }
-      intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+      if (elevatorSubsystem.elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < Constants.Elevator.heightOfHeadBang) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
+      }
       
     }
     else if (floor == 1) {
