@@ -5,9 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "RunMotor"
+            "pathName": "R to R3"
           }
         }
       ]

@@ -23,9 +23,21 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "RunMotor"
+            "pathName": "R4 to CSB"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CSB to R4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R4 to CSB"
           }
         }
       ]

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3372859589041095,
-        "y": 0.9898116438356169
+        "x": 7.55846590909091,
+        "y": 5.171732954545454
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.981759917291729,
-        "y": 2.2391657603943536
+        "x": 7.296701748307445,
+        "y": 5.171641327518443
       },
       "isLocked": false,
-      "linkedName": "R2 to CSB end"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.771710526315789,
-        "y": 2.793421052631579
+        "x": 6.112585227272728,
+        "y": 5.171732954545454
       },
       "prevControl": {
-        "x": 2.604177220353264,
-        "y": 1.9279743851672215
+        "x": 5.8625852313155935,
+        "y": 5.171777914893664
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "CSB to R4 End"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
