@@ -45,8 +45,8 @@ public final class Constants {
   public static class Elevator {
     public static final double deadband = 0.02;
 
-    public static final double maxVelocity = 1.0;
-    public static final double maxAcceleration = 0.5;
+    public static final double maxVelocity = 1.2;
+    public static final double maxAcceleration = 0.7;
     public static final double ks = 0.0;
     public static final double kg = 0.138;
     public static final double kv = 1.78;
@@ -82,7 +82,7 @@ public final class Constants {
     public static final double inchesToRotations = maxHeightRotation/maxHeightInches;
 
     public static final double groundFloor = 0.0;
-    public static final double secondFloor = distanceToLevel2 * inchesToRotations;
+    public static final double secondFloor = 1.1;
     public static final double thirdFloor = distanceToLevel3 * inchesToRotations;
     public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
     public static final double topFloor = 6.0 + (250.0/360.0);
@@ -107,7 +107,7 @@ public final class Constants {
     public static final double intakeMotorKv = 0.002114;
 
     public static class PID {
-      public static final double kp = 0.8;
+      public static final double kp = 6;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
     }
@@ -138,7 +138,7 @@ public final class Constants {
 
     public static final double eSpitSpeed = -1000.0;
     public static final double ejectSpeed = 1000.0;
-    public static final double intakeSpeed = 2000.0;
+    public static final double intakeSpeed = 1000.0;
     
     public static final double distanceSensorPointBlankRange = 0.1;
 
