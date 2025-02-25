@@ -89,9 +89,9 @@ public class RobotContainer {
    * by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-      () -> -controller0.getRawAxis(1) * 1,
-      () -> -controller0.getRawAxis(0) * 1)
-      .withControllerRotationAxis(() -> -controller0.getRawAxis(4) * -1)
+      () -> -controller0.getRawAxis(1) * -1,
+      () -> -controller0.getRawAxis(0) * -1)
+      .withControllerRotationAxis(() -> -controller0.getRawAxis(4) * 1)
       .deadband(OperatorConstants.DEADBAND)
       .scaleTranslation(0.8)// Decideds robot (speed)
       .allianceRelativeControl(true);
@@ -118,9 +118,9 @@ public class RobotContainer {
       .allianceRelativeControl(false);
 
   SwerveInputStream driveAngularVelocityKeyboard = SwerveInputStream.of(drivebase.getSwerveDrive(),
-      () -> -controller0.getRawAxis(1),
-      () -> -controller0.getRawAxis(0))
-      .withControllerRotationAxis(() -> controller0.getRawAxis(
+      () -> controller0.getRawAxis(1),
+      () -> controller0.getRawAxis(0))
+      .withControllerRotationAxis(() -> -controller0.getRawAxis(
           2))
       .deadband(OperatorConstants.DEADBAND)
       .scaleTranslation(0.8)
@@ -136,14 +136,14 @@ public class RobotContainer {
   // Derive the heading axis with math!
   SwerveInputStream driveDirectAngleKeyboard = driveAngularVelocityKeyboard.copy()
       .withControllerHeadingAxis(() -> Math.sin(
-          controller0.getRawAxis(
+          -controller0.getRawAxis(
               2) *
               Math.PI)
           *
           (Math.PI *
               2),
           () -> Math.cos(
-              controller0.getRawAxis(2) *
+              -controller0.getRawAxis(2) *
               Math.PI)
               *
               (Math.PI * 2))
