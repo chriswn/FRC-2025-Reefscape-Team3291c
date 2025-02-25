@@ -143,6 +143,9 @@ public class GoToFloor extends Command {
     SmartDashboard.putBoolean("startButton", startButton.getAsBoolean());
     SmartDashboard.putBoolean("startButtonPressed", startButtonPressed);
     SmartDashboard.putBoolean("startButtonReady", startButtonReady);
+    SmartDashboard.putBoolean("aButton", aButton.getAsBoolean());
+    SmartDashboard.putBoolean("aButtonPressed", aButtonPressed);
+    SmartDashboard.putBoolean("aButtonReady", aButtonReady);
   
   }
 
