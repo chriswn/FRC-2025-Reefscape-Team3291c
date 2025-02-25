@@ -90,9 +90,9 @@ public class RobotContainer {
    * by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-      () -> -controller0.getRawAxis(1) * 1,
-      () -> -controller0.getRawAxis(0) * 1)
-      .withControllerRotationAxis(() -> -controller0.getRawAxis(4) * -1)
+      () -> -controller0.getRawAxis(1) * -1,
+      () -> -controller0.getRawAxis(0) * -1)
+      .withControllerRotationAxis(() -> -controller0.getRawAxis(4) * 1)
       .deadband(OperatorConstants.DEADBAND)
       .scaleTranslation(0.8)// Decideds robot (speed)
       .allianceRelativeControl(true);
