@@ -63,7 +63,8 @@ public class RobotContainer {
   public RunMotorSub runMotorSub = new RunMotorSub();
   // public ColorChanger colorChanger = new ColorChanger();
   // The robot's subsystems and commands are defined here...
-  private final SwerveSubsystem drivebase = new SwerveSubsystem();
+  private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
+                                                                                "swerve/neo"));
 
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final IntakePivotSubsystem intakePivotSubsystem = new IntakePivotSubsystem();
