@@ -87,8 +87,8 @@ public final class Constants {
     public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
     public static final double topFloor = 6.0 + (250.0/360.0);
 
-    public static final double heightOfHeadBang = 25.5 * inchesToRotations;
-    public static final double algaeOffset = 2.0 * inchesToRotations;
+    public static final double heightOfHeadBang = 0.88;
+    public static final double algaeOffset = 1;
   }
 
 
@@ -97,7 +97,7 @@ public final class Constants {
     public static final double pivotMaxAcceleration = 0.3;
     public static final double pivotKs = 0.0;
     public static final double pivotKg = 0.5;
-    public static final double pivotKv = 6.1;
+    public static final double pivotKv = 7.3;
     public static final double pivotKa = 0.0;
 
     public static final double intakeMotorKp = 0.00001;
@@ -123,7 +123,7 @@ public final class Constants {
     public static final double pivotEncoderOffset = 0.715;
 
     //angles
-    public static final double stowAngle = 17.4/360.0;
+    public static final double stowAngle = 21/360;
     public static final double midLevelsFallingOffset = 3.0/360.0;
     public static final double midLevelsAngle = 0.13;//35.0/360.0 - midLevelsFallingOffset;
     public static final double topLevelAngle = 90.0/360.0;
