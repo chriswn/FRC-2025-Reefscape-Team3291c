@@ -28,6 +28,7 @@ public class ESpitCMD extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    intakeMotorSubsystem.isActive = true;
     //intakeMotorSubsystem.moveIntakeMotor(-Constants.intake.ejectSpeed);
    
   }
@@ -43,6 +44,7 @@ public class ESpitCMD extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    intakeMotorSubsystem.isActive = false;
     intakeMotorSubsystem.stopIntakeMotorSubsystem();//stops it
   }
 

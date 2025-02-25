@@ -28,6 +28,8 @@ public class IntakeCMD extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    intakeMotorSubsystem.isActive = false;
+
     if (intakeMotorSubsystem.hasCoral()) {
       hadCoral = true;
     }
@@ -53,6 +55,7 @@ public class IntakeCMD extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    intakeMotorSubsystem.isActive = false;
     intakeMotorSubsystem.stopIntakeMotorSubsystem();//stops it
   }
 
