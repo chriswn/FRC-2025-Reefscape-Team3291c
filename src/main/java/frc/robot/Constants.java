@@ -45,8 +45,8 @@ public final class Constants {
   public static class Elevator {
     public static final double deadband = 0.02;
 
-    public static final double maxVelocity = 1.0;
-    public static final double maxAcceleration = 0.5;
+    public static final double maxVelocity = 1.2;
+    public static final double maxAcceleration = 0.7;
     public static final double ks = 0.0;
     public static final double kg = 0.138;
     public static final double kv = 1.78;
@@ -82,12 +82,13 @@ public final class Constants {
     public static final double inchesToRotations = maxHeightRotation/maxHeightInches;
 
     public static final double groundFloor = 0.0;
-    public static final double secondFloor = distanceToLevel2 * inchesToRotations;
+    public static final double secondFloor = 1.1;
     public static final double thirdFloor = distanceToLevel3 * inchesToRotations;
     public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
     public static final double topFloor = 6.0 + (250.0/360.0);
 
-    public static final double heightOfHeadBang = 25.5 * inchesToRotations;
+    public static final double heightOfHeadBang = 0.88;
+    public static final double algaeOffset = 1;
   }
 
 
@@ -96,7 +97,7 @@ public final class Constants {
     public static final double pivotMaxAcceleration = 0.3;
     public static final double pivotKs = 0.0;
     public static final double pivotKg = 0.5;
-    public static final double pivotKv = 6.1;
+    public static final double pivotKv = 7.3;
     public static final double pivotKa = 0.0;
 
     public static final double intakeMotorKp = 0.00001;
@@ -106,7 +107,7 @@ public final class Constants {
     public static final double intakeMotorKv = 0.002114;
 
     public static class PID {
-      public static final double kp = 0.8;
+      public static final double kp = 6;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
     }
@@ -122,11 +123,13 @@ public final class Constants {
     public static final double pivotEncoderOffset = 0.715;
 
     //angles
-    public static final double stowAngle = 17.4/360.0;
+    public static final double stowAngle = 21/360;
     public static final double midLevelsFallingOffset = 3.0/360.0;
     public static final double midLevelsAngle = 0.13;//35.0/360.0 - midLevelsFallingOffset;
     public static final double topLevelAngle = 90.0/360.0;
-    public static final double groundAngle = 180.0/360.0;//not currently in use
+    public static final double groundAngle = 180.0/360.0;//for algae
+    public static final double angleToAvoidHeadBang = 0.13;
+
 
     public static final double angleDeadband = 5.0/360.0;
     public static final double tolerance = angleDeadband;
@@ -135,7 +138,7 @@ public final class Constants {
 
     public static final double eSpitSpeed = -1000.0;
     public static final double ejectSpeed = 1000.0;
-    public static final double intakeSpeed = 2000.0;
+    public static final double intakeSpeed = 1000.0;
     
     public static final double distanceSensorPointBlankRange = 0.1;
 

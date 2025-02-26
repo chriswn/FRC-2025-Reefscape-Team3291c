@@ -76,9 +76,7 @@ public class RobotContainer {
   private final Command pivotToStow = new PivotToStow(intakePivotSubsystem);
   private final Command eSpitCMD = new ESpitCMD(intakeMotorSubsystem);
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
-  private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem,
-      () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(),
-      () -> controller1.button(Constants.ButtonList.start).getAsBoolean());
+  private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean());
 
   private final RunMotorCommand runMotorCommand = new RunMotorCommand(
       runMotorSub,
@@ -175,26 +173,10 @@ public class RobotContainer {
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
-    NamedCommands.registerCommand("goToGroundFloor",
-        new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(),
-            () -> controller1.povDown().getAsBoolean(),
-            () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), 0)
-            .until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
-    NamedCommands.registerCommand("goToSecondFloor",
-        new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(),
-            () -> controller1.povDown().getAsBoolean(),
-            () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), 1)
-            .until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));
-    NamedCommands.registerCommand("goToThirdFloor",
-        new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(),
-            () -> controller1.povDown().getAsBoolean(),
-            () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), 2)
-            .until(() -> elevatorSubsystem.ifAtFloor(Elevator.thirdFloor)));
-    NamedCommands.registerCommand("goToFourthFloor",
-        new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(),
-            () -> controller1.povDown().getAsBoolean(),
-            () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), 3)
-            .until(() -> elevatorSubsystem.ifAtFloor(Elevator.fourthFloor)));
+    NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
+    NamedCommands.registerCommand("goToSecondFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 1).until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));
+    NamedCommands.registerCommand("goToThirdFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 2).until(() -> elevatorSubsystem.ifAtFloor(Elevator.thirdFloor)));
+    NamedCommands.registerCommand("goToFourthFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 3).until(() -> elevatorSubsystem.ifAtFloor(Elevator.fourthFloor)));
     NamedCommands.registerCommand("intakeCMD", intakeCMD);
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
 

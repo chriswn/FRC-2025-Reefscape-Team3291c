@@ -25,6 +25,8 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   public SparkMaxConfig config;
   public CANrange canRange;
 
+  public Boolean isActive = false;
+
   public double intakeMotorKp = Preferences.getDouble("intakeMotorKp", Constants.Intake.intakeMotorKp);
   public double intakeMotorKi = Preferences.getDouble("intakeMotorKi", Constants.Intake.intakeMotorKi);
   public double intakeMotorKd = Preferences.getDouble("intakeMotorKd", Constants.Intake.intakeMotorKd);
@@ -125,6 +127,12 @@ public class IntakeMotorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (!isActive) {
+      if (IntakeMotorEncoder.getVelocity() == 0) {
+        moveIntakeMotor(0);
+      }
+    }
+    SmartDashboard.putBoolean("isActive", isActive);
     updatePreferences(); //to be commented out
 
     SmartDashboard.putNumber("canrange is detected", canRange.getIsDetected().getValueAsDouble());
