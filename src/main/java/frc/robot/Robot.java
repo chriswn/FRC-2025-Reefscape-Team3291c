@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.core.CoreCANrange;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -80,7 +78,7 @@ public class Robot extends TimedRobot
   @Override
   public void disabledInit()
   {
-    //m_robotContainer.setMotorBrake(true);
+    m_robotContainer.setMotorBrake(true);
     disabledTimer.reset();
     disabledTimer.start();
   }
@@ -90,7 +88,7 @@ public class Robot extends TimedRobot
   {
     if (disabledTimer.hasElapsed(Constants.DrivebaseConstants.WHEEL_LOCK_TIME))
     {
-     // m_robotContainer.setMotorBrake(false);
+      m_robotContainer.setMotorBrake(false);
       disabledTimer.stop();
     }
   }
@@ -101,8 +99,8 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit()
   {
-    // m_robotContainer.setMotorBrake(true);
-    // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_robotContainer.setMotorBrake(true);
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null)
