@@ -165,24 +165,15 @@ public class IntakePivotSubsystem extends SubsystemBase {
     }
   }
 
-  public double giveVoltage(double pivotAngle, double current_angle) {
-    // pivot control
-    SmartDashboard.putNumber("originalAngle", current_angle);
-   
-    //double angle = Math.abs(1 - current_angle); //reverses it
-    double angle = current_angle;
-    SmartDashboard.putNumber("updatedAngle", angle);
-
+  public double giveVoltage(double pivotAngle, double angle) {
     double pivotVoltage = profiledPIDController.calculate(angle, pivotAngle) + armFeedforward.calculate(Math.toRadians(angle * 360.0 + 40.0), profiledPIDController.getSetpoint().velocity);
-    SmartDashboard.putNumber("intake setpoint", profiledPIDController.getSetpoint().position);
+    SmartDashboard.putNumber("pivotSetpoint", profiledPIDController.getSetpoint().position);
 
-    //double adjustedpivotVoltage = 10 - Math.abs(pivotVoltage);
-    double adjustedpivotVoltage = pivotVoltage; //error reversed for voltage
     if (!intakeEncoder.isConnected()) {
-      adjustedpivotVoltage = 0.0;
+      pivotVoltage = 0.0;
     }
 
-    return adjustedpivotVoltage;
+    return pivotVoltage;
   }
  
   public void stopIntake() {
@@ -225,15 +216,15 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
   public void goToPosition(PivotTarget pivotTarget) {
     double pivotAngle = pivotTargetToAngle(pivotTarget);
-    SmartDashboard.putNumber("pivotAngle", pivotAngle);
+    SmartDashboard.putNumber("pivotTargetAngle", pivotAngle);
     double voltage = giveVoltage(pivotAngle, getCurrentAngle());
     if (pivotTarget == PivotTarget.STOW && ifAtAngle(Constants.Intake.stowAngle)) {
       pivotMotor.set(0);
-      SmartDashboard.putNumber("getIntakeVoltage", 0);
+      SmartDashboard.putNumber("pivotVoltage", 0);
       return;
     }
     pivotMotor.setVoltage(voltage);
-    SmartDashboard.putNumber("getIntakeVoltage", voltage);
+    SmartDashboard.putNumber("pivotVoltage", voltage);
   }
 
   @Override

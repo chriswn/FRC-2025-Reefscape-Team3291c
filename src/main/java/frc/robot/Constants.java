@@ -22,6 +22,7 @@ import swervelib.math.Matter;
  */
 public final class Constants {
   public static final int runMotorID = 39;
+  public static final int smartCurrentLimit = 30;
 
   public static final double ROBOT_MASS = (148.0 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
@@ -74,8 +75,8 @@ public final class Constants {
     //inch measurements
     public static final double distanceOffGround = 15.0 + (3.0/8.0);
     public static final double distanceToLevel2 = 23.0 + (7.0/8.0) - distanceOffGround;
-    public static final double distanceToLevel3 = 40 + (4.0/8.0) - distanceOffGround;
-    public static final double distanceToLevel4 = 70 - distanceOffGround;
+    public static final double distanceToLevel3 = 40.0 + (4.0/8.0) - distanceOffGround;
+    public static final double distanceToLevel4 = 70.0 - distanceOffGround;
 
     public static final double maxHeightInches = 81.0 + (1.0/4.0) - distanceOffGround;
     public static final double maxHeightRotation = 6.0 + (250.0/360.0);
@@ -88,7 +89,7 @@ public final class Constants {
     public static final double topFloor = 6.0 + (250.0/360.0);
 
     public static final double heightOfHeadBang = 0.88;
-    public static final double algaeOffset = 1;
+    public static final double algaeOffset = 1.0;
   }
 
 
@@ -107,7 +108,7 @@ public final class Constants {
     public static final double intakeMotorKv = 0.002114;
 
     public static class PID {
-      public static final double kp = 6;
+      public static final double kp = 6.0;
       public static final double ki = 0.0;
       public static final double kd = 0.0;
     }
@@ -123,7 +124,7 @@ public final class Constants {
     public static final double pivotEncoderOffset = 0.715;
 
     //angles
-    public static final double stowAngle = 21/360;
+    public static final double stowAngle = 21.0/360.0;
     public static final double midLevelsFallingOffset = 3.0/360.0;
     public static final double midLevelsAngle = 0.13;//35.0/360.0 - midLevelsFallingOffset;
     public static final double topLevelAngle = 90.0/360.0;

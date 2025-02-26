@@ -211,7 +211,7 @@
   {
     "name": "/Preferences/ejectSpeed",
     "type": "double",
-    "value": 1000.0,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -219,7 +219,7 @@
   {
     "name": "/Preferences/intakeSpeed",
     "type": "double",
-    "value": 2000.0,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -260,6 +260,14 @@
     "name": "/Preferences/intakeMotorKv",
     "type": "double",
     "value": 0.002114,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/algaeOffset",
+    "type": "double",
+    "value": 0.5081172253847775,
     "properties": {
       "persistent": true
     }

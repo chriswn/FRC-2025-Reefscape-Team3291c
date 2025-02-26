@@ -18,10 +18,10 @@ import frc.robot.Constants;
 
 public class IntakeMotorSubsystem extends SubsystemBase {
 
-  public SparkMax IntakeMotorMotor;
+  public SparkMax intakeMotorMotor;
   public PIDController PIDController;
   public SimpleMotorFeedforward simpleMotorFeedforward;
-  public RelativeEncoder IntakeMotorEncoder;
+  public RelativeEncoder intakeMotorEncoder;
   public SparkMaxConfig config;
   public CANrange canRange;
 
@@ -72,14 +72,15 @@ public class IntakeMotorSubsystem extends SubsystemBase {
     }
 
     
-    this.IntakeMotorMotor = new SparkMax(Constants.Intake.IntakeID, MotorType.kBrushless);
+    this.intakeMotorMotor = new SparkMax(Constants.Intake.IntakeID, MotorType.kBrushless);
 
     this.config = new SparkMaxConfig();
     this.config
+        .smartCurrentLimit(30)
         .inverted(Constants.Intake.reverseIntakeMotor)
         .idleMode(IdleMode.kBrake);
-    this.IntakeMotorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    this.IntakeMotorEncoder = this.IntakeMotorMotor.getEncoder();
+    this.intakeMotorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.intakeMotorEncoder = this.intakeMotorMotor.getEncoder();
   }
 
   public void updatePreferences() {
@@ -104,16 +105,16 @@ public class IntakeMotorSubsystem extends SubsystemBase {
 
   public void moveIntakeMotor(double rpm) {
     double power;
-    power = PIDController.calculate(IntakeMotorEncoder.getVelocity(), rpm) + simpleMotorFeedforward.calculate(rpm);
-    IntakeMotorMotor.setVoltage(power);
+    power = PIDController.calculate(intakeMotorEncoder.getVelocity(), rpm) + simpleMotorFeedforward.calculate(rpm);
+    intakeMotorMotor.setVoltage(power);
 
     SmartDashboard.putNumber("IntakeMotorVoltage", power);
     SmartDashboard.putNumber("IntakeMotorDesiredSpeed", rpm);
-    SmartDashboard.putNumber("IntakeMotorVelocity", IntakeMotorEncoder.getVelocity());
+    SmartDashboard.putNumber("IntakeMotorVelocity", intakeMotorEncoder.getVelocity());
   }
 
   public void stopIntakeMotorSubsystem() {
-    IntakeMotorMotor.set(0);
+    intakeMotorMotor.set(0);
   }
 
   public boolean hasCoral() {
@@ -128,11 +129,12 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     if (!isActive) {
-      if (IntakeMotorEncoder.getVelocity() == 0) {
-        moveIntakeMotor(0);
+      if (intakeMotorEncoder.getVelocity() == 0 && hasCoral()) {
+        //keep it from falling out since kS directly translates to volts
+        intakeMotorMotor.setVoltage(-Constants.Intake.intakeMotorKs);
       }
     }
-    SmartDashboard.putBoolean("isActive", isActive);
+    SmartDashboard.putBoolean("IntakeMotor isActive", isActive);
     updatePreferences(); //to be commented out
 
     SmartDashboard.putNumber("canrange is detected", canRange.getIsDetected().getValueAsDouble());

@@ -191,7 +191,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public double giveVoltage(double height_in_ticks) {
     // Floor control
     double height = height_in_ticks / Constants.Elevator.encoderTicksPerRotation;
-    SmartDashboard.putNumber("adjusted height", height);
+    SmartDashboard.putNumber("elevator adjusted height", height);
 
     double elevatorFloorVoltage = profiledPIDController.calculate(height) + elevatorFeedforward.calculate(profiledPIDController.getSetpoint().velocity);
     SmartDashboard.putNumber("elevator setpoint", profiledPIDController.getSetpoint().position);
@@ -240,13 +240,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     if (algaeMode && (floor_target == FloorTarget.SECOND_FLOOR || floor_target == FloorTarget.THIRD_FLOOR)) {
       desired_height += algaeOffset;
     }
-    SmartDashboard.putNumber("desired_height", desired_height);
+    SmartDashboard.putNumber("elevator_desired_height", desired_height);
     goal = new TrapezoidProfile.State(desired_height, 0);
     profiledPIDController.setGoal(goal);
 
     double voltage = giveVoltage(elevatorEncoder.get());
     elevatorMotorLeader.setVoltage(voltage);
-    SmartDashboard.putNumber("getElevatorVoltage", voltage);
+    SmartDashboard.putNumber("elevatorVoltage", voltage);
   }
 
   @Override
@@ -263,8 +263,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("elevatorAtFourthFloor", ifAtFloor(Constants.Elevator.fourthFloor));
 
     SmartDashboard.putBoolean("elevatorAtTopFloor", ifAtFloor(Constants.Elevator.topFloor));
-    SmartDashboard.putNumber("floorTarget", floorTargetToHeight(floor_target));
-    SmartDashboard.putNumber("elevator motor bus voltage", elevatorMotorLeader.getBusVoltage());
+    SmartDashboard.putNumber("elevatorFloorTarget", floorTargetToHeight(floor_target));
   }
 }
  
