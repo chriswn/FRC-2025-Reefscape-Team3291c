@@ -129,7 +129,7 @@ public class IntakeMotorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     if (!isActive) {
-      if (intakeMotorEncoder.getVelocity() == 0) {
+      if (intakeMotorEncoder.getVelocity() == 0 && hasCoral()) {
         //keep it from falling out since kS directly translates to volts
         intakeMotorMotor.setVoltage(-Constants.Intake.intakeMotorKs);
       }
