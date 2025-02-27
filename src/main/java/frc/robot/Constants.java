@@ -46,8 +46,8 @@ public final class Constants {
   public static class Elevator {
     public static final double deadband = 0.02;
 
-    public static final double maxVelocity = 1.2;
-    public static final double maxAcceleration = 0.7;
+    public static final double maxVelocity = 3.6;
+    public static final double maxAcceleration = 2.6;
     public static final double ks = 0.0;
     public static final double kg = 0.138;
     public static final double kv = 1.78;
