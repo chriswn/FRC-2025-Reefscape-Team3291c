@@ -137,8 +137,8 @@ public final class Constants {
 
     public static final boolean reverseIntakeMotor = true;
 
-    public static final double eSpitSpeed = -1000.0;
-    public static final double ejectSpeed = 1200.0;
+    public static final double eSpitSpeed = -1200.0;
+    public static final double ejectSpeed = 1600.0;
     public static final double intakeSpeed = 1000.0;
     
     public static final double distanceSensorPointBlankRange = 0.1;
