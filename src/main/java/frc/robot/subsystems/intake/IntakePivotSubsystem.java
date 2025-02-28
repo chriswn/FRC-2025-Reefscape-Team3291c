@@ -33,7 +33,8 @@ public class IntakePivotSubsystem extends SubsystemBase {
     GROUND,
     STOW,
     MIDLEVELS,
-    TOPLEVEL
+    TOPLEVEL,
+    ALGAE
   }
 
   public PivotTarget pivot_target = PivotTarget.STOW;
@@ -190,6 +191,8 @@ public class IntakePivotSubsystem extends SubsystemBase {
         return midLevelsAngle;
       case TOPLEVEL:
         return topLevelAngle;
+      case ALGAE:
+        return Constants.Intake.algaeAngle;
       default:
         // "Safe" default
         return stowAngle;

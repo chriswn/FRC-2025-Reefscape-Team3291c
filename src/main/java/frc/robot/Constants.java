@@ -83,6 +83,7 @@ public final class Constants {
     public static final double inchesToRotations = maxHeightRotation/maxHeightInches;
 
     public static final double groundFloor = 0.0;
+    public static final double algaeFloor = 6 * inchesToRotations;
     public static final double secondFloor = 1.1;
     public static final double thirdFloor = distanceToLevel3 * inchesToRotations;
     public static final double fourthFloor = distanceToLevel4 * inchesToRotations;
@@ -130,6 +131,7 @@ public final class Constants {
     public static final double topLevelAngle = 90.0/360.0;
     public static final double groundAngle = 180.0/360.0;//for algae
     public static final double angleToAvoidHeadBang = 0.13;
+    public static final double algaeAngle = 0.51;
 
 
     public static final double angleDeadband = 5.0/360.0;

@@ -43,6 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public enum FloorTarget {
     NONE,
     GROUND_FLOOR,
+    ALGAE_FLOOR,
     SECOND_FLOOR,
     THIRD_FLOOR,
     FOURTH_FLOOR,
@@ -208,6 +209,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     switch (target) {
       case GROUND_FLOOR:
         return Constants.Elevator.groundFloor; //ground floor and top floor shouldn't be changed
+      case ALGAE_FLOOR:
+        return Constants.Elevator.algaeFloor;
       case SECOND_FLOOR:
         return secondFloor;
       case THIRD_FLOOR:

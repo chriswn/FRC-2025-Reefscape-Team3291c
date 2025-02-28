@@ -97,9 +97,17 @@ public class GoToFloor extends Command {
 
     if (floor == 0) {
       if (!startButtonPressed) {
-      elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
+        if (aButtonPressed) {
+          elevatorSubsystem.setTarget(FloorTarget.ALGAE_FLOOR);
+        }
+        else {
+          elevatorSubsystem.setTarget(FloorTarget.GROUND_FLOOR);
+        }
       }
-      if (elevatorSubsystem.elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < Constants.Elevator.heightOfHeadBang) {
+      if (aButtonPressed) {
+        intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.ALGAE;
+      }
+      else if (elevatorSubsystem.elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation < Constants.Elevator.heightOfHeadBang) {
         intakePivotSubsystem.pivot_target = IntakePivotSubsystem.PivotTarget.STOW;
       }
       
