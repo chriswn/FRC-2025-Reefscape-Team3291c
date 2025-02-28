@@ -94,8 +94,8 @@ public final class Constants {
 
 
   public static class Intake {
-    public static final double pivotMaxVelocity = 0.3;
-    public static final double pivotMaxAcceleration = 0.3;
+    public static final double pivotMaxVelocity = 0.5;
+    public static final double pivotMaxAcceleration = 0.5;
     public static final double pivotKs = 0.0;
     public static final double pivotKg = 0.5;
     public static final double pivotKv = 7.3;

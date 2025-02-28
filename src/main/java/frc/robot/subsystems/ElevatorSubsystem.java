@@ -252,7 +252,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     goToPosition();
-    loadPreferences();//to be commented out
+   // loadPreferences();//to be commented out
     //This method will be called once per scheduler run
     SmartDashboard.putNumber("elevator encoder reading", elevatorEncoder.get());
     SmartDashboard.putNumber("elevator adjusted encoder reading", elevatorEncoder.get()/Constants.Elevator.encoderTicksPerRotation);
