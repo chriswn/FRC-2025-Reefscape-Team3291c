@@ -24,6 +24,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
+
 public class VisionSim {
     private final PhotonCamera camera;
     private final PhotonPoseEstimator photonEstimator;
