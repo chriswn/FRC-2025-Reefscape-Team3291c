@@ -82,8 +82,6 @@ public class RobotContainer {
   private final PhotonCamera camera = new PhotonCamera("cam_in");
   private final VisionSim visionSim = new VisionSim(camera);
 
-  private final Command chaseTagCommand = new ChaseTagCommand(camera, visionSim.getPhotonEstimator(), controller1, drivebase);
-
 //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,
 //         () -> 2 // Example: Getting speed from joystick Y-axis
@@ -180,7 +178,7 @@ if (Robot.isSimulation()) {
  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
 }
  // Register ChaseTag command to a button or joystick input
-        driverXbox.a().onTrue(chaseTagCommand); // Use the A button on Xbox controller to trigger the chase tag command
+      // Use the A button on Xbox controller to trigger the chase tag command
         
         DriverStation.silenceJoystickConnectionWarning(true);
         

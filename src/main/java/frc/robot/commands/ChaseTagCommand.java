@@ -12,11 +12,15 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
+import org.photonvision.PhotonCamera;
 
 public class ChaseTagCommand extends Command {
     private final PhotonCamera camera;
     private final PhotonPoseEstimator photonEstimator;
-    private final XboxController controller;
+    private final CommandXboxController controller;
     private final SwerveSubsystem drivebase;
     private boolean chasingTag = false;
     
@@ -29,16 +33,17 @@ public class ChaseTagCommand extends Command {
     private static final double MAX_STRAFE_SPEED = 2.0;
     private static final double TARGET_DISTANCE = 1.0;
     private static final double TARGET_CENTER_TOLERANCE = 2.5;
-    
+      final CommandXboxController driverXbox = new CommandXboxController(0);
+
     private final SlewRateLimiter driveLimiter = new SlewRateLimiter(2.0);
     private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(2.0);
     private final SlewRateLimiter turnLimiter = new SlewRateLimiter(2.0);
     
     public ChaseTagCommand(PhotonCamera camera, PhotonPoseEstimator photonEstimator, 
-                         XboxController controller, SwerveSubsystem drivebase) {
+    CommandXboxController driverXbox, SwerveSubsystem drivebase) {
         this.camera = camera;
         this.photonEstimator = photonEstimator;
-        this.controller = controller;
+        this.controller = driverXbox;
         this.drivebase = drivebase;
         addRequirements(drivebase);
     }
@@ -50,7 +55,7 @@ public class ChaseTagCommand extends Command {
 
     @Override
     public void execute() {
-        if (controller.getAButtonPressed()) {
+        if (controller.a().getAsBoolean()) {
             chasingTag = !chasingTag;
         }
 
