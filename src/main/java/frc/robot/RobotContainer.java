@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Elevator;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.ChaseTagCommand;
 // import frc.robot.commands.RunMotorCommand;
 // import frc.robot.subsystems.RunMotorSub;
 import frc.robot.commands.ElevatorCMDs.GoToFloor;
@@ -173,9 +174,13 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+
     // In your robot container initialization
 if (Robot.isSimulation()) {
  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
+ // In RobotContainer.java
+ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+driverXbox.a().whileTrue(chaseCommand);
 }
  // Register ChaseTag command to a button or joystick input
       // Use the A button on Xbox controller to trigger the chase tag command
@@ -255,7 +260,11 @@ if (Robot.isSimulation()) {
       controller1.povRight().toggleOnTrue(intakeCMD);
       elevatorSubsystem.setDefaultCommand(goToFloor);
       intakePivotSubsystem.setDefaultCommand(goToFloor);
-      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+
+      driverXbox.a().whileTrue(chaseCommand);
+
+      //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driverXbox.b().whileTrue(
           drivebase.driveToPose(

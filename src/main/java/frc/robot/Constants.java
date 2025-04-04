@@ -35,6 +35,10 @@ import swervelib.math.Matter;
 public final class Constants {
 
     public static class Vision {
+
+      public static final int TARGET_TAG_ID = 4;
+      public static final double CAMERA_HEIGHT = 0.5; // meters
+       public static final double TAG_HEIGHT = 1.0; // meters
         // public static final String kCameraName = "YOUR CAMERA NAME";
         // // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         public static final Transform3d kRobotToCam =
@@ -56,7 +60,7 @@ public final class Constants {
     public static final double CAMERA_HEIGHT_METERS = 0.5;
     public static final double TAG_HEIGHT_METERS = 1.0;
     public static final int DESIRED_TAG_ID = 4;
-    
+
   // Add vision constants here or in an appropriate nested class:
   public static final double VISION_TURN_kP = 0.01; // Adjust this proportional gain as needed
   public static final double MAX_ANGULAR_SPEED = Math.PI; // Example value (radians per second)
