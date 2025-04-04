@@ -174,7 +174,7 @@ public class RobotContainer {
   public RobotContainer() {
     // In your robot container initialization
 if (Robot.isSimulation()) {
-  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
+ SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
 }
     // Configure the trigger bindings
     configureBindings();
@@ -272,4 +272,4 @@ if (Robot.isSimulation()) {
   public void setMotorBrake(boolean brake) {
     drivebase.setMotorBrake(brake);
   }
-}
+} 

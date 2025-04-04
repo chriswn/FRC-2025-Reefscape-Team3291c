@@ -24,10 +24,11 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
-
 public class VisionSim {
     private final PhotonCamera camera;
     private final PhotonPoseEstimator photonEstimator;
+    private final Field2d field2d = new Field2d();
+    private final Field2d estimatedPoseField = new Field2d();
     private Matrix<N3, N1> curStdDevs;
     
     private PhotonCameraSim cameraSim;
@@ -45,6 +46,10 @@ public class VisionSim {
             kRobotToCam
         );
         photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+
+        SmartDashboard.putData("Vision/Field", field2d);
+        SmartDashboard.putData("Vision/EstimatedPose", estimatedPoseField);
+
 
         if (Robot.isSimulation()) {
             initializeSimulation();
