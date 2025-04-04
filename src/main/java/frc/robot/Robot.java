@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -35,11 +36,10 @@ public class Robot extends TimedRobot
 
   private RobotContainer m_robotContainer;
 
+
   private Timer disabledTimer;
 
-private PhotonCamera camera;
-private VisionSim visionSim;
-  private final Command chaseTagCommand = new ChaseTagCommand(camera, visionSim.getPhotonEstimator(), controller1, drivebase);
+  
 
   public Robot()
   {
@@ -50,6 +50,7 @@ private VisionSim visionSim;
   {
     return instance;
   }
+
 
   /**
    * This function is run when the robot is first started up and should be used for any initialization code.
@@ -70,7 +71,13 @@ private VisionSim visionSim;
       DriverStation.silenceJoystickConnectionWarning(true);
     }
   }
+    public SwerveSubsystem getDrivebase() {
+    return m_robotContainer.drivebase;
+}
 
+  public VisionSim getVisionSim() {
+    return m_robotContainer.visionSim;
+}
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics that you want ran
    * during disabled, autonomous, teleoperated and test.
@@ -170,10 +177,7 @@ private VisionSim visionSim;
   @Override
   public void testPeriodic()
   {
-     // Register ChaseTag command to a button or joystick input
-        driverXbox.a().onTrue(chaseTagCommand); // Use the A button on Xbox controller to trigger the chase tag command
-        
-        DriverStation.silenceJoystickConnectionWarning(true);
+     
   }
 
   /**
@@ -182,6 +186,7 @@ private VisionSim visionSim;
   @Override
   public void simulationInit()
   {
+   
     // if (Robot.isSimulation()) {
     //   var visionSim = new VisionSystemSim("test");
       
@@ -208,6 +213,8 @@ private VisionSim visionSim;
       
     //   // Add to dashboard
     //   SmartDashboard.putData("Vision Field", visionSim.getDebugField());
+    
+
     }
 
   
@@ -218,7 +225,15 @@ private VisionSim visionSim;
    */
   @Override
   public void simulationPeriodic()
-  {
-    
+  { // Safe null-checked access
+    if (m_robotContainer != null && 
+        getDrivebase() != null && 
+        getVisionSim() != null) {
+        
+        Pose2d currentPose = getDrivebase().getPose();
+        if (currentPose != null) {
+            getVisionSim().simulationPeriodic(currentPose);
+        }
+    }
   }
 }

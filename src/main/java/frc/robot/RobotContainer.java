@@ -66,7 +66,7 @@ public class RobotContainer {
   // public RunMotorSub runMotorSub = new RunMotorSub();
   // public ColorChanger colorChanger = new ColorChanger();
   // The robot's subsystems and commands are defined here...
-  private final SwerveSubsystem drivebase = new SwerveSubsystem();
+  public final SwerveSubsystem drivebase = new SwerveSubsystem();
 
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   private final IntakePivotSubsystem intakePivotSubsystem = new IntakePivotSubsystem();
@@ -80,7 +80,7 @@ public class RobotContainer {
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
   private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean());
   private final PhotonCamera camera = new PhotonCamera("cam_in");
-  private final VisionSim visionSim = new VisionSim(camera);
+  public final VisionSim visionSim = new VisionSim(camera);
 
 //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,

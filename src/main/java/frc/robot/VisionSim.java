@@ -25,6 +25,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
@@ -35,8 +36,6 @@ public class VisionSim {
     private final Field2d field2d = new Field2d();
     private final Field2d estimatedPoseField = new Field2d();
     private Matrix<N3, N1> curStdDevs;
-    private final XboxController controller;
-    private final SwerveSubsystem driveSubsystem;
     
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
@@ -80,23 +79,22 @@ public class VisionSim {
         visionSim.addAprilTags(tagLayout);
 
         // Configure camera properties
+        configureCameraSim();
+    }
+
+    private void configureCameraSim() {
         SimCameraProperties cameraProp = new SimCameraProperties();
-        cameraProp.setCalibration(320, 240, Rotation2d.fromDegrees(90));
+        cameraProp.setCalibration(1280, 720, Rotation2d.fromDegrees(90));
         cameraProp.setCalibError(0.25, 0.08);
         cameraProp.setFPS(30);
         cameraProp.setAvgLatencyMs(30);
         cameraProp.setLatencyStdDevMs(5);
-
-        // Create camera simulation
+        
         cameraSim = new PhotonCameraSim(camera, cameraProp);
-
-        // Add camera to vision system
-        visionSim.addCamera(cameraSim, kRobotToCam);
-
-        // Configure streams - ORDER MATTERS HERE
         cameraSim.enableRawStream(true);
         cameraSim.enableProcessedStream(true);
         cameraSim.enableDrawWireframe(true);
+      
 
         // Force initial update with robot near tags
         visionSim.update(new Pose2d(1.5, 1.5, new Rotation2d()));
@@ -105,11 +103,10 @@ public class VisionSim {
         SmartDashboard.putData("PhotonVision/SimField", visionSim.getDebugField());
         
         System.out.println("PhotonVision simulation initialized for camera: " + camera.getName());
-    }
+}
 
-    public void toggleChaseTag() {
-        ChaseTagCommand chaseTagCommand = new ChaseTagCommand(camera, photonEstimator, controller, driveSubsystem);
-        CommandScheduler.getInstance().schedule(chaseTagCommand);
+    public PhotonPoseEstimator getPhotonEstimator() {
+        return photonEstimator;
     }
 
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
@@ -191,6 +188,18 @@ public class VisionSim {
     public Matrix<N3, N1> getEstimationStdDevs() {
         return curStdDevs;
     }
+    public void updateField2d(Pose2d robotPose) {
+        field2d.setRobotPose(robotPose);
+        estimatedPoseField.setRobotPose(getEstimatedGlobalPose()
+            .map(est -> est.estimatedPose.toPose2d())
+            .orElse(new Pose2d()));
+    }
+    public void updateOdometry(SwerveSubsystem drivebase) {
+        Optional<EstimatedRobotPose> visionEst = getEstimatedGlobalPose();
+        visionEst.ifPresent(est -> 
+            drivebase.addVisionMeasurement(est)
+        );
+    }
 
     public void simulationPeriodic(Pose2d robotSimPose) {
         if (Robot.isSimulation() && visionSim != null) {
@@ -213,5 +222,9 @@ public class VisionSim {
 
     public Field2d getSimDebugField() {
         return (Robot.isSimulation() && visionSim != null) ? visionSim.getDebugField() : null;
+    }
+
+    public PhotonCamera getCamera() {
+        return camera;
     }
 }

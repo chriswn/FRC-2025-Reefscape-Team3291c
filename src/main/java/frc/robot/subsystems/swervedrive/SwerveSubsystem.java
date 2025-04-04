@@ -5,6 +5,8 @@
 package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Meter;
+import edu.wpi.first.math.Matrix;
+
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -26,12 +28,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -46,7 +51,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
+import frc.robot.VisionSim;
 
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -58,6 +66,7 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
+
 public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(), "swerve3291");
@@ -65,8 +74,8 @@ public class SwerveSubsystem extends SubsystemBase {
   //private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
   private final boolean visionDriveTest = false;
 
-  private Vision vision;
-
+  // private Vision vision;
+  private VisionSim visionSim;
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -129,22 +138,34 @@ public class SwerveSubsystem extends SubsystemBase {
    * Setup the photon vision class.
    */
   public void setupPhotonVision() {
-    vision = new Vision(swerveDrive::getPose, swerveDrive.field);
+    PhotonCamera camera = new PhotonCamera("cam_in");
+    visionSim = new VisionSim(camera);
+   // vision = new Vision(swerveDrive::getPose, swerveDrive.field);
   }
 
   @Override
   public void periodic() {
-    // When vision is enabled we must manually update odometry in SwerveDrive
     if (visionDriveTest) {
-      swerveDrive.updateOdometry();
-      vision.updatePoseEstimation(swerveDrive);
-    }
+      visionSim.updateOdometry(this); // Continuous updates during teleop
+  }
+   
   }
 
   @Override
   public void simulationPeriodic() {
+     if (visionDriveTest) {
+        // Update both drivebase and vision simulation
+        swerveDrive.updateOdometry();
+        visionSim.simulationPeriodic(getPose());
+        
+        // Update debug field visualization
+        Field2d debugField = visionSim.getSimDebugField();
+        if (debugField != null) {
+            debugField.getObject("EstimatedRobot").setPose(getPose());
+        }
+    }
   }
-
+  
   /**
    * Setup AutoBuilder for PathPlanner.
    */
@@ -700,7 +721,15 @@ public class SwerveSubsystem extends SubsystemBase {
   public Rotation2d getPitch() {
     return swerveDrive.getPitch();
   }
-
+  public void addVisionMeasurement(EstimatedRobotPose visionMeasurement) {
+    // Use either the vision system's calculated std devs or default values
+    Matrix<N3, N1> stdDevs = visionSim.getEstimationStdDevs(); 
+    swerveDrive.addVisionMeasurement(
+        visionMeasurement.estimatedPose.toPose2d(),
+        visionMeasurement.timestampSeconds,
+        stdDevs
+    );
+}
   /**
    * Add a fake vision reading for testing purposes.
    */
@@ -713,7 +742,10 @@ public class SwerveSubsystem extends SubsystemBase {
    *
    * @return {@link SwerveDrive}
    */
-  public SwerveDrive getSwerveDrive() {
+
+   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
   }
+ 
 }
+
