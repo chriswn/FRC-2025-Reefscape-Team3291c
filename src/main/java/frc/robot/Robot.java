@@ -39,6 +39,7 @@ public class Robot extends TimedRobot
 
 private PhotonCamera camera;
 private VisionSim visionSim;
+  private final Command chaseTagCommand = new ChaseTagCommand(camera, visionSim.getPhotonEstimator(), controller1, drivebase);
 
   public Robot()
   {
@@ -169,6 +170,10 @@ private VisionSim visionSim;
   @Override
   public void testPeriodic()
   {
+     // Register ChaseTag command to a button or joystick input
+        driverXbox.a().onTrue(chaseTagCommand); // Use the A button on Xbox controller to trigger the chase tag command
+        
+        DriverStation.silenceJoystickConnectionWarning(true);
   }
 
   /**

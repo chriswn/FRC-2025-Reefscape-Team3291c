@@ -22,7 +22,10 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.ChaseTagCommand;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 public class VisionSim {
     private final PhotonCamera camera;
@@ -30,16 +33,19 @@ public class VisionSim {
     private final Field2d field2d = new Field2d();
     private final Field2d estimatedPoseField = new Field2d();
     private Matrix<N3, N1> curStdDevs;
+    private final XboxController controller;
+    private final SwerveSubsystem driveSubsystem;
     
     private PhotonCameraSim cameraSim;
     private VisionSystemSim visionSim;
 
-    public VisionSim(PhotonCamera cam_in) {
+    public VisionSim(PhotonCamera cam_in, XboxController controller, SwerveSubsystem driveSubsystem) {
         System.out.println("Initializing VisionSim - Is simulation? " + Robot.isSimulation());
-
-        camera = cam_in;
         
-        // Initialize with 2025 field layout
+        this.camera = cam_in;
+        this.controller = controller;
+        this.driveSubsystem = driveSubsystem;
+        
         photonEstimator = new PhotonPoseEstimator(
             AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -50,52 +56,47 @@ public class VisionSim {
         SmartDashboard.putData("Vision/Field", field2d);
         SmartDashboard.putData("Vision/EstimatedPose", estimatedPoseField);
 
-
         if (Robot.isSimulation()) {
             initializeSimulation();
         }
     }
 
     private void initializeSimulation() {
-        // Create vision system with unique name
         visionSim = new VisionSystemSim("photonvision_sim");
         
-        // Load 2025 AprilTag layout
         AprilTagFieldLayout tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
         visionSim.addAprilTags(tagLayout);
 
-        // Configure camera properties
         SimCameraProperties cameraProp = new SimCameraProperties();
         cameraProp.setCalibration(320, 240, Rotation2d.fromDegrees(90));
         cameraProp.setCalibError(0.25, 0.08);
         cameraProp.setFPS(30);
         cameraProp.setAvgLatencyMs(30);
         cameraProp.setLatencyStdDevMs(5);
-
-        // Create camera simulation
+        
         cameraSim = new PhotonCameraSim(camera, cameraProp);
-
-        // Add camera to vision system
         visionSim.addCamera(cameraSim, kRobotToCam);
 
-        // Configure streams - ORDER MATTERS HERE
         cameraSim.enableRawStream(true);
         cameraSim.enableProcessedStream(true);
         cameraSim.enableDrawWireframe(true);
 
-        // Force initial update with robot near tags
         visionSim.update(new Pose2d(1.5, 1.5, new Rotation2d()));
 
-        // Add debug field to dashboard
         SmartDashboard.putData("PhotonVision/SimField", visionSim.getDebugField());
         
         System.out.println("PhotonVision simulation initialized for camera: " + camera.getName());
     }
 
+    public void toggleChaseTag() {
+        ChaseTagCommand chaseTagCommand = new ChaseTagCommand(camera, photonEstimator, controller, driveSubsystem);
+        CommandScheduler.getInstance().schedule(chaseTagCommand);
+    }
+
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
-        if (camera == null || !camera.isConnected()) {
+        if (!camera.isConnected()) {
             return visionEst;
         }
 
@@ -112,8 +113,7 @@ public class VisionSim {
         return visionEst;
     }
 
-    private void updateEstimationStdDevs(
-            Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
+    private void updateEstimationStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
         if (estimatedPose.isEmpty()) {
             curStdDevs = kSingleTagStdDevs;
             return;
@@ -132,18 +132,16 @@ public class VisionSim {
                 .getDistance(estimatedPose.get().estimatedPose.toPose2d().getTranslation());
         }
 
-        if (numTags == 0) {
-            curStdDevs = kSingleTagStdDevs;
-        } else {
+        if (numTags > 0) {
             avgDist /= numTags;
-            if (numTags > 1) estStdDevs = kMultiTagStdDevs;
+            estStdDevs = (numTags > 1) ? kMultiTagStdDevs : estStdDevs;
             if (numTags == 1 && avgDist > 4) {
                 estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
             } else {
                 estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
             }
-            curStdDevs = estStdDevs;
         }
+        curStdDevs = estStdDevs;
     }
 
     public Matrix<N3, N1> getEstimationStdDevs() {
