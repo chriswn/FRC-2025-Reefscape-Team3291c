@@ -1,100 +1,119 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// // Copyright (c) FIRST and other WPILib contributors.
+// // Open Source Software; you can modify and/or share it under the terms of
+// // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+// package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPipelineResult;
-import org.photonvision.PhotonTrackedTarget;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import java.util.List;
+// import static frc.robot.Constants.VisionConstants.APRILTAG_CAMERA_TO_ROBOT;
 
-public class VisionSubsystem extends SubsystemBase{
- private PhotonCamera camera;
- private static final String CAMERA_NAME = "photonvision";
- private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+// import java.io.IOException;
 
- private Transform3d cameraToRobot; 
+// import org.photonvision.PhotonCamera;
+// import org.photonvision.PhotonPoseEstimator;
+// import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
- //constructor
-  public VisionSubsystem(){
-      PhotonCamera camera = new PhotonCamera("photonvision");
-      // The field from AprilTagFields will be different depending on the game.
-   try {
-            aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-        } catch (Exception e) {
-            e.printStackTrace();  // Handle error loading the field layout
-        }
-      // Initialize cameraToRobot (you need to define this transform based on your robot's configuration)
-      cameraToRobot = new Transform3d();  // Replace this with actual robot configuration
-    }
+// import edu.wpi.first.apriltag.AprilTagFieldLayout;
+// import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
+// import edu.wpi.first.apriltag.AprilTagFields;
+// import edu.wpi.first.math.geometry.Transform3d;
+// import edu.wpi.first.wpilibj.DriverStation;
+// import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
- @Override 
- public void periodic(){
-  
-  // Query the latest result from PhotonVision
-  var result7= camera.getLatestResult();
+// import org.photonvision.targeting.PhotonTrackedTarget;
+// import org.photonvision.targeting.PhotonPipelineResult;
+// import edu.wpi.first.math.geometry.Pose2d;
+// import edu.wpi.first.math.geometry.Pose3d;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import org.photonvision.PhotonUtils;
+// import java.util.Optional;
+// import org.photonvision.EstimatedRobotPose;
 
-  // Check if the latest result has any targets.
-  boolean hasTargets = result.hasTargets();
+// public class VisionSubsystem extends SubsystemBase {
+//     private final PhotonCamera photonCamera;
+//     private static final String CameraName = "photonvision";
+//     private AprilTagFieldLayout aprilTagFieldLayout;
+//     private PhotonPoseEstimator photonPoseEstimator;
+//     private final Transform3d ROBOT_TO_APRILTAG_CAMERA;
 
-  if(result.hasTargets()){
- // Get a list of all targets detected by the camera
-  List<PhotonTrackedTarget> targets = result.getTargets();
-  
-  // Get the current best target.
-  PhotonTrackedTarget target = result.getBestTarget();
+//     public VisionSubsystem() {
+//         // Initialize the camera using the class field
+//         photonCamera = new PhotonCamera(CameraName);
+        
+//         // Calculate the robot-to-camera transform
+//         ROBOT_TO_APRILTAG_CAMERA = APRILTAG_CAMERA_TO_ROBOT.inverse();
 
-  // Get information from target.
-double yaw = target.getYaw();
-double pitch = target.getPitch();
-double area = target.getArea();
-double skew = target.getSkew();
-Transform2d pose = target.getCameraToTarget();
-List<TargetCorner> corners = target.getCorners();
-
-// Get information from target.
-int targetID = target.getFiducialId();
-double poseAmbiguity = target.getPoseAmbiguity();
-Transform3d bestCameraToTarget = target.getBestCameraToTarget();
-Transform3d alternateCameraToTarget = target.getAlternateCameraToTarget();
-
-  // if (bestTarget.getFiducialId() != -1) {
-  //               int targetID = bestTarget.getFiducialId();
-  //               double poseAmbiguity = bestTarget.getPoseAmbiguity();
-  //               Transform3d bestCameraToTarget = target.getBestCameraToTarget();
-  //               Transform3d alternateCameraToTarget = target.getAlternateCameraToTarget();
-  //           }
-
- SmartDashboard.putNumber("Yaw", yaw);
- SmartDashboard.putNumber("Pitch", pitch);
- SmartDashboard.putNumber("Area", area);
- SmartDashboard.putNumber("Skew", skew);
-
-   // Check for AprilTag ID and calculate field-relative robot pose
-  int targetID = target.getFiducialId();
-            if (aprilTagFieldLayout.getTagPose(targetID).isPresent()) {
-                Pose3d tagPose = aprilTagFieldLayout.getTagPose(targetID).get();
-                Pose3d robotPose = PhotonUtils.estimateFieldToRobotAprilTag(
-                        target.getBestCameraToTarget(),
-                        tagPose,
-                        cameraToRobot
-                );
+//         try {
+//             // Load the field layout
+//             aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
+//             aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
             
-    // You can also calculate the robot's field-relative pose using the target's data
-      if (aprilTagFieldLayout.getTagPose(target.getFiducialId()).isPresent()) {
-  Pose3d robotPose = PhotonUtils.estimateFieldToRobotAprilTag(target.getBestCameraToTarget(), aprilTagFieldLayout.getTagPose(target.getFiducialId()).get(), cameraToRobot);
-  double distanceToTarget = PhotonUtils.getDistanceToPose(robotPose, targetPose);
-  SmartDashboard.putNumber("Distance to Target", distanceToTarget);
-      }
-            }
-  }
- 
- }
+//             // Initialize the pose estimator
+//             photonPoseEstimator = new PhotonPoseEstimator(
+//                 aprilTagFieldLayout, 
+//                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+//                 photonCamera, 
+//                 ROBOT_TO_APRILTAG_CAMERA
+//             );
+            
+//             photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+//         } catch (IOException e) {
+//             DriverStation.reportError("Failed to load AprilTagFieldLayout: " + e.getMessage(), false);
+//             photonPoseEstimator = null;
+//         } catch (Exception e) {
+//             DriverStation.reportError("Unexpected error initializing PhotonPoseEstimator: " + e.getMessage(), false);
+//             photonPoseEstimator = null;
+//         }
+//     }
 
+//     @Override 
+//     public void periodic() {
+//         // Query the latest result from PhotonVision
+//         var result = photonCamera.getLatestResult();
 
-}
+//         // Check if the latest result has any targets.
+//         if (result.hasTargets()) {
+//             // Get the current best target.
+//             PhotonTrackedTarget target = result.getBestTarget();
+
+//             // Get information from target.
+//             double yaw = target.getYaw();
+//             double pitch = target.getPitch();
+//             double area = target.getArea();
+//             double skew = target.getSkew();
+//             int targetID = target.getFiducialId();
+
+//             SmartDashboard.putNumber("Vision/Yaw", yaw);
+//             SmartDashboard.putNumber("Vision/Pitch", pitch);
+//             SmartDashboard.putNumber("Vision/Area", area);
+//             SmartDashboard.putNumber("Vision/Skew", skew);
+//             SmartDashboard.putNumber("Vision/Target ID", targetID);
+
+//             // Check for AprilTag ID and calculate field-relative robot pose
+//             if (targetID != -1 && aprilTagFieldLayout != null) {
+//                 Optional<Pose3d> tagPose = aprilTagFieldLayout.getTagPose(targetID);
+//                 if (tagPose.isPresent()) {
+//                     Pose3d robotPose = PhotonUtils.estimateFieldToRobotAprilTag(
+//                         target.getBestCameraToTarget(),
+//                         tagPose.get(),
+//                         ROBOT_TO_APRILTAG_CAMERA.inverse() // Convert back to camera-to-robot
+//                     );
+                    
+//                     double distanceToTarget = PhotonUtils.getDistanceToPose(
+//                         robotPose.toPose2d(), 
+//                         tagPose.get().toPose2d()
+//                     );
+                    
+//                     SmartDashboard.putNumber("Vision/Distance to Target", distanceToTarget);
+//                 }
+//             }
+//         }
+//     }
+
+//     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+//         if (photonPoseEstimator != null) {
+//             photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+//             return photonPoseEstimator.update();
+//         }
+//         return Optional.empty();
+//     }
+// }

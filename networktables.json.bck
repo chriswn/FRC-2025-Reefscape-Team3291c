@@ -1,8 +1,16 @@
 [
   {
+    "name": "/Preferences/algaeOffset",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/elevatorSecondFloorHeight",
     "type": "double",
-    "value": 0.8637992831541219,
+    "value": 1.1,
     "properties": {
       "persistent": true
     }
@@ -60,8 +68,7 @@
     "type": "double",
     "value": 0.138,
     "properties": {
-      "persistent": true,
-      "retained": true
+      "persistent": true
     }
   },
   {
@@ -83,7 +90,7 @@
   {
     "name": "/Preferences/elevatorMaxAccleration",
     "type": "double",
-    "value": 0.5,
+    "value": 5.0,
     "properties": {
       "persistent": true
     }
@@ -91,183 +98,7 @@
   {
     "name": "/Preferences/elevatorMaxVelocity",
     "type": "double",
-    "value": 1.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/encoderOffset",
-    "type": "double",
-    "value": 0.715,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotAngleGround",
-    "type": "double",
-    "value": 0.5,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotAngleStow",
-    "type": "double",
-    "value": 0.04833333333333333,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotAngleMidLevels",
-    "type": "double",
-    "value": 0.08888888888888889,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotAngleTopLevel",
-    "type": "double",
-    "value": 0.25,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKp",
-    "type": "double",
-    "value": 0.8,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKi",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKd",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKs",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKg",
-    "type": "double",
-    "value": 0.5,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKv",
-    "type": "double",
-    "value": 6.1,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotKa",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotMaxAcceleration",
-    "type": "double",
-    "value": 0.3,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/pivotMaxVelocity",
-    "type": "double",
-    "value": 0.3,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/ejectSpeed",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/intakeSpeed",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/intakeMotorKp",
-    "type": "double",
-    "value": 1e-05,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/intakeMotorKi",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/intakeMotorKd",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/intakeMotorKs",
-    "type": "double",
-    "value": 0.15,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/intakeMotorKv",
-    "type": "double",
-    "value": 0.002114,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/algaeOffset",
-    "type": "double",
-    "value": 0.5081172253847775,
+    "value": 5.5,
     "properties": {
       "persistent": true
     }

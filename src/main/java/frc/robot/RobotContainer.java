@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.io.File;
 
+import org.photonvision.PhotonCamera;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -39,11 +41,12 @@ import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
 import frc.robot.commands.IntakePivotCMDs.PivotToStow;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+//import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import swervelib.SwerveInputStream;
+import frc.robot.VisionSim;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -58,7 +61,7 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandXboxController driverXbox = new CommandXboxController(0);
   public CommandJoystick controller1 = new CommandJoystick(1);
-  public VisionSubsystem visionSubsystem = new VisionSubsystem();
+  //public VisionSubsystem visionSubsystem = new VisionSubsystem();
   private final SendableChooser<Command> autoChooser;
   // public RunMotorSub runMotorSub = new RunMotorSub();
   // public ColorChanger colorChanger = new ColorChanger();
@@ -76,7 +79,8 @@ public class RobotContainer {
   private final Command eSpitCMD = new ESpitCMD(intakeMotorSubsystem);
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
   private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean());
-
+  private final PhotonCamera camera = new PhotonCamera("cam_in");
+  private final VisionSim visionSim = new VisionSim(camera);
 //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,
 //         () -> 2 // Example: Getting speed from joystick Y-axis
@@ -168,9 +172,11 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    // In your robot container initialization
+if (Robot.isSimulation()) {
+  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
+}
     // Configure the trigger bindings
-
-
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
