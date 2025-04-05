@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Elevator;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoAlignCommand;
 import frc.robot.commands.ChaseTagCommand;
 // import frc.robot.commands.RunMotorCommand;
 // import frc.robot.subsystems.RunMotorSub;
@@ -174,6 +176,7 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+   
 
     // In your robot container initialization
 if (Robot.isSimulation()) {
@@ -182,6 +185,7 @@ if (Robot.isSimulation()) {
 ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
 driverXbox.a().whileTrue(chaseCommand);
 }
+
 
 if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
   driverXbox.a().whileTrue(chaseCommand); }
@@ -199,6 +203,12 @@ if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagComma
     NamedCommands.registerCommand("goToFourthFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 3).until(() -> elevatorSubsystem.ifAtFloor(Elevator.fourthFloor)));
     NamedCommands.registerCommand("intakeCMD", intakeCMD);
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
+    driverXbox.y().whileTrue(new AutoAlignCommand(
+    visionSim,
+    drivebase,
+    18,  // Example target AprilTag ID
+    new Pose2d(1.0, 0.0, Rotation2d.fromDegrees(0))  // Example offset (1m forward)
+));
     
 
 
@@ -208,6 +218,9 @@ if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagComma
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     //controller0.button(2).whileTrue(runMotorCommand);
+   
+      
+  
   }
 
   /**

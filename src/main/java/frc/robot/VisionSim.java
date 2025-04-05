@@ -50,8 +50,9 @@ public class VisionSim {
         // Initialize with 2025 field layout
         photonEstimator = new PhotonPoseEstimator(
             AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
             kRobotToCam
+            //MULTI_TAG_PNP_ON_COPROCESSOR
         );
         photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
@@ -77,7 +78,7 @@ public class VisionSim {
     }
     }).start();
     }
-    
+
     public void simulationInit() {
         if (RobotBase.isSimulation() && visionSim != null) {
             // Reset simulation pose to a known location with AprilTags

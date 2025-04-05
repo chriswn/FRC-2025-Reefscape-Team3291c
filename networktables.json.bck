@@ -102,5 +102,173 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/encoderOffset",
+    "type": "double",
+    "value": 0.715,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotAngleGround",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotAngleStow",
+    "type": "double",
+    "value": 0.058333333333333334,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotAngleMidLevels",
+    "type": "double",
+    "value": 0.13,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotAngleTopLevel",
+    "type": "double",
+    "value": 0.25,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKp",
+    "type": "double",
+    "value": 6.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKi",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKd",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKs",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKg",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKv",
+    "type": "double",
+    "value": 7.3,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotKa",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotMaxAcceleration",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/pivotMaxVelocity",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ejectSpeed",
+    "type": "double",
+    "value": 1600.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/intakeSpeed",
+    "type": "double",
+    "value": 1000.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/intakeMotorKp",
+    "type": "double",
+    "value": 1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/intakeMotorKi",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/intakeMotorKd",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/intakeMotorKs",
+    "type": "double",
+    "value": 0.15,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/intakeMotorKv",
+    "type": "double",
+    "value": 0.002114,
+    "properties": {
+      "persistent": true
+    }
   }
 ]
