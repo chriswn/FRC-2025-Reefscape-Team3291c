@@ -36,7 +36,7 @@ public final class Constants {
 
     public static class Vision {
 
-      public static final int TARGET_TAG_ID = 4;
+      public static final int TARGET_TAG_ID = 16;
       public static final double CAMERA_HEIGHT = 0.5; // meters
        public static final double TAG_HEIGHT = 1.0; // meters
         // public static final String kCameraName = "YOUR CAMERA NAME";
@@ -44,10 +44,13 @@ public final class Constants {
         public static final Transform3d kRobotToCam =
                 new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0));
 
-        // The layout of the AprilTags on the field
-        public static final AprilTagFieldLayout kTagLayout =
-                AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+                public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = 
+    AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
+// PID Constants (tune these per robot)
+public static final double AUTO_ALIGN_kP = 0.8;
+public static final double AUTO_ALIGN_kI = 0.0;
+public static final double AUTO_ALIGN_kD = 0.1;
         // The standard deviations of our vision estimated poses, which affect correction rate
         // (Fake values. Experiment and determine estimation noise on an actual robot.)
         // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);

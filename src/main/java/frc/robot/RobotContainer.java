@@ -182,6 +182,9 @@ if (Robot.isSimulation()) {
 ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
 driverXbox.a().whileTrue(chaseCommand);
 }
+
+if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+  driverXbox.a().whileTrue(chaseCommand); }
  // Register ChaseTag command to a button or joystick input
       // Use the A button on Xbox controller to trigger the chase tag command
         
@@ -197,6 +200,7 @@ driverXbox.a().whileTrue(chaseCommand);
     NamedCommands.registerCommand("intakeCMD", intakeCMD);
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
     
+
 
     //NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 
@@ -252,6 +256,8 @@ driverXbox.a().whileTrue(chaseCommand);
       // driverXbox.back().whileTrue(drivebase.centerModulesCommand());
       // driverXbox.leftBumper().onTrue(Commands.none());
       // driverXbox.rightBumper().onTrue(Commands.none());
+      ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+      driverXbox.a().whileTrue(chaseCommand);
     } else {
       controller1.button(Constants.ButtonList.r3).whileTrue(ResetElevatorEncoder);//should be commented out after testing
       driverXbox.x().whileTrue(pivotToGround);
@@ -260,9 +266,9 @@ driverXbox.a().whileTrue(chaseCommand);
       controller1.povRight().toggleOnTrue(intakeCMD);
       elevatorSubsystem.setDefaultCommand(goToFloor);
       intakePivotSubsystem.setDefaultCommand(goToFloor);
-      ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+      // ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
 
-      driverXbox.a().whileTrue(chaseCommand);
+      // driverXbox.a().whileTrue(chaseCommand);
 
       //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));

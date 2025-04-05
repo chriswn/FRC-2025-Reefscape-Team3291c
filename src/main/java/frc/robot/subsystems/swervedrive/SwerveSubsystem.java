@@ -34,6 +34,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -137,11 +138,21 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Setup the photon vision class.
    */
+  // public void setupPhotonVision() {
+  //   PhotonCamera camera = new PhotonCamera("cam_in");
+  //   visionSim = new VisionSim(camera);
+  //  // vision = new Vision(swerveDrive::getPose, swerveDrive.field);
+  // }
+
   public void setupPhotonVision() {
     PhotonCamera camera = new PhotonCamera("cam_in");
+    // Add this for simulation compatibility
+    if (RobotBase.isSimulation()) {
+        camera.setDriverMode(false); // Force processor mode
+        camera.setPipelineIndex(0); // Ensure correct pipeline
+    }
     visionSim = new VisionSim(camera);
-   // vision = new Vision(swerveDrive::getPose, swerveDrive.field);
-  }
+}
 
   @Override
   public void periodic() {
@@ -150,7 +161,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
    
   }
-
+ 
   @Override
   public void simulationPeriodic() {
      if (visionDriveTest) {
@@ -721,14 +732,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public Rotation2d getPitch() {
     return swerveDrive.getPitch();
   }
-  public void addVisionMeasurement(EstimatedRobotPose visionMeasurement) {
-    // Use either the vision system's calculated std devs or default values
-    Matrix<N3, N1> stdDevs = visionSim.getEstimationStdDevs(); 
-    swerveDrive.addVisionMeasurement(
-        visionMeasurement.estimatedPose.toPose2d(),
-        visionMeasurement.timestampSeconds,
-        stdDevs
-    );
+  public void addVisionMeasurement(Pose2d pose, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+    swerveDrive.addVisionMeasurement(pose, timestampSeconds, stdDevs);
 }
   /**
    * Add a fake vision reading for testing purposes.
