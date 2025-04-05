@@ -50,7 +50,7 @@ public class VisionSim {
         // Initialize with 2025 field layout
         photonEstimator = new PhotonPoseEstimator(
             AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
-            PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             kRobotToCam
             //MULTI_TAG_PNP_ON_COPROCESSOR
         );

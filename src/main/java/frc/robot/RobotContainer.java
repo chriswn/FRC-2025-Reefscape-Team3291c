@@ -207,7 +207,7 @@ if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagComma
     visionSim,
     drivebase,
     18,  // Example target AprilTag ID
-    new Pose2d(1.0, 0.0, Rotation2d.fromDegrees(0))  // Example offset (1m forward)
+    new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0))  // Example offset (1m forward)
 ));
     
 
