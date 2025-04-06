@@ -89,8 +89,9 @@ public class RobotContainer {
   private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean());
   private final PhotonCamera camera = new PhotonCamera("cam_in");
   public final VisionSim visionSim = new VisionSim(camera);
-  private final Command alignCommand = new AutoAlignCommand(visionSim, drivebase, Constants.Vision.TARGET_TAG_ID, Constants.Vision.TAG_TO_GOAL);
-//     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
+  private final Command AutoAlignCommand = new AutoAlignCommand(visionSim, drivebase, Constants.Vision.TARGET_TAG_ID, Constants.Vision.TAG_TO_GOAL);
+
+  //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,
 //         () -> 2 // Example: Getting speed from joystick Y-axis
 // );
@@ -195,6 +196,8 @@ public class RobotContainer {
 
 if (RobotBase.isSimulation()) {
   SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
+  drivebase.configureForAlliance();
+
   driverXbox.a().whileTrue(chaseCommand); }
  
         

@@ -4,12 +4,15 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -80,12 +83,20 @@ public class VisionSim {
     }
 
     public void simulationInit() {
-        if (RobotBase.isSimulation() && visionSim != null) {
+        // if (RobotBase.isSimulation() && visionSim != null) {
             // Reset simulation pose to a known location with AprilTags
-            resetSimPose(new Pose2d(1.5, 1.5, new Rotation2d()));
-            visionSim.getDebugField().setRobotPose(new Pose2d(1.5, 1.5, new Rotation2d()));
+            // resetSimPose(new Pose2d(1.5, 1.5, new Rotation2d()));
+            // visionSim.getDebugField().setRobotPose(new Pose2d(1.5, 1.5, new Rotation2d()));
+            if (RobotBase.isSimulation() && visionSim != null) {
+                Alliance alliance = getAlliance();
+                Pose2d startPose = (alliance == Alliance.Blue) ? 
+                    Constants.Vision.BLUE_START_POSE : Constants.Vision.RED_START_POSE;
+                
+                resetSimPose(startPose);
+                visionSim.getDebugField().setRobotPose(startPose);
+            }
         }
-    }
+    
     private void initializeSimulation() {
         // Create vision system with unique name
         visionSim = new VisionSystemSim("photonvision_sim");
@@ -149,6 +160,9 @@ public class VisionSim {
         }
         return visionEst;
     }
+    private Alliance getAlliance() {
+        return DriverStation.getAlliance().orElse(Alliance.Blue); // Default to Blue
+    }
     public Pose2d getTagToGoal(int tagId) {
 
         // Replace with the actual logic to compute the Pose2d for the given tagId
@@ -209,9 +223,20 @@ public class VisionSim {
         estimatedPoseField.setRobotPose(getEstimatedGlobalPose()
             .map(est -> est.estimatedPose.toPose2d())
             .orElse(new Pose2d()));
+
+            var visibleTags = camera.getLatestResult().getTargets().stream()
+            .map(PhotonTrackedTarget::getFiducialId)
+            .toList();
         
+            SmartDashboard.putStringArray("Vision/Visible Tags", visibleTags.stream()
+                .map(String::valueOf)
+                .toArray(String[]::new));
+
         // Force update dashboard
         SmartDashboard.updateValues();
+    
+        // Log nearby tags
+       
     }
 
     public void updateOdometry(SwerveSubsystem drivebase) {
@@ -247,7 +272,7 @@ public class VisionSim {
             visionSim.resetRobotPose(pose);
         }
     }
-
+    
     public Field2d getSimDebugField() {
         return (RobotBase.isSimulation() && visionSim != null) ? 
             visionSim.getDebugField() : null;

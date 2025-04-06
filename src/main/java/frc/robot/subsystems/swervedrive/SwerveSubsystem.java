@@ -78,11 +78,26 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // private Vision vision;
   private VisionSim visionSim;
+
+  
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
    * @param directory Directory of swerve drive config files.
    */
+
+  public void configureForAlliance() {
+    Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+    Pose2d startPose = (alliance == Alliance.Blue) ? 
+        Constants.Vision.BLUE_START_POSE : Constants.Vision.RED_START_POSE;
+    resetOdometry(startPose);
+    if (visionSim != null) {
+        visionSim.resetSimPose(startPose);
+        visionSim.getSimDebugField().setRobotPose(startPose);
+    }
+}
+
   public SwerveSubsystem() {
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
     // objects being created.
@@ -92,6 +107,7 @@ public class SwerveSubsystem extends SubsystemBase {
           new Pose2d(new Translation2d(Meter.of(1),
               Meter.of(4)),
               Rotation2d.fromDegrees(0)));
+              configureForAlliance();
       // Alternative method if you don't want to supply the conversion factor via JSON
       // files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed,
@@ -173,7 +189,7 @@ public class SwerveSubsystem extends SubsystemBase {
         visionSim.simulationPeriodic(getPose());
 
         visionSim.simulationPeriodic(getPose());
-        
+
         // Update odometry with vision estimates
         visionSim.updateOdometry(this); 
         // Update debug field visualization
@@ -556,6 +572,13 @@ public class SwerveSubsystem extends SubsystemBase {
   public void resetOdometry(Pose2d initialHolonomicPose) {
     swerveDrive.resetOdometry(initialHolonomicPose);
   }
+
+//   public void resetOdometrysim(Pose2d initialPose) {
+//     if (m_poseEstimator == null) {
+//       m_poseEstimator = new PoseEstimator(); // Initialize m_poseEstimator with a default constructor or appropriate parameters
+//     }
+//     m_poseEstimator.resetPosition(getGyroRotation(), getModulePositions(), initialPose);
+// }
 
   /**
    * Gets the current pose (position and rotation) of the robot, as reported by
