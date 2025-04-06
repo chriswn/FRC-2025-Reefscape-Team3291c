@@ -171,7 +171,11 @@ public class SwerveSubsystem extends SubsystemBase {
         // Update both drivebase and vision simulation
         swerveDrive.updateOdometry();
         visionSim.simulationPeriodic(getPose());
+
+        visionSim.simulationPeriodic(getPose());
         
+        // Update odometry with vision estimates
+        visionSim.updateOdometry(this); 
         // Update debug field visualization
         Field2d debugField = visionSim.getSimDebugField();
         if (debugField != null) {
