@@ -1,40 +1,67 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.Optional;
+
 public class ChaseTagCommand extends Command {
+    
+    // Motion constraints for profiling
+    private static final TrapezoidProfile.Constraints XY_CONSTRAINTS = 
+        new TrapezoidProfile.Constraints(3.0, 2.0);
+    private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = 
+        new TrapezoidProfile.Constraints(8.0, 8.0);
+    
     private final PhotonCamera camera;
     private final SwerveSubsystem drivebase;
     
-    // PID constants
-    private static final double TURN_kP = 0.035;
-    private static final double DRIVE_kP = 0.4;
-    private static final double STRAFE_kP = 0.35;
-    private static final double MAX_DRIVE_SPEED = 3.0;
-    private static final double MAX_TURN_SPEED = Math.PI;
-    private static final double MAX_STRAFE_SPEED = 2.0;
-    private static final double TARGET_DISTANCE = 1.0;
-    private static final double TARGET_YAW_TOLERANCE = 1.5;
+    private final ProfiledPIDController xController = 
+        new ProfiledPIDController(3.0, 0.0, 0.0, XY_CONSTRAINTS);
+    private final ProfiledPIDController yController = 
+        new ProfiledPIDController(3.0, 0.0, 0.0, XY_CONSTRAINTS);
+    private final ProfiledPIDController omegaController = 
+        new ProfiledPIDController(2.0, 0.0, 0.0, OMEGA_CONSTRAINTS);
 
-    private final SlewRateLimiter driveLimiter = new SlewRateLimiter(3.0);
-    private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(3.0);
-    private final SlewRateLimiter turnLimiter = new SlewRateLimiter(3.0);
+    private PhotonTrackedTarget lastTarget;
+    private final Transform3d TAG_TO_GOAL = new Transform3d(
+        new Translation3d(1.5, 0.0, 0.0), 
+        new Rotation3d(0.0, 0.0, Math.PI));
 
     public ChaseTagCommand(PhotonCamera camera, SwerveSubsystem drivebase) {
         this.camera = camera;
         this.drivebase = drivebase;
+
+        xController.setTolerance(0.2);
+        yController.setTolerance(0.2);
+        omegaController.setTolerance(Units.degreesToRadians(3));
+        omegaController.enableContinuousInput(-Math.PI, Math.PI);
+
         addRequirements(drivebase);
+    }
+
+    @Override
+    public void initialize() {
+        lastTarget = null;
+        Pose2d currentPose = drivebase.getPose();
+        xController.reset(currentPose.getX());
+        yController.reset(currentPose.getY());
+        omegaController.reset(currentPose.getRotation().getRadians());
     }
 
     @Override
@@ -45,91 +72,77 @@ public class ChaseTagCommand extends Command {
             return;
         }
 
-        PhotonTrackedTarget target = getDesiredTarget(result);
-        if (target == null) {
+        Optional<PhotonTrackedTarget> targetOpt = result.getTargets().stream()
+            .filter(t -> t.getFiducialId() == Constants.Vision.TARGET_TAG_ID)
+            .filter(t -> t.getPoseAmbiguity() <= 0.2 && t.getPoseAmbiguity() != -1)
+            .findFirst();
+
+        if (targetOpt.isEmpty()) {
             drivebase.drive(new ChassisSpeeds());
             return;
         }
 
-        processTarget(target);
+        PhotonTrackedTarget target = targetOpt.get();
+        updateGoalPosition(target);
+        driveToTarget();
     }
 
-    private PhotonTrackedTarget getDesiredTarget(PhotonPipelineResult result) {
-        return result.getTargets().stream()
-                .filter(t -> t.getFiducialId() == Constants.Vision.TARGET_TAG_ID)
-                .findFirst()
-                .orElse(null);
+    private void updateGoalPosition(PhotonTrackedTarget target) {
+        Pose3d robotPose3d = new Pose3d(drivebase.getPose());
+        Transform3d cameraToRobot = Constants.Vision.ROBOT_TO_CAMERA.inverse();
+        
+        // Get camera to target transform
+        Transform3d cameraToTarget = target.getBestCameraToTarget();
+        
+        // Calculate target pose relative to field
+        Pose3d targetPose = robotPose3d
+            .transformBy(cameraToRobot)
+            .transformBy(cameraToTarget);
+        
+        // Calculate desired goal pose
+        Pose3d goalPose3d = targetPose.transformBy(TAG_TO_GOAL);
+        Pose2d goalPose = goalPose3d.toPose2d();
+
+        xController.setGoal(goalPose.getX());
+        yController.setGoal(goalPose.getY());
+        omegaController.setGoal(goalPose.getRotation().getRadians());
     }
 
-    private void processTarget(PhotonTrackedTarget target) {
-        double yaw = target.getYaw();
-        double pitch = target.getPitch();
-        double distance = calculateDistance(pitch);
+    private void driveToTarget() {
+        Pose2d currentPose = drivebase.getPose();
         
-        double driveSpeed = driveLimiter.calculate(calculateDriveSpeed(distance));
-        double turnSpeed = turnLimiter.calculate(calculateTurnSpeed(yaw));
-        double strafeSpeed = strafeLimiter.calculate(calculateStrafeSpeed(yaw));
-        
+        double xSpeed = xController.calculate(currentPose.getX());
+        double ySpeed = yController.calculate(currentPose.getY());
+        double omegaSpeed = omegaController.calculate(currentPose.getRotation().getRadians());
+
+        if (xController.atGoal()) xSpeed = 0;
+        if (yController.atGoal()) ySpeed = 0;
+        if (omegaController.atGoal()) omegaSpeed = 0;
+
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            driveSpeed,
-            strafeSpeed,
-            turnSpeed,
-            drivebase.getHeading()
+            xSpeed, 
+            ySpeed, 
+            omegaSpeed, 
+            currentPose.getRotation()
         );
-        
+
         drivebase.drive(speeds);
-        updateTelemetry(distance, yaw, driveSpeed, turnSpeed, strafeSpeed);
+        updateTelemetry();
     }
 
-    private double calculateDistance(double pitch) {
-        return Math.abs(
-            (Constants.Vision.TAG_HEIGHT - Constants.Vision.CAMERA_HEIGHT) 
-            / Math.tan(Units.degreesToRadians(pitch))
-        );
-    }
-
-    private double calculateDriveSpeed(double distance) {
-        double error = distance - TARGET_DISTANCE;
-        if (Math.abs(error) < 0.1) return 0;
-        return edu.wpi.first.math.MathUtil.clamp(error * DRIVE_kP, -MAX_DRIVE_SPEED, MAX_DRIVE_SPEED);
-    }
-
-    private double calculateTurnSpeed(double yaw) {
-        if (Math.abs(yaw) < TARGET_YAW_TOLERANCE) return 0;
-        return edu.wpi.first.math.MathUtil.clamp(
-            -Units.degreesToRadians(yaw) * TURN_kP, 
-            -MAX_TURN_SPEED, 
-            MAX_TURN_SPEED
-        );
-    }
-
-    private double calculateStrafeSpeed(double yaw) {
-        if (Math.abs(yaw) < TARGET_YAW_TOLERANCE) return 0;
-        return edu.wpi.first.math.MathUtil.clamp(
-            -yaw * STRAFE_kP,
-            -MAX_STRAFE_SPEED,
-            MAX_STRAFE_SPEED
-        );
-    }
-
-    private void updateTelemetry(double distance, double yaw, double drive, double turn, double strafe) {
-        SmartDashboard.putNumber("ChaseTag/Distance", distance);
-        SmartDashboard.putNumber("ChaseTag/Yaw", yaw);
-        SmartDashboard.putNumber("ChaseTag/Drive", drive);
-        SmartDashboard.putNumber("ChaseTag/Turn", turn);
-        SmartDashboard.putNumber("ChaseTag/Strafe", strafe);
+    private void updateTelemetry() {
+        SmartDashboard.putNumber("ChaseTag/X Error", xController.getPositionError());
+        SmartDashboard.putNumber("ChaseTag/Y Error", yController.getPositionError());
+        SmartDashboard.putNumber("ChaseTag/Omega Error", omegaController.getPositionError());
     }
 
     @Override
     public void end(boolean interrupted) {
         drivebase.drive(new ChassisSpeeds());
-        driveLimiter.reset(0);
-        strafeLimiter.reset(0);
-        turnLimiter.reset(0);
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return xController.atGoal() && yController.atGoal() && omegaController.atGoal();
     }
 }

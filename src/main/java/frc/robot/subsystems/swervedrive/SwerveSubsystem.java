@@ -43,7 +43,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
-import frc.robot.subsystems.swervedrive.Vision.Cameras;
+// import frc.robot.subsystems.swervedrive.Vision.Cameras;
+// Ensure Cameras is defined or replace it with the correct type
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -157,6 +158,7 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     if (visionDriveTest) {
+      visionSim.simulationPeriodic(getPose());
       visionSim.updateOdometry(this); // Continuous updates during teleop
   }
    
@@ -164,6 +166,7 @@ public class SwerveSubsystem extends SubsystemBase {
  
   @Override
   public void simulationPeriodic() {
+  
      if (visionDriveTest) {
         // Update both drivebase and vision simulation
         swerveDrive.updateOdometry();
@@ -248,7 +251,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * Aim the robot at the target returned by PhotonVision.
    *
    * @return A {@link Command} which will run the alignment.
-   */
+  public Command aimAtTarget(Object camera) { // Replace Object with the correct type if Cameras is defined
   public Command aimAtTarget(Cameras camera) {
 
     return run(() -> {

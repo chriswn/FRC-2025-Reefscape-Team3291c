@@ -13,7 +13,11 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -24,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -84,7 +89,7 @@ public class RobotContainer {
   private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean());
   private final PhotonCamera camera = new PhotonCamera("cam_in");
   public final VisionSim visionSim = new VisionSim(camera);
-
+  private final Command alignCommand = new AutoAlignCommand(visionSim, drivebase, Constants.Vision.TARGET_TAG_ID, Constants.Vision.TAG_TO_GOAL);
 //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,
 //         () -> 2 // Example: Getting speed from joystick Y-axis
@@ -176,26 +181,28 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-   
+    ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+    
 
     // In your robot container initialization
-if (Robot.isSimulation()) {
- SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
- // In RobotContainer.java
-ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
-driverXbox.a().whileTrue(chaseCommand);
-}
+// if (Robot.isSimulation()) {
+//  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
+//  // In RobotContainer.java
+// ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+// driverXbox.a().whileTrue(chaseCommand);
+// }
 
 
-if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
+if (RobotBase.isSimulation()) {
+  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
   driverXbox.a().whileTrue(chaseCommand); }
- // Register ChaseTag command to a button or joystick input
-      // Use the A button on Xbox controller to trigger the chase tag command
+ 
         
         DriverStation.silenceJoystickConnectionWarning(true);
         
     // Configure the trigger bindings
     configureBindings();
+    driverXbox.y().whileTrue(new AutoAlignCommand(visionSim, drivebase, Constants.Vision.TARGET_TAG_ID, Constants.Vision.TAG_TO_GOAL));
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
     NamedCommands.registerCommand("goToSecondFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 1).until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));
@@ -203,12 +210,10 @@ if (RobotBase.isSimulation()) { ChaseTagCommand chaseCommand = new ChaseTagComma
     NamedCommands.registerCommand("goToFourthFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 3).until(() -> elevatorSubsystem.ifAtFloor(Elevator.fourthFloor)));
     NamedCommands.registerCommand("intakeCMD", intakeCMD);
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
-    driverXbox.y().whileTrue(new AutoAlignCommand(
-    visionSim,
-    drivebase,
-    18,  // Example target AprilTag ID
-    new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0))  // Example offset (1m forward)
-));
+
+ 
+    
+  driverXbox.a().whileTrue(chaseCommand);
     
 
 

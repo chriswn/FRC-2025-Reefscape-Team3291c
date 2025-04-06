@@ -227,6 +227,7 @@ public class Robot extends TimedRobot
   @Override
   public void simulationPeriodic()
   { // Safe null-checked access
+    
     if (m_robotContainer != null && 
         getDrivebase() != null && 
         getVisionSim() != null) {

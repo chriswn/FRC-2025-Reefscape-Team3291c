@@ -112,7 +112,7 @@ public class VisionSim {
         cameraSim.enableDrawWireframe(true);
         visionSim.addCamera(cameraSim, kRobotToCam);
         // Force initial update with robot near tags
-        visionSim.update(new Pose2d(1.5, 1.5, new Rotation2d()));
+        // visionSim.update(new Pose2d(1.5, 1.5, new Rotation2d()));
 
         // Add debug field to dashboard
         SmartDashboard.putData("PhotonVision/SimField", visionSim.getDebugField());
@@ -149,7 +149,13 @@ public class VisionSim {
         }
         return visionEst;
     }
+    public Pose2d getTagToGoal(int tagId) {
 
+        // Replace with the actual logic to compute the Pose2d for the given tagId
+
+        return new Pose2d(0, 0, new Rotation2d(0));
+
+    }
     private double[] pose3dToDoubleArray(Pose3d pose) {
         return new double[] {
             pose.getX(), pose.getY(), pose.getZ(),

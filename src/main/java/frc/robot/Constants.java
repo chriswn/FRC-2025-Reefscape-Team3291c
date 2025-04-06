@@ -35,8 +35,17 @@ import swervelib.math.Matter;
 public final class Constants {
 
     public static class Vision {
+      public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(
+    new Translation3d(0.5, 0.0, 0.5), // Example values - measure your actual camera position
+    new Rotation3d(0.0, 0.0, 0.0)
+); 
+public static final Transform3d TAG_TO_GOAL = new Transform3d(
+  new Translation3d(1.5, 0.0, 0.0),
+  new Rotation3d(0.0, 0.0, Math.PI)
+);
 
-      public static final int TARGET_TAG_ID = 16;
+
+      public static final int TARGET_TAG_ID = 6;
       public static final double CAMERA_HEIGHT = 0.5; // meters
        public static final double TAG_HEIGHT = 1.0; // meters
         // public static final String kCameraName = "YOUR CAMERA NAME";
@@ -44,8 +53,7 @@ public final class Constants {
         public static final Transform3d kRobotToCam =
                 new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0));
 
-                public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = 
-    AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+                public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
 // PID Constants (tune these per robot)
 public static final double AUTO_ALIGN_kP = 0.8;
@@ -60,9 +68,9 @@ public static final double AUTO_ALIGN_kD = 0.1;
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10));
     
     }
-    public static final double CAMERA_HEIGHT_METERS = 0.5;
-    public static final double TAG_HEIGHT_METERS = 1.0;
-    public static final int DESIRED_TAG_ID = 4;
+    // public static final double CAMERA_HEIGHT_METERS = 0.5;
+    // public static final double TAG_HEIGHT_METERS = 1.0;
+    // public static final int DESIRED_TAG_ID = 12;
 
   // Add vision constants here or in an appropriate nested class:
   public static final double VISION_TURN_kP = 0.01; // Adjust this proportional gain as needed

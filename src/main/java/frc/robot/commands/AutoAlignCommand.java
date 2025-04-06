@@ -1,256 +1,158 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.VisionSim;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
 
 public class AutoAlignCommand extends Command {
-    
+
     private final VisionSim visionSim;
     private final SwerveSubsystem drivebase;
-    private final PIDController xController = new PIDController(0.3, 0, 0.2);
-    private final PIDController yController = new PIDController(0.3, 0, 0.2);
-    private final PIDController thetaController = new PIDController(0.05, 0, 0.05);
-
-    // Tunable parameters
-    private final LoggedNetworkNumber pGainX = new LoggedNetworkNumber("/Tuning/PID/kP_X", 0.3);
-    private final LoggedNetworkNumber pGainY = new LoggedNetworkNumber("/Tuning/PID/kP_Y", 0.3);
-    private final LoggedNetworkNumber pGainTheta = new LoggedNetworkNumber("/Tuning/PID/kP_Theta", 0.05);
-    private final LoggedNetworkNumber dGainX = new LoggedNetworkNumber("/Tuning/PID/kD_X", 0.2);
-    private final LoggedNetworkNumber dGainY = new LoggedNetworkNumber("/Tuning/PID/kD_Y", 0.2);
-    private final LoggedNetworkNumber dGainTheta = new LoggedNetworkNumber("/Tuning/PID/kD_Theta", 0.05);
-    private final LoggedNetworkNumber speedSmoothing = new LoggedNetworkNumber("/Tuning/Smoothing", 0.5);
-    private final LoggedNetworkNumber deadband = new LoggedNetworkNumber("/Tuning/Deadband", 0.1);
-    
-    // Configuration
     private final int targetTagId;
-    private final Pose2d targetOffset;
-    private final double positionTolerance;
-    private final double rotationTolerance;
-    private final double maxLinearSpeed;
-    private final double maxAngularSpeed;
-    private ChassisSpeeds prevSpeeds = new ChassisSpeeds();
-    private double startTime;
+    private final Transform3d TAG_TO_GOAL;
+    private boolean isActive = false;
 
-    // Minimum runtime before allowing exit
-    private static final double MIN_RUN_TIME = 1.0; // Adjust the value as needed
+    // Profiled PID Controllers
+    private final ProfiledPIDController xController = 
+        new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
+    private final ProfiledPIDController yController = 
+        new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
+    private final ProfiledPIDController thetaController = 
+        new ProfiledPIDController(2.0, 0, 0.1, new TrapezoidProfile.Constraints(8, 8));
 
     // State
     private Pose2d targetPose = new Pose2d();
+    private double startTime;
     private boolean hasValidTarget;
-    private boolean isAtSetpoint;
 
     public AutoAlignCommand(VisionSim visionSim, SwerveSubsystem drivebase, 
-                          int targetTagId, Pose2d targetOffset) {
+                          int targetTagId, Transform3d tagToGoal) {
         this.visionSim = visionSim;
         this.drivebase = drivebase;
         this.targetTagId = targetTagId;
-        this.targetOffset = targetOffset;
-
-        this.positionTolerance = RobotBase.isSimulation() ? 0.1 : 0.03;
-        this.rotationTolerance = RobotBase.isSimulation() ? 3.0 : 1.5;
-        this.maxLinearSpeed = RobotBase.isSimulation() ? 2.0 : 4.5;
-        this.maxAngularSpeed = RobotBase.isSimulation() ? Math.PI : 3 * Math.PI; // Increased rotation speed
+        this.TAG_TO_GOAL = tagToGoal;
+        
 
         configureControllers();
         addRequirements(drivebase);
     }
 
     private void configureControllers() {
-        thetaController.enableContinuousInput(-180, 180);
-        xController.setTolerance(positionTolerance);
-        yController.setTolerance(positionTolerance);
-        thetaController.setTolerance(rotationTolerance);
-
-        xController.setIntegratorRange(-0.5, 0.5);
-        yController.setIntegratorRange(-0.5, 0.5);
-        thetaController.setIntegratorRange(-0.5, 0.5);
+        xController.setTolerance(0.05);
+        yController.setTolerance(0.05);
+        thetaController.setTolerance(Units.degreesToRadians(1.5));
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     @Override
     public void initialize() {
         startTime = Timer.getFPGATimestamp();
-        isAtSetpoint = false;
-        xController.reset();
-        yController.reset();
-        thetaController.reset();
         hasValidTarget = false;
-        prevSpeeds = new ChassisSpeeds(); // Reset smoothing buffer
+        isActive = true;
 
-        Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(targetTagId).ifPresent(tagPose -> {
-            Transform2d offsetTransform = new Transform2d(
-                targetOffset.getTranslation(),
-                targetOffset.getRotation()
-            );
-            targetPose = tagPose.toPose2d().transformBy(offsetTransform);
+        // Reset controllers with current state
+        Pose2d currentPose = drivebase.getPose();
+        xController.reset(currentPose.getX());
+        yController.reset(currentPose.getY());
+        thetaController.reset(currentPose.getRotation().getRadians());
+
+        // Get target pose from field layout
+        Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(targetTagId).ifPresent(tagPose3d -> {
+            Pose3d goalPose3d = tagPose3d.transformBy(TAG_TO_GOAL);
+            targetPose = goalPose3d.toPose2d();
             hasValidTarget = true;
+            
+            // Set controller goals
+            xController.setGoal(targetPose.getX());
+            yController.setGoal(targetPose.getY());
+            thetaController.setGoal(targetPose.getRotation().getRadians());
         });
-        
-        if (!hasValidTarget) {
-            DriverStation.reportWarning("AprilTag " + targetTagId + " not found!", false);
-        }
     }
 
     @Override
     public void execute() {
         if (!hasValidTarget) return;
 
-        // Update controller gains
-        xController.setP(pGainX.get());
-        xController.setD(dGainX.get());
-        yController.setP(pGainY.get());
-        yController.setD(dGainY.get());
-        thetaController.setP(pGainTheta.get());
-        thetaController.setD(dGainTheta.get());
+        // Get vision-corrected pose
+        Pose2d currentPose = getCorrectedPose();
+        
+        // Calculate speeds using motion profiling
+        double xSpeed = xController.calculate(currentPose.getX());
+        double ySpeed = yController.calculate(currentPose.getY());
+        double thetaSpeed = thetaController.calculate(currentPose.getRotation().getRadians());
 
-        Pose2d currentPose = drivebase.getPose();
-        Pose2d relativePose = currentPose.relativeTo(targetPose);
+        // Apply smoothing at goal
+        if (xController.atGoal()) xSpeed *= 0.2;
+        if (yController.atGoal()) ySpeed *= 0.2;
+        if (thetaController.atGoal()) thetaSpeed *= 0.2;
 
-        // Calculate rotation error with proper wrapping
-        double thetaError = currentPose.getRotation().minus(targetPose.getRotation()).getDegrees();
-        thetaError = (thetaError + 180) % 360 - 180; // Force wrap to [-180, 180)
-
-        // Apply deadband before PID calculation
-        double xError = Math.abs(relativePose.getX()) > deadband.get() ? relativePose.getX() : 0;
-        double yError = Math.abs(relativePose.getY()) > deadband.get() ? relativePose.getY() : 0;
-
-        // Calculate PID outputs
-        double xSpeed = -clamp(xController.calculate(xError, 0), maxLinearSpeed);
-        double ySpeed = -clamp(yController.calculate(yError, 0), maxLinearSpeed);
-        double thetaSpeed = -clamp(thetaController.calculate(thetaError, 0), maxAngularSpeed);
-
-        // Generate and smooth speeds
+        // Drive with field-relative speeds
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             xSpeed, ySpeed, thetaSpeed, drivebase.getHeading()
         );
         
-        // double smoothing = speedSmoothing.get();
-        ChassisSpeeds smoothedSpeeds = new ChassisSpeeds();
-        //     prevSpeeds.vxMetersPerSecond * smoothing + speeds.vxMetersPerSecond * (1 - smoothing),
-        //     prevSpeeds.vyMetersPerSecond * smoothing + speeds.vyMetersPerSecond * (1 - smoothing),
-        //     prevSpeeds.omegaRadiansPerSecond * smoothing + speeds.omegaRadiansPerSecond * (1 - smoothing)
-        // );
+        drivebase.drive(speeds);
+        updateTelemetry(currentPose);
+    }
 
-        if (Timer.getFPGATimestamp() - startTime < 0.3) { // First 300ms
-            // Use heavier smoothing during initial alignment
-            smoothedSpeeds = new ChassisSpeeds(
-                prevSpeeds.vxMetersPerSecond * 0.8 + speeds.vxMetersPerSecond * 0.2,
-                prevSpeeds.vyMetersPerSecond * 0.8 + speeds.vyMetersPerSecond * 0.2,
-                prevSpeeds.omegaRadiansPerSecond * 0.8 + speeds.omegaRadiansPerSecond * 0.2
-            );
-        } else {
-            // Use normal smoothing
-            double smoothing = speedSmoothing.get();
-            smoothedSpeeds = new ChassisSpeeds(
-                prevSpeeds.vxMetersPerSecond * smoothing + speeds.vxMetersPerSecond * (1 - smoothing),
-                prevSpeeds.vyMetersPerSecond * smoothing + speeds.vyMetersPerSecond * (1 - smoothing),
-                prevSpeeds.omegaRadiansPerSecond * smoothing + speeds.omegaRadiansPerSecond * (1 - smoothing)
-            );
+    private Pose2d getCorrectedPose() {
+        // Use vision pose when available with low ambiguity
+        Optional<EstimatedRobotPose> visionEst = visionSim.getEstimatedGlobalPose();
+        if (visionEst.isPresent() && visionEst.get().estimatedPose.getTranslation().getNorm() < 3.0) {
+            return visionEst.get().estimatedPose.toPose2d();
         }
-        
-        prevSpeeds = smoothedSpeeds;
-        drivebase.drive(smoothedSpeeds); // Single drive command
-
-        updateTelemetry(relativePose, smoothedSpeeds, thetaError);
+        return drivebase.getPose();
     }
 
-    private double clamp(double value, double max) {
-        return Math.copySign(Math.min(Math.abs(value), max), value);
-    }
-
-    private void updateTelemetry(Pose2d relativePose, ChassisSpeeds speeds, double thetaError) {
-        // Current state
-        Pose2d currentPose = drivebase.getPose();
+    private void updateTelemetry(Pose2d currentPose) {
         SmartDashboard.putNumberArray("AutoAlign/Current Pose", 
             new double[]{currentPose.getX(), currentPose.getY(), currentPose.getRotation().getDegrees()});
         
-        // Target state
         SmartDashboard.putNumberArray("AutoAlign/Target Pose", 
             new double[]{targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()});
         
-        // Errors
-        SmartDashboard.putNumber("AutoAlign/X Error (m)", relativePose.getX());
-        SmartDashboard.putNumber("AutoAlign/Y Error (m)", relativePose.getY());
-        SmartDashboard.putNumber("AutoAlign/Theta Error (deg)", thetaError);
-        
-        // Speeds
-        SmartDashboard.putNumber("AutoAlign/X Speed (m/s)", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("AutoAlign/Y Speed (m/s)", speeds.vyMetersPerSecond);
-        SmartDashboard.putNumber("AutoAlign/Theta Speed (deg/s)", 
-            Math.toDegrees(speeds.omegaRadiansPerSecond));
-        
-        // Tunable parameters
-        SmartDashboard.putNumber("AutoAlign/Current kP_Theta", pGainTheta.get());
-        SmartDashboard.putNumber("AutoAlign/Current kD_Theta", dGainTheta.get());
-            // Add alignment progress
-            SmartDashboard.putNumber("AutoAlign/Progress", 
-                Math.min(1.0, (Timer.getFPGATimestamp() - startTime) / MIN_RUN_TIME));
-            
-            // Add stability indicators
-            SmartDashboard.putBoolean("AutoAlign/Stable", 
-                (Timer.getFPGATimestamp() - startTime) > 0.5);
-        
-    }
-
-    // @Override
-    // public void end(boolean interrupted) {
-    //     drivebase.drive(new ChassisSpeeds());
-    //     SmartDashboard.putBoolean("AutoAlign/Active", false);
-    // }
-
-    @Override
-    public boolean isFinished() {
-         boolean atSetpoint = xController.atSetpoint() && 
-                            yController.atSetpoint() && 
-                            thetaController.atSetpoint();
-        
-        // Require minimum runtime before allowing exit
-        boolean minTimeElapsed = (Timer.getFPGATimestamp() - startTime) > MIN_RUN_TIME;
-        isAtSetpoint = atSetpoint && minTimeElapsed;
-        
-        return !hasValidTarget || isAtSetpoint;
-
-        // return !hasValidTarget || 
-        //        (xController.atSetpoint() && 
-        //         yController.atSetpoint() && 
-        //         thetaController.atSetpoint());
-         
-    }
-
-    @Override
-    public boolean runsWhenDisabled() {
-        return false;
+        SmartDashboard.putNumber("AutoAlign/X Error", xController.getPositionError());
+        SmartDashboard.putNumber("AutoAlign/Y Error", yController.getPositionError());
+        SmartDashboard.putNumber("AutoAlign/Theta Error", thetaController.getPositionError());
+        SmartDashboard.putBoolean("AutoAlign/Active", isActive);
+        SmartDashboard.putBoolean("AutoAlign/Valid Target", hasValidTarget);
+        SmartDashboard.putNumber("AutoAlign/Time Elapsed", Timer.getFPGATimestamp() - startTime);   
+        SmartDashboard.putNumber("AutoAlign/Target ID", targetTagId);
+        SmartDashboard.putNumber("AutoAlign/Target X", targetPose.getX());
+        SmartDashboard.putNumber("AutoAlign/Target Y", targetPose.getY());
+        SmartDashboard.putNumber("AutoAlign/Target Rotation", targetPose.getRotation().getDegrees());
+        SmartDashboard.putNumber("AutoAlign/Current X", currentPose.getX());
+        SmartDashboard.putNumber("AutoAlign/Current Y", currentPose.getY());
+        SmartDashboard.putNumber("AutoAlign/Current Rotation", currentPose.getRotation().getDegrees());
+        SmartDashboard.putNumber("AutoAlign/Current Heading", drivebase.getHeading().getDegrees());
     }
 
     @Override
     public void end(boolean interrupted) {
-        // Smooth stop instead of immediate zero
-        ChassisSpeeds stopSpeeds = new ChassisSpeeds(
-            prevSpeeds.vxMetersPerSecond * 0.5,
-            prevSpeeds.vyMetersPerSecond * 0.5,
-            prevSpeeds.omegaRadiansPerSecond * 0.5
-        );
-        drivebase.drive(stopSpeeds);
-        
-        new Thread(() -> {
-            try { Thread.sleep(150); } // Allow 150ms for slowdown
-            catch (InterruptedException e) {}
-            drivebase.drive(new ChassisSpeeds());
-        }).start();
-        
-        SmartDashboard.putBoolean("AutoAlign/Active", false);
+        drivebase.drive(new ChassisSpeeds());
     }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+
+    @Override
+    public boolean isFinished() {
+        return (Timer.getFPGATimestamp() - startTime > 1.0) && 
+               xController.atGoal() && 
+               yController.atGoal() && 
+               thetaController.atGoal();
+    }
+    
 }
