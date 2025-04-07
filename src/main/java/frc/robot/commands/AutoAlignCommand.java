@@ -75,7 +75,16 @@ Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(targetTagId).ifPresent(tagPose
         new Rotation3d(0.0, 0.0, 0.0)       // Robot faces the tag
     );
 
-    Pose3d goalPose3d = tagPose3d.transformBy(tagToGoal);
+// Rotate the offset by the tag’s rotation so it's relative to the tag's orientation
+Transform3d rotatedOffset = new Transform3d(
+    tagToGoal.getTranslation().rotateBy(tagPose3d.getRotation()), 
+    tagToGoal.getRotation()
+);
+
+// Apply rotated transform
+Pose3d goalPose3d = tagPose3d.transformBy(rotatedOffset);
+
+    
     targetPose = goalPose3d.toPose2d();
     hasValidTarget = true;
 
