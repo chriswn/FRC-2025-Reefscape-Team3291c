@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -19,7 +20,6 @@ public class AutoAlignCommand extends Command {
     private final VisionSim visionSim;
     private final SwerveSubsystem drivebase;
     private final int targetTagId;
-    private final Transform3d TAG_TO_GOAL;
     private boolean isActive = false;
 
     // Profiled PID Controllers
@@ -36,11 +36,10 @@ public class AutoAlignCommand extends Command {
     private boolean hasValidTarget;
 
     public AutoAlignCommand(VisionSim visionSim, SwerveSubsystem drivebase, 
-                          int targetTagId, Transform3d tagToGoal) {
+                          int targetTagId) {
         this.visionSim = visionSim;
         this.drivebase = drivebase;
         this.targetTagId = targetTagId;
-        this.TAG_TO_GOAL = tagToGoal;
         
 
         configureControllers();
@@ -66,18 +65,40 @@ public class AutoAlignCommand extends Command {
         yController.reset(currentPose.getY());
         thetaController.reset(currentPose.getRotation().getRadians());
 
-        // Get target pose from field layout
-        Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(targetTagId).ifPresent(tagPose3d -> {
-            Pose3d goalPose3d = tagPose3d.transformBy(TAG_TO_GOAL);
-            targetPose = goalPose3d.toPose2d();
-            hasValidTarget = true;
-            
-            // Set controller goals
-            xController.setGoal(targetPose.getX());
-            yController.setGoal(targetPose.getY());
-            thetaController.setGoal(targetPose.getRotation().getRadians());
-        });
+        
+Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(targetTagId).ifPresent(tagPose3d -> {
+    Rotation3d tagRotation = tagPose3d.getRotation();
+
+    // Offset robot 1.5 meters in front of the tag (opposite its facing direction)
+    Transform3d tagToGoal = new Transform3d(
+        new Translation3d(1, 0.0, 0.0),  // 
+        new Rotation3d(0.0, 0.0, 0.0)       // Robot faces the tag
+    );
+
+    Pose3d goalPose3d = tagPose3d.transformBy(tagToGoal);
+    targetPose = goalPose3d.toPose2d();
+    hasValidTarget = true;
+
+    // Set controller goals: x, y = target position, theta = face the tag
+    xController.setGoal(targetPose.getX());
+    yController.setGoal(targetPose.getY());
+    thetaController.setGoal(
+        MathUtil.angleModulus(tagRotation.toRotation2d().plus(Rotation2d.fromDegrees(180)).getRadians())
+    );
+});
     }
+        // Get target pose from field layout
+    //     Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(targetTagId).ifPresent(tagPose3d -> {
+    //         Pose3d goalPose3d = tagPose3d.transformBy(TAG_TO_GOAL);
+    //         targetPose = goalPose3d.toPose2d();
+    //         hasValidTarget = true;
+            
+    //         // Set controller goals
+    //         xController.setGoal(targetPose.getX());
+    //         yController.setGoal(targetPose.getY());
+    //         thetaController.setGoal(targetPose.getRotation().getRadians());
+    //     });
+    // }
 
     @Override
     public void execute() {
