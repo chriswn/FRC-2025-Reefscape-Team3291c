@@ -47,7 +47,7 @@ public final class Constants {
 public static final Pose2d BLUE_START_POSE = new Pose2d(8.05, 4.5, Rotation2d.fromDegrees(180)); // Example
 public static final Pose2d RED_START_POSE = new Pose2d(9.5, 2.5, Rotation2d.fromDegrees(0));  // Example
 
-      public static final int TARGET_TAG_ID = 21;
+      public static final int TARGET_TAG_ID = 17;
       public static final double CAMERA_HEIGHT = 0.5; // meters
        public static final double TAG_HEIGHT = 1.0; // meters
         // public static final String kCameraName = "YOUR CAMERA NAME";
