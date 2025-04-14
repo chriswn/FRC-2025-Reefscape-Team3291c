@@ -11,10 +11,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.VisionSim;
 
 public class AutoAlignCommand extends Command {
-    private final VisionSim visionSim;
+    private final VisionSubsystem visionSubsystem;
     private final SwerveSubsystem drivebase;
     private final int targetTagId;
     private boolean isActive = false;
@@ -32,8 +33,8 @@ public class AutoAlignCommand extends Command {
     private boolean hasValidTarget = false;
     private double tagYawRad = 0.0;  // remember tag orientation
 
-    public AutoAlignCommand(VisionSim visionSim, SwerveSubsystem drivebase, int targetTagId) {
-        this.visionSim   = visionSim;
+    public AutoAlignCommand(VisionSubsystem visionSubsystem, SwerveSubsystem drivebase, int targetTagId) {
+        this.visionSubsystem = visionSubsystem;
         this.drivebase   = drivebase;
         this.targetTagId = targetTagId;
 
