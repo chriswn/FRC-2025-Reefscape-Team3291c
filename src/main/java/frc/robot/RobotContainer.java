@@ -187,7 +187,7 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSubsystem.getCamera(), drivebase);
+    // ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSubsystem.getCamera(), drivebase);
     ChaseTag2 ChaseTag2 = new ChaseTag2(visionSubsystem, drivebase);
 
     // In your robot container initialization
@@ -218,7 +218,7 @@ if (RobotBase.isSimulation()) {
     NamedCommands.registerCommand("goToFourthFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 3).until(() -> elevatorSubsystem.ifAtFloor(Elevator.fourthFloor)));
     NamedCommands.registerCommand("intakeCMD", intakeCMD);
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
-    driverXbox.a().whileTrue(chaseCommand);
+    // driverXbox.a().whileTrue(chaseCommand);
     driverXbox.a().whileTrue(ChaseTag2);
 
 

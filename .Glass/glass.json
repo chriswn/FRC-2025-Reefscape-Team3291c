@@ -1,4 +1,53 @@
 {
+  "NetworkTables": {
+    "transitory": {
+      "SmartDashboard": {
+        "ChaseTag": {
+          "open": true
+        },
+        "Vision": {
+          "EstimatedPose": {
+            "open": true
+          },
+          "Field": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "photonvision": {
+        ".timesync": {
+          "limelight-front-3291": {
+            "open": true
+          }
+        }
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Alerts": "Alerts",
+      "/SmartDashboard/Auto Chooser": "String Chooser",
+      "/SmartDashboard/Encoders": "Alerts",
+      "/SmartDashboard/IMU": "Alerts",
+      "/SmartDashboard/JSON": "Alerts",
+      "/SmartDashboard/Motors": "Alerts",
+      "/SmartDashboard/PhotonAlerts": "Alerts",
+      "/SmartDashboard/Swerve Drive": "Alerts",
+      "/SmartDashboard/Vision/EstimatedPose": "Field2d",
+      "/SmartDashboard/Vision/Field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Vision/EstimatedPose": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875
+      }
+    }
+  },
   "NetworkTables Info": {
     "Connections": {
       "open": true

@@ -17,6 +17,7 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
+
 import java.util.Optional;
 
 public class ChaseTag2 extends Command {
@@ -47,7 +48,7 @@ public class ChaseTag2 extends Command {
     private Pose2d startingPose;
     private double startTime;
     private boolean hasValidTarget = false;
-    private double tagYawRad = 0.0;  // remember tag orientation
+    private double tagYawRad = 0.0;  // Remember tag orientation
 
     public ChaseTag2(VisionSubsystem visionSubsystem, SwerveSubsystem drivebase) {
         this.visionSubsystem = visionSubsystem;
@@ -71,69 +72,60 @@ public class ChaseTag2 extends Command {
         yController.reset(startingPose.getY());
         omegaController.reset(startingPose.getRotation().getRadians());
 
-        // Retrieve the tag pose from your field layout (using your constants)
-        Constants.Vision.APRILTAG_FIELD_LAYOUT
-            .getTagPose(Constants.Vision.TARGET_TAG_ID)
-            .ifPresent(tagPose3d -> {
-                // Capture tag yaw (assuming Z-axis holds the yaw value)
-                tagYawRad = tagPose3d.getRotation().getZ();
-
-                // Offset from tag to goal pose (adjust offset as needed)
-                Pose3d goal3d = tagPose3d.transformBy(TAG_TO_GOAL);
-                targetPose = goal3d.toPose2d();
-                hasValidTarget = true;
-
-                xController.setGoal(targetPose.getX());
-                yController.setGoal(targetPose.getY());
-
-                double yawGoal = Math.abs(tagYawRad) < Math.PI/2.0 
-                    ? Math.toRadians(180) : 0.0; // Example logic: flip goal based on tag orientation
-                omegaController.setGoal(yawGoal);
-            });
-
-        SmartDashboard.putString("ChaseTag/StartPose", startingPose.toString());
-        SmartDashboard.putNumber("ChaseTag/TagYawDeg", Math.toDegrees(tagYawRad));
+        // Initialize telemetry
+        SmartDashboard.putString("ChaseTag2/StartPose", startingPose.toString());
     }
 
     @Override
     public void execute() {
-        // Get the latest vision result from the VisionSubsystem's camera
+
         PhotonPipelineResult result = visionSubsystem.getCamera().getLatestResult();
         if (!result.hasTargets()) {
-            drivebase.drive(new ChassisSpeeds());
-            return;
-        }
+        SmartDashboard.putString("ChaseTag2/TargetStatus", "No Targets");
+        drivebase.drive(new ChassisSpeeds());
+        return;
+}
+SmartDashboard.putString("ChaseTag2/TargetStatus", "Target Found");
 
+       
+
+        // Find the best target (smallest pose ambiguity)
         Optional<PhotonTrackedTarget> targetOpt = result.getTargets().stream()
-            .filter(t -> t.getFiducialId() == Constants.Vision.TARGET_TAG_ID)
-            .filter(t -> t.getPoseAmbiguity() <= 0.2 && t.getPoseAmbiguity() != -1)
-            .findFirst();
-
-        if (targetOpt.isEmpty()) {
-            drivebase.drive(new ChassisSpeeds());
-            return;
-        }
-
+        .filter(t -> t.getPoseAmbiguity() <= 0.9 && t.getPoseAmbiguity() != -1)
+        .min((t1, t2) -> Double.compare(t1.getPoseAmbiguity(), t2.getPoseAmbiguity()));
+    
+    if (targetOpt.isEmpty()) {
+        SmartDashboard.putString("ChaseTag2/TargetStatus", "No Valid Target");
+        drivebase.drive(new ChassisSpeeds());
+        return;
+    }
+    
         PhotonTrackedTarget target = targetOpt.get();
+        SmartDashboard.putString("ChaseTag2/TargetPose", target.getBestCameraToTarget().toString());
+         SmartDashboard.putNumber("ChaseTag2/PoseAmbiguity", target.getPoseAmbiguity());
         updateGoalPosition(target);
         driveToTarget();
     }
 
     private void updateGoalPosition(PhotonTrackedTarget target) {
         Pose2d currentPose = drivebase.getPose();
+        
         // Using your constants, get the transformation from robot to camera.
         Transform3d cameraToRobot = Constants.Vision.ROBOT_TO_CAMERA.inverse();
         
         // Get camera-to-target transform from the vision target data
         Transform3d cameraToTarget = target.getBestCameraToTarget();
-        
+        SmartDashboard.putString("ChaseTag2/CameraToTarget", cameraToTarget.toString());
+
         // Calculate target pose relative to the field
-        Pose3d targetPose = new Pose3d(currentPose).transformBy(cameraToRobot).transformBy(cameraToTarget);
+        Pose3d targetPose3d = new Pose3d(currentPose).transformBy(cameraToRobot).transformBy(cameraToTarget);
+        SmartDashboard.putString("ChaseTag2/TargetPose3d", targetPose3d.toString());
         
         // Calculate desired goal pose relative to the tag
-        Pose3d goalPose3d = targetPose.transformBy(TAG_TO_GOAL);
+        Pose3d goalPose3d = targetPose3d.transformBy(TAG_TO_GOAL);
         Pose2d goalPose = goalPose3d.toPose2d();
 
+        // Update the PID controllers with the new goal pose
         xController.setGoal(goalPose.getX());
         yController.setGoal(goalPose.getY());
         omegaController.setGoal(goalPose.getRotation().getRadians());
@@ -142,26 +134,35 @@ public class ChaseTag2 extends Command {
     private void driveToTarget() {
         Pose2d currentPose = drivebase.getPose();
         
+        // Calculate PID outputs
         double xSpeed = xController.calculate(currentPose.getX());
         double ySpeed = yController.calculate(currentPose.getY());
         double omegaSpeed = omegaController.calculate(currentPose.getRotation().getRadians());
 
+        // If at goal, stop moving
         if (xController.atGoal()) xSpeed = 0;
         if (yController.atGoal()) ySpeed = 0;
         if (omegaController.atGoal()) omegaSpeed = 0;
 
+        // Drive the robot with field-relative control
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             xSpeed, ySpeed, omegaSpeed, currentPose.getRotation()
         );
-
+        
+        SmartDashboard.putNumber("ChaseTag2/X Speed", xSpeed);
+        SmartDashboard.putNumber("ChaseTag2/Y Speed", ySpeed);
+        SmartDashboard.putNumber("ChaseTag2/Omega Speed", omegaSpeed);
+        
         drivebase.drive(speeds);
         updateTelemetry();
     }
 
     private void updateTelemetry() {
-        SmartDashboard.putNumber("ChaseTag/X Error", xController.getPositionError());
-        SmartDashboard.putNumber("ChaseTag/Y Error", yController.getPositionError());
-        SmartDashboard.putNumber("ChaseTag/Omega Error", omegaController.getPositionError());
+        SmartDashboard.putString("ChaseTag2/GoalPose", targetPose.toString());
+        SmartDashboard.putNumber("ChaseTag2/X Error", xController.getPositionError());
+        SmartDashboard.putNumber("ChaseTag2/Y Error", yController.getPositionError());
+        SmartDashboard.putNumber("ChaseTag2/Omega Error", omegaController.getPositionError());
+        
     }
 
     @Override
