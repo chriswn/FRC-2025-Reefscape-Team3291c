@@ -69,6 +69,14 @@ public static final double AUTO_ALIGN_kD = 0.1;
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.7, 0.7, Units.degreesToRadians(30));
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10));
     
+
+    public static final int[][] TAG_IDS = {
+      {1, 2, 3}, // face 0 → levels 1,2,3
+      {4, 5, 6}, // face 1
+   // up through face 5
+    };
+    
+
     }
     // public static final double CAMERA_HEIGHT_METERS = 0.5;
     // public static final double TAG_HEIGHT_METERS = 1.0;

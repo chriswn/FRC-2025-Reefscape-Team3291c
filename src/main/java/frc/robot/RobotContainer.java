@@ -50,13 +50,23 @@ import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
 import frc.robot.commands.IntakePivotCMDs.PivotToStow;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ReefMap;
+import frc.robot.subsystems.ScoringTargetManager;
 import frc.robot.subsystems.VisionSubsystem;
 //import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import swervelib.SwerveInputStream;
+import frc.robot.subsystems.ScoringTargetManager;
+import frc.robot.subsystems.ScoringTarget;
 
+import frc.robot.commands.ScoreTargetSequence;
+import frc.robot.commands.ElevatorCMDs.SetElevatorLevelCommand;
+
+
+import frc.robot.subsystems.ScoringTargetManager;
+import frc.robot.subsystems.ScoringTarget;
 import frc.robot.VisionSim;
 
 /**
@@ -93,6 +103,8 @@ public class RobotContainer {
   private final PhotonCamera camera = new PhotonCamera("cam_in");
   public final VisionSim visionSim = new VisionSim(camera);
   private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+private final ScoringTargetManager scoringTargetManager = new ScoringTargetManager();
+private final ReefMap reefMap = new ReefMap();
 
   private final Command autoAlignCommand = new AutoAlignCommand(visionSubsystem, drivebase, Constants.Vision.TARGET_TAG_ID);
 
@@ -189,6 +201,8 @@ public class RobotContainer {
   public RobotContainer() {
     // ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSubsystem.getCamera(), drivebase);
     ChaseTag2 ChaseTag2 = new ChaseTag2(visionSubsystem, drivebase);
+    scoringTargetManager.reset(); // Reset on init
+
 
     // In your robot container initialization
 // if (Robot.isSimulation()) {
@@ -220,7 +234,49 @@ if (RobotBase.isSimulation()) {
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
     // driverXbox.a().whileTrue(chaseCommand);
     driverXbox.a().whileTrue(ChaseTag2);
+    driverXbox.a().whileTrue(ChaseTag2);
 
+    driverXbox.a().onTrue(
+      // Commands.runOnce(() ->
+      //   scoringTargetManager.callTarget(scoringTargetManager.getNextTarget())  // getNextTarget(), not getNext()
+      // ).andThen(
+      //   new ScoreTargetSequence(
+      //     visionSubsystem,
+      //     drivebase,
+      //     elevatorSubsystem,
+      //     intakeMotorSubsystem,
+      //     scoringTargetManager
+      //   )
+      // )
+
+
+        // 1) pick & call the next ScoringTargetManager target
+  Commands.runOnce(() -> {
+    // ask ReefMap for [face,level]
+    int[] next = reefMap.getNextTarget();
+    if (next != null) {
+      // convert to ScoringTarget and store in manager
+      ScoringTarget tgt = new ScoringTarget(next[0], next[1] + 1);
+      scoringTargetManager.callTarget(tgt);
+    }
+  })
+  // 2) then run the actual scoring sequence
+  .andThen(new ScoreTargetSequence(
+    visionSubsystem,
+    drivebase,
+    elevatorSubsystem,
+    intakeMotorSubsystem,
+    scoringTargetManager
+  ))
+  // 3) then mark that face/level as scored in the ReefMap
+  .andThen(Commands.runOnce(() -> {
+    scoringTargetManager.getCurrentTarget().ifPresent(t -> {
+      // note: t.getLevel() returns 1–3, ReefMap.Level.L1 = ordinal(0)
+      ReefMap.Level levelEnum = ReefMap.Level.values()[t.getLevel() - 1];
+      reefMap.markScored(t.getFace(), levelEnum);
+    });
+  }))
+    );
 
     //NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 

@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.VisionConstants.APRILTAG_CAMERA_TO_ROBOT;
@@ -44,6 +40,13 @@ public class VisionSubsystem extends SubsystemBase {
     // Use a consistent camera name variable
     private static final String CAMERA_NAME = "limelight-front-3291";  // Update with actual camera name
     private final PhotonCamera photonCamera;
+
+    // For future multiple camera support:
+    // private final List<PhotonCamera> cameras = List.of(
+    //     new PhotonCamera("limelight-front-3291"),
+    //     new PhotonCamera("limelight-back-3291") // Example additional camera
+    // );
+
     private AprilTagFieldLayout aprilTagFieldLayout;
     private PhotonPoseEstimator photonPoseEstimator;
 
@@ -62,7 +65,7 @@ public class VisionSubsystem extends SubsystemBase {
     public VisionSubsystem() {
         // Initialize the PhotonCamera using the name defined in constants or UI
         photonCamera = new PhotonCamera(CAMERA_NAME);
-        
+
         System.out.println("Initializing VisionSubsystem - Is simulation? " + RobotBase.isReal());
 
         // Initialize the AprilTag field layout (for 2025 Reefscape)
@@ -80,6 +83,13 @@ public class VisionSubsystem extends SubsystemBase {
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             APRILTAG_CAMERA_TO_ROBOT
         );
+
+        // --- MULTI-CAMERA SETUP (Uncomment this if you have multiple cameras) ---
+// private final List<PhotonPoseEstimator> photonPoseEstimators = List.of(
+//     new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, new PhotonCamera("limelight-front-3291"), APRILTAG_CAMERA_TO_ROBOT),
+//     new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, new PhotonCamera("limelight-back-3291"), APRILTAG_CAMERA_TO_ROBOT)
+// );
+
 
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
@@ -129,6 +139,26 @@ public class VisionSubsystem extends SubsystemBase {
             return visionEst;
         }
 
+
+        // --- MULTI-CAMERA ESTIMATION LOGIC (Uncomment this when using multiple cameras) ---
+// Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+//     return photonPoseEstimators.stream()
+//         .map(estimator -> {
+//             var cam = estimator.getCamera();
+//             if (!cam.isConnected()) return Optional.<EstimatedRobotPose>empty();
+//             var result = cam.getLatestResult();
+//             return result.hasTargets() ? estimator.update(result) : Optional.<EstimatedRobotPose>empty();
+//         })
+//         .filter(Optional::isPresent)
+//         .map(Optional::get)
+//         .sorted((a, b) -> Integer.compare(
+//             b.targetsUsed.size(), // Prefer the one with more visible tags
+//             a.targetsUsed.size()
+//         ))
+//         .findFirst();
+// }
+
+
         var result = photonCamera.getLatestResult();
         if (result.hasTargets()) {
             visionEst = photonPoseEstimator.update(result);
@@ -143,7 +173,7 @@ public class VisionSubsystem extends SubsystemBase {
         }  else {
             SmartDashboard.putString("Vision/TargetStatus", "No Targets Detected");
         }
-        
+
         return visionEst;
     }
 
@@ -219,11 +249,6 @@ public class VisionSubsystem extends SubsystemBase {
             .map(PhotonTrackedTarget::getFiducialId)
             .toList();
 
-            SmartDashboard.putStringArray("Vision/Visible Tags", visibleTags.stream()
-    .map(String::valueOf)
-    .toArray(String[]::new));
-
-
         SmartDashboard.putStringArray("Vision/Visible Tags", visibleTags.stream()
             .map(String::valueOf)
             .toArray(String[]::new));
@@ -233,7 +258,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void updateOdometry(SwerveSubsystem drivebase) {
         Optional<EstimatedRobotPose> visionEst = getEstimatedGlobalPose();
-        visionEst.ifPresent(est ->
+        visionEst.ifPresent(est -> 
             drivebase.addVisionMeasurement(
                 est.estimatedPose.toPose2d(),
                 est.timestampSeconds,
