@@ -99,10 +99,10 @@ public class AutoAlignCommand extends Command {
         if (thetaController.atGoal()) thetaSpeed *= 0.2;
 
         // dynamic inversion: tags facing red side (|yaw|<90°) need inverted drives
-        if (Math.abs(tagYawRad) < Math.PI/2.0) {
-            xSpeed = -xSpeed;
-            ySpeed = -ySpeed;
-        }
+        // if (Math.abs(tagYawRad) < Math.PI/2.0) {
+        //     xSpeed = -xSpeed;
+        //     ySpeed = -ySpeed;
+        // }
 
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             xSpeed, ySpeed, thetaSpeed, drivebase.getHeading()

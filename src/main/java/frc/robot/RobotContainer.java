@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -254,48 +255,49 @@ driverXbox.start().onTrue(Commands.runOnce(() -> {
     // driverXbox.a().whileTrue(chaseCommand);
     // driverXbox.a().whileTrue(ChaseTag2);
     // driverXbox.a().whileTrue(ChaseTag2);
-
-    driverXbox.a().onTrue(
-      // Commands.runOnce(() ->
-      //   scoringTargetManager.callTarget(scoringTargetManager.getNextTarget())  // getNextTarget(), not getNext()
-      // ).andThen(
-      //   new ScoreTargetSequence(
-      //     visionSubsystem,
-      //     drivebase,
-      //     elevatorSubsystem,
-      //     intakeMotorSubsystem,
-      //     scoringTargetManager
-      //   )
-      // )
-
-
-        // 1) pick & call the next ScoringTargetManager target
-  Commands.runOnce(() -> {
-    // ask ReefMap for [face,level]
-    int[] next = reefMap.getNextTarget();
-    if (next != null) {
-      // convert to ScoringTarget and store in manager
-      ScoringTarget tgt = new ScoringTarget(next[0], next[1] + 1);
-      scoringTargetManager.callTarget(tgt);
-    }
-  })
-  // 2) then run the actual scoring sequence
-  .andThen(new ScoreTargetSequence(
-    visionSubsystem,
-    drivebase,
-    elevatorSubsystem,
-    intakeMotorSubsystem,
-    scoringTargetManager
-  ))
-  // 3) then mark that face/level as scored in the ReefMap
-  .andThen(Commands.runOnce(() -> {
-    scoringTargetManager.getCurrentTarget().ifPresent(t -> {
-      // note: t.getLevel() returns 1–3, ReefMap.Level.L1 = ordinal(0)
-      ReefMap.Level levelEnum = ReefMap.Level.values()[t.getLevel() - 1];
-      reefMap.markScored(t.getFace(), levelEnum);
-    });
-  }))
-    );
+driverXbox.a().onTrue(
+    Commands.sequence(
+        Commands.runOnce(() -> {
+            // 1. Get next target from ReefMap
+            int[] next = reefMap.getNextTarget();
+            if (next == null) {
+                System.out.println("[ERROR] No available targets!");
+                return;
+            }
+            
+            // 2. Convert to ScoringTarget (ReefMap levels are 0-2)
+            ScoringTarget tgt = new ScoringTarget(next[0], next[1] + 1);
+            System.out.println("Selected target: " + tgt);
+            
+            // 3. Store in manager
+            scoringTargetManager.callTarget(tgt);
+        }),
+        
+        // 4. Run scoring sequence with timeout
+        new ScoreTargetSequence(
+            visionSubsystem,
+            drivebase,
+            elevatorSubsystem,
+            intakeMotorSubsystem,
+            scoringTargetManager
+        ).withTimeout(10),  // Add overall timeout
+        
+        // 5. Mark as scored only if sequence completed
+        Commands.runOnce(() -> {
+            scoringTargetManager.getCurrentTarget().ifPresent(t -> {
+                if (!CommandScheduler.getInstance().isScheduled(
+                    new ScoreTargetSequence(visionSubsystem, drivebase, 
+                        elevatorSubsystem, intakeMotorSubsystem, scoringTargetManager))) {
+                    ReefMap.Level level = ReefMap.Level.values()[t.getLevel() - 1];
+                    reefMap.markScored(t.getFace(), level);
+                    System.out.println("Marked scored: " + t);
+                }
+            });
+        })
+    )
+    .handleInterrupt(() -> System.out.println("Scoring interrupted!"))
+    .withName("FullScoringSequence")
+);
 
     //NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 
