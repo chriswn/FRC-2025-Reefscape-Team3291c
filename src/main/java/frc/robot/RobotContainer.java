@@ -5,7 +5,9 @@
 package frc.robot;
 
 import java.io.File;
+import java.util.Optional;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -39,6 +41,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoAlignCommand;
 import frc.robot.commands.ChaseTag2;
 import frc.robot.commands.ChaseTagCommand;
+import frc.robot.commands.CoralIntakeToScoreCommandGroup;
 // import frc.robot.commands.RunMotorCommand;
 // import frc.robot.subsystems.RunMotorSub;
 import frc.robot.commands.ElevatorCMDs.GoToFloor;
@@ -216,7 +219,23 @@ private final ReefMap reefMap = new ReefMap();
 if (RobotBase.isSimulation()) {
   SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
   drivebase.configureForAlliance();
-
+// Bind to controller button in configureBindings()
+driverXbox.start().onTrue(Commands.runOnce(() -> {
+    // Place robot near tag 1 and verify detection
+    Pose2d testPose = new Pose2d(2.0, 3.0, Rotation2d.fromDegrees(180));
+    visionSim.resetSimPose(testPose);
+    
+    // Add specific tag to simulation
+    visionSim.getSimDebugField().getObject("TestTag")
+        .setPose(new Pose2d(3.0, 3.0, Rotation2d.fromDegrees(0)));
+}).andThen(
+    Commands.waitSeconds(0.5),
+    Commands.run(() -> {
+        Optional<EstimatedRobotPose> est = visionSim.getEstimatedGlobalPose();
+        SmartDashboard.putBoolean("Vision/TestPassed", 
+            est.isPresent() && est.get().targetsUsed.size() > 0);
+    })
+));
  }
  
 
@@ -233,8 +252,8 @@ if (RobotBase.isSimulation()) {
     NamedCommands.registerCommand("intakeCMD", intakeCMD);
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
     // driverXbox.a().whileTrue(chaseCommand);
-    driverXbox.a().whileTrue(ChaseTag2);
-    driverXbox.a().whileTrue(ChaseTag2);
+    // driverXbox.a().whileTrue(ChaseTag2);
+    // driverXbox.a().whileTrue(ChaseTag2);
 
     driverXbox.a().onTrue(
       // Commands.runOnce(() ->
@@ -286,7 +305,15 @@ if (RobotBase.isSimulation()) {
     //controller0.button(2).whileTrue(runMotorCommand);
    
       
-  
+  autoChooser.addOption("Intake+Score Sequence", 
+    new CoralIntakeToScoreCommandGroup(
+        visionSubsystem,
+        drivebase,
+        intakeMotorSubsystem,
+        intakePivotSubsystem,
+        elevatorSubsystem
+    ));
+
   }
 
   /**

@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import java.util.Optional;
 import frc.robot.Constants;
 import frc.robot.subsystems.ReefMap;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * Manages the current and next scoring targets.
  */
@@ -22,6 +24,8 @@ public class ScoringTargetManager {
      */
     public void callTarget(ScoringTarget newTarget) {
         this.currentTarget = newTarget;
+        SmartDashboard.putString("Current Target", newTarget.toString());
+        
     }
 
     /**
@@ -46,9 +50,26 @@ public class ScoringTargetManager {
 
         int[] next = reefMap.getNextTarget(); // from your new ReefMap
         if (next == null) {
+            SmartDashboard.putString("Next Available Target", "All scored ✅");
           return null;
         }
-        // reefMap returns [face, levelOrdinal], but levelOrdinal is 0-2 for L1-L3
-        return new ScoringTarget(next[0], next[1] + 1);
+
+        ScoringTarget nextTarget = new ScoringTarget(next[0], next[1] + 1);
+        SmartDashboard.putString("Next Available Target", nextTarget.toString());
+
+        
+            // reefMap returns [face, levelOrdinal], where levelOrdinal is 0-2 for L1–L3
+            // So we need to add 1 to levelOrdinal to get the actual level (1-3)
+                // return new ScoringTarget(next[0], next[1] + 1);
+        return nextTarget;
+   
     }
+
+    public void markScored(ScoringTarget target) {
+        ReefMap.Level levelEnum = ReefMap.Level.values()[target.getLevel() - 1]; // because level = 1,2,3
+        reefMap.markScored(target.getFace(), levelEnum);
+        currentTarget = null; // clear after scoring
+        SmartDashboard.putString("Current Target", "None");
+    }
+    
 }

@@ -71,8 +71,8 @@ public static final double AUTO_ALIGN_kD = 0.1;
     
 
     public static final int[][] TAG_IDS = {
-      {1, 2, 3}, // face 0 → levels 1,2,3
-      {4, 5, 6}, // face 1
+      {6, 7, 8}, // face 0 → levels 1,2,3
+      {9, 10, 11}, // face 1
    // up through face 5
     };
     
