@@ -250,8 +250,9 @@ public class Robot extends TimedRobot
   private int simTick = 0;
   @Override
   public void simulationPeriodic() {
+    long start = System.nanoTime();
       simTick++;
-      if (simTick % 5 != 0) return; // Only update every 5 ticks (100ms)
+      if (simTick % 6 != 0) return; // Only update every 5 ticks (100ms)
       
       if (m_robotContainer != null && getDrivebase() != null && getVisionSim() != null) {
           Pose2d currentPose = getDrivebase().getPose();
@@ -259,6 +260,8 @@ public class Robot extends TimedRobot
               getVisionSim().simulationPeriodic(currentPose);
           }
       }
+      long end = System.nanoTime();
+   //   System.out.println("Sim tick duration (ms): " + (end - start) / 1_000_000.0);
   }
   
 

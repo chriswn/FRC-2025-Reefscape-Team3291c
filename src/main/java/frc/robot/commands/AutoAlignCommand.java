@@ -1,6 +1,6 @@
 package frc.robot.commands;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -16,37 +16,31 @@ import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.ScoringTarget;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.VisionSim;
 
 public class AutoAlignCommand extends Command {
     private final VisionSubsystem visionSubsystem;
     private final SwerveSubsystem drivebase;
-    // private final int targetTagId;
     private final Supplier<Optional<ScoringTarget>> scoringTargetSupplier;
 
-    private boolean isActive = false;
-    private boolean isFinished = false;
-
-    private final ProfiledPIDController xController =
+    private final ProfiledPIDController xController = 
         new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
-    private final ProfiledPIDController yController =
+    private final ProfiledPIDController yController = 
         new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
-    private final ProfiledPIDController thetaController =
+    private final ProfiledPIDController thetaController = 
         new ProfiledPIDController(2.0, 0, 0.1, new TrapezoidProfile.Constraints(8, 8));
 
     private Pose2d targetPose = new Pose2d();
     private Pose2d startingPose;
+    private List<Pose2d> bezierPath;
+    private int pathIndex = 0;
     private double startTime;
     private boolean hasValidTarget = false;
-    private double tagYawRad = 0.0;  // remember tag orientation
+    private double tagYawRad = 0.0;
 
-    public AutoAlignCommand(VisionSubsystem visionSubsystem, SwerveSubsystem drivebase,     Supplier<Optional<ScoringTarget>> scoringTargetSupplier
-      /* int targetTagId*/ ) {
+    public AutoAlignCommand(VisionSubsystem visionSubsystem, SwerveSubsystem drivebase, Supplier<Optional<ScoringTarget>> scoringTargetSupplier) {
         this.visionSubsystem = visionSubsystem;
-        this.drivebase   = drivebase;
+        this.drivebase = drivebase;
         this.scoringTargetSupplier = scoringTargetSupplier;
-
-        // this.targetTagId = targetTagId;
 
         xController.setTolerance(0.05);
         yController.setTolerance(0.05);
@@ -57,63 +51,62 @@ public class AutoAlignCommand extends Command {
     }
 
     @Override
-public void initialize() {
-    System.out.println("[AutoAlign] Initializing...");
-    Optional<ScoringTarget> optTarget = scoringTargetSupplier.get();
-   
-    scoringTargetSupplier.get().ifPresent(target -> {
-        int tagId = target.getTagId(); 
-        System.out.println("[AutoAlign] Scoring target present? " + optTarget.isPresent());
-        System.out.println("[AutoAlign] Valid target: " + target);
-        Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(tagId)
-            .ifPresent(tagPose3d -> {
-                tagYawRad = tagPose3d.getRotation().getZ();
-                Transform3d tagToGoal = new Transform3d(
-                    new Translation3d(2.0, 0.0, 0.0),
-                    new Rotation3d()
-                );
-                Pose3d goal3d = tagPose3d.transformBy(tagToGoal);
-                targetPose = goal3d.toPose2d();
-                hasValidTarget = true;
+    public void initialize() {
+        startingPose = drivebase.getPose();
+        System.out.println("[AutoAlign] Initializing...");
 
-                startTime = Timer.getFPGATimestamp();
+        SmartDashboard.setDefaultNumber("AutoAlign/X_P", 2);
+        SmartDashboard.setDefaultNumber("AutoAlign/X_I", 0.007);
+        SmartDashboard.setDefaultNumber("AutoAlign/X_D", 0.35);
 
-                xController.setGoal(targetPose.getX());
-                yController.setGoal(targetPose.getY());
-                double yawGoal = MathUtil.angleModulus(tagYawRad + Math.PI);
-                thetaController.setGoal(yawGoal);
-                loadPIDFromSmartDashboard();
+        SmartDashboard.setDefaultNumber("AutoAlign/Y_P", 1.5);
+        SmartDashboard.setDefaultNumber("AutoAlign/Y_I", 0.0);
+        SmartDashboard.setDefaultNumber("AutoAlign/Y_D", 0.2);
 
-                SmartDashboard.putNumber("AutoAlign/TargetID", tagId);
-                SmartDashboard.putString("AutoAlign/TargetPose", targetPose.toString());
-                SmartDashboard.putString("AutoAlign/TagPose3D", tagPose3d.toString());
-                SmartDashboard.putString("AutoAlign/TagToGoal", tagToGoal.toString());
-                SmartDashboard.putString("AutoAlign/TagPose3D", tagPose3d.toString());
-                SmartDashboard.putString("AutoAlign/TagPose2D", targetPose.toString());
-                SmartDashboard.putNumber("AutoAlign/TagYawRad", tagYawRad);
-                SmartDashboard.putNumber("AutoAlign/TagYawDeg", Math.toDegrees(tagYawRad));
-                
-        
-            });
-    });
-}
+        SmartDashboard.setDefaultNumber("AutoAlign/Theta_P", 2.0);
+        SmartDashboard.setDefaultNumber("AutoAlign/Theta_I", 0.0);
+        SmartDashboard.setDefaultNumber("AutoAlign/Theta_D", 0.1);
+
+        scoringTargetSupplier.get().ifPresent(target -> {
+            int tagId = target.getTagId();
+            Constants.Vision.APRILTAG_FIELD_LAYOUT.getTagPose(tagId)
+                .ifPresent(tagPose3d -> {
+                    tagYawRad = tagPose3d.getRotation().getZ();
+                    Transform3d tagToGoal = new Transform3d(new Translation3d(1.5, 0.0, 0.0), new Rotation3d());
+                    Pose3d goal3d = tagPose3d.transformBy(tagToGoal);
+                    targetPose = goal3d.toPose2d();
+                    hasValidTarget = true;
+                    startTime = Timer.getFPGATimestamp();
+
+                    xController.setGoal(targetPose.getX());
+                    yController.setGoal(targetPose.getY());
+                    double yawGoal = MathUtil.angleModulus(tagYawRad + Math.PI);
+                    thetaController.setGoal(yawGoal);
+                    loadPIDFromSmartDashboard();
+
+                    bezierPath = generateBezierPath(startingPose, targetPose, 50);
+                });
+        });
+    }
+
     @Override
     public void execute() {
         loadPIDFromSmartDashboard();
-        if (!hasValidTarget) return;
+        if (!hasValidTarget || bezierPath == null) return;
 
-        // always use odometry for current pose
         Pose2d currentPose = drivebase.getPose();
 
-        double xSpeed     = xController.calculate(currentPose.getX());
-        double ySpeed     = yController.calculate(currentPose.getY());
+        if (pathIndex < bezierPath.size() - 1) pathIndex++;
+        Pose2d intermediateTarget = bezierPath.get(pathIndex);
+
+        double xSpeed = xController.calculate(currentPose.getX(), intermediateTarget.getX());
+        double ySpeed = yController.calculate(currentPose.getY(), intermediateTarget.getY());
         double thetaSpeed = thetaController.calculate(currentPose.getRotation().getRadians());
 
-        if (xController.atGoal())     xSpeed     *= 0.2;
-        if (yController.atGoal())     ySpeed     *= 0.2;
+        if (xController.atGoal()) xSpeed *= 0.2;
+        if (yController.atGoal()) ySpeed *= 0.2;
         if (thetaController.atGoal()) thetaSpeed *= 0.2;
 
-        //dynamic inversion: tags facing red side (|yaw|<90°) need inverted drives
         if (Math.abs(tagYawRad) < Math.PI/2.0) {
             xSpeed = -xSpeed;
             ySpeed = -ySpeed;
@@ -124,58 +117,68 @@ public void initialize() {
         );
         drivebase.drive(speeds);
 
-        // telemetry
         SmartDashboard.putString("AutoAlign/CurrentPose", currentPose.toString());
-        SmartDashboard.putString("AutoAlign/TargetPose",  targetPose.toString());
-        SmartDashboard.putNumber("AutoAlign/XError",      xController.getPositionError());
-        SmartDashboard.putNumber("AutoAlign/YError",      yController.getPositionError());
-        SmartDashboard.putNumber("AutoAlign/ThetaError",  thetaController.getPositionError());
-        SmartDashboard.putBoolean("AutoAlign/Active",     isActive);
-        SmartDashboard.putBoolean("AutoAlign/HasValidTarget", hasValidTarget);
-        SmartDashboard.putNumber("AutoAlign/TimeElapsed", Timer.getFPGATimestamp() - startTime);
-        SmartDashboard.putNumber("AutoAlign/TargetID",    scoringTargetSupplier.get().map(ScoringTarget::getTagId).orElse(-1));
-        SmartDashboard.putNumber("AutoAlign/TagYawRad", tagYawRad);
-        SmartDashboard.putNumber("AutoAlign/TagYawDeg", Math.toDegrees(tagYawRad));
-        SmartDashboard.putNumber("AutoAlign/TagYawDeg", Math.toDegrees(tagYawRad));
-
+        SmartDashboard.putString("AutoAlign/TargetPose", targetPose.toString());
+        SmartDashboard.putNumber("AutoAlign/XError", xController.getPositionError());
+        SmartDashboard.putNumber("AutoAlign/YError", yController.getPositionError());
+        SmartDashboard.putNumber("AutoAlign/ThetaError", thetaController.getPositionError());
     }
 
     @Override
     public void end(boolean interrupted) {
-        isFinished=true;
-        System.out.println("AutoAlignCommand ended. Interrupted = " + interrupted);
         drivebase.drive(new ChassisSpeeds());
         SmartDashboard.putBoolean("AutoAlign/Interrupted", interrupted);
-        isActive = false;
     }
 
     @Override
     public boolean isFinished() {
-        // Tolerances for how close we need to be to the target before finishing
-    double xTolerance = 0.5; // Adjust as needed
-    double yTolerance = 0.5; // Adjust as needed
-    double thetaTolerance = Units.degreesToRadians(5.0); // Adjust angle tolerance if necessary
-    
-    // Check if within tolerance of the target
-    return hasValidTarget
-        && Math.abs(xController.getPositionError()) < xTolerance
-        && Math.abs(yController.getPositionError()) < yTolerance
-        && Math.abs(thetaController.getPositionError()) < thetaTolerance
-        && Timer.getFPGATimestamp() - startTime > 1.0;  // Minimum time for alignment
-        }
+        return hasValidTarget
+            && xController.atGoal()
+            && yController.atGoal()
+            && thetaController.atGoal()
+            && Timer.getFPGATimestamp() - startTime > 1.0;
+    }
 
-        private void loadPIDFromSmartDashboard() {
-            // Load PID constants from SmartDashboard
-            xController.setP(SmartDashboard.getNumber("AutoAlign/X_P", 1.5));
-            xController.setI(SmartDashboard.getNumber("AutoAlign/X_I", 0.0));
-            xController.setD(SmartDashboard.getNumber("AutoAlign/X_D", 0.2));
-    
-            yController.setP(SmartDashboard.getNumber("AutoAlign/Y_P", 1.5));
-            yController.setI(SmartDashboard.getNumber("AutoAlign/Y_I", 0.0));
-            yController.setD(SmartDashboard.getNumber("AutoAlign/Y_D", 0.2));
-    
-            thetaController.setP(SmartDashboard.getNumber("AutoAlign/Theta_P", 2.0));
-            thetaController.setI(SmartDashboard.getNumber("AutoAlign/Theta_I", 0.0));
-            thetaController.setD(SmartDashboard.getNumber("AutoAlign/Theta_D", 0.1));
+    private void loadPIDFromSmartDashboard() {
+        xController.setP(SmartDashboard.getNumber("AutoAlign/X_P", 2));
+        xController.setI(SmartDashboard.getNumber("AutoAlign/X_I", 0.007));
+        xController.setD(SmartDashboard.getNumber("AutoAlign/X_D", 0.35));
+
+        yController.setP(SmartDashboard.getNumber("AutoAlign/Y_P", 1.5));
+        yController.setI(SmartDashboard.getNumber("AutoAlign/Y_I", 0.0));
+        yController.setD(SmartDashboard.getNumber("AutoAlign/Y_D", 0.2));
+
+        thetaController.setP(SmartDashboard.getNumber("AutoAlign/Theta_P", 2.0));
+        thetaController.setI(SmartDashboard.getNumber("AutoAlign/Theta_I", 0.0));
+        thetaController.setD(SmartDashboard.getNumber("AutoAlign/Theta_D", 0.1));
+    }
+
+    private List<Pose2d> generateBezierPath(Pose2d start, Pose2d end, int samples) {
+        Translation2d p0 = start.getTranslation();
+        Translation2d p3 = end.getTranslation();
+
+        Translation2d p1 = p0.plus(new Translation2d(start.getRotation().getCos(), start.getRotation().getSin()).times(0.5));
+        Translation2d p2 = p3.minus(new Translation2d(end.getRotation().getCos(), end.getRotation().getSin()).times(0.5));
+
+        List<Pose2d> path = new ArrayList<>();
+        for (int i = 0; i <= samples; i++) {
+            double t = i / (double) samples;
+            Translation2d pos = bezierPoint(p0, p1, p2, p3, t);
+            path.add(new Pose2d(pos, end.getRotation()));
         }
+        return path;
+    }
+
+    private Translation2d bezierPoint(Translation2d p0, Translation2d p1, Translation2d p2, Translation2d p3, double t) {
+        double oneMinusT = 1 - t;
+        double x = Math.pow(oneMinusT, 3) * p0.getX()
+                 + 3 * Math.pow(oneMinusT, 2) * t * p1.getX()
+                 + 3 * oneMinusT * Math.pow(t, 2) * p2.getX()
+                 + Math.pow(t, 3) * p3.getX();
+        double y = Math.pow(oneMinusT, 3) * p0.getY()
+                 + 3 * Math.pow(oneMinusT, 2) * t * p1.getY()
+                 + 3 * oneMinusT * Math.pow(t, 2) * p2.getY()
+                 + Math.pow(t, 3) * p3.getY();
+        return new Translation2d(x, y);
+    }
 }
