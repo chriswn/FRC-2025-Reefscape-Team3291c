@@ -149,7 +149,7 @@ public void initialize() {
         return hasValidTarget
             && xController.atGoal()
             && yController.atGoal()
-            && thetaController.atGoal();
-            // && Timer.getFPGATimestamp() - startTime > 5.0;
-    }
+            && thetaController.atGoal()
+            && Timer.getFPGATimestamp() - startTime > 1.0;
+        }
 }

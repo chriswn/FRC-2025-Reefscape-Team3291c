@@ -65,7 +65,13 @@ public class Robot extends TimedRobot
     // Create a timer to disable motor brake a few seconds after disable.  This will let the robot stop
     // immediately when disabled, but then also let it be pushed more 
     disabledTimer = new Timer();
-
+    CommandScheduler.getInstance()
+    .onCommandInitialize(cmd -> System.out.println("SCHEDULER: initialize " + cmd.getName()));
+  CommandScheduler.getInstance()
+    .onCommandInterrupt(cmd -> System.out.println("SCHEDULER: interrupted " + cmd.getName()));
+  CommandScheduler.getInstance()
+    .onCommandFinish(cmd -> System.out.println("SCHEDULER: finish " + cmd.getName()));
+  
     if (isSimulation())
     {
       DriverStation.silenceJoystickConnectionWarning(true);

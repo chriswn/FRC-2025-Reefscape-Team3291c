@@ -64,7 +64,12 @@ public class ScoringTargetManager {
         return nextTarget;
    
     }
-
+    
+    public boolean hasUnscoredTargets() {
+        return reefMap.hasUnscoredTargets();
+    }
+    
+    
     public void markScored(ScoringTarget target) {
         ReefMap.Level levelEnum = ReefMap.Level.values()[target.getLevel() - 1]; // because level = 1,2,3
         reefMap.markScored(target.getFace(), levelEnum);

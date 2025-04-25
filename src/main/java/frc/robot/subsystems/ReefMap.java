@@ -49,6 +49,15 @@ public class ReefMap {
     }
     SmartDashboard.putBoolean(key(face, level), true);
   }
+  public boolean hasUnscoredTargets() {
+    for (int i = 0; i < 6; i++) {
+        FaceState fs = faceStates.get(i);
+        if (!fs.l1 || !fs.l2 || !fs.l3) {
+            return true;
+        }
+    }
+    return false;
+}
 
   /**
    * Reset all faces (e.g., at match start).

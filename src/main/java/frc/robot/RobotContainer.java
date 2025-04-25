@@ -31,6 +31,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -43,12 +45,14 @@ import frc.robot.commands.AutoAlignCommand;
 import frc.robot.commands.ChaseTag2;
 import frc.robot.commands.ChaseTagCommand;
 import frc.robot.commands.CoralIntakeToScoreCommandGroup;
+import frc.robot.commands.MultiScoreCommand;
 // import frc.robot.commands.RunMotorCommand;
 // import frc.robot.subsystems.RunMotorSub;
 import frc.robot.commands.ElevatorCMDs.GoToFloor;
 import frc.robot.commands.ElevatorCMDs.GoToGround;
 import frc.robot.commands.ElevatorCMDs.GoToTop;
 import frc.robot.commands.ElevatorCMDs.ResetElevatorEncoder;
+import frc.robot.commands.ElevatorCMDs.SetElevatorLevelCommand;
 import frc.robot.commands.IntakeMotorCMDs.ESpitCMD;
 import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
@@ -62,15 +66,9 @@ import frc.robot.subsystems.intake.IntakeMotorSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import swervelib.SwerveInputStream;
-import frc.robot.subsystems.ScoringTargetManager;
 import frc.robot.subsystems.ScoringTarget;
 
 import frc.robot.commands.ScoreTargetSequence;
-import frc.robot.commands.ElevatorCMDs.SetElevatorLevelCommand;
-
-
-import frc.robot.subsystems.ScoringTargetManager;
-import frc.robot.subsystems.ScoringTarget;
 import frc.robot.VisionSim;
 
 /**
@@ -205,39 +203,13 @@ private final ReefMap reefMap = new ReefMap();
    */
   public RobotContainer() {
     // ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSubsystem.getCamera(), drivebase);
-    ChaseTag2 ChaseTag2 = new ChaseTag2(visionSubsystem, drivebase);
+    // ChaseTag2 ChaseTag2 = new ChaseTag2(visionSubsystem, drivebase);
     scoringTargetManager.reset(); // Reset on init
-
-
-    // In your robot container initialization
-// if (Robot.isSimulation()) {
-//  SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
-//  // In RobotContainer.java
-// ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
-// driverXbox.a().whileTrue(chaseCommand);
-// }
-
 
 if (RobotBase.isSimulation()) {
   SmartDashboard.putData("Vision Sim Field", visionSim.getSimDebugField());
   drivebase.configureForAlliance();
-// Bind to controller button in configureBindings()
-driverXbox.start().onTrue(Commands.runOnce(() -> {
-    // Place robot near tag 1 and verify detection
-    Pose2d testPose = new Pose2d(2.0, 3.0, Rotation2d.fromDegrees(180));
-    visionSim.resetSimPose(testPose);
-    
-    // Add specific tag to simulation
-    visionSim.getSimDebugField().getObject("TestTag")
-        .setPose(new Pose2d(3.0, 3.0, Rotation2d.fromDegrees(0)));
-}).andThen(
-    Commands.waitSeconds(0.5),
-    Commands.run(() -> {
-        Optional<EstimatedRobotPose> est = visionSim.getEstimatedGlobalPose();
-        SmartDashboard.putBoolean("Vision/TestPassed", 
-            est.isPresent() && est.get().targetsUsed.size() > 0);
-    })
-));
+
  }
  
 
@@ -245,7 +217,7 @@ driverXbox.start().onTrue(Commands.runOnce(() -> {
         
     // Configure the trigger bindings
     configureBindings();
-    driverXbox.y().onTrue(new AutoAlignCommand(visionSubsystem, drivebase,  () -> scoringTargetManager.getCurrentTarget()));
+   // driverXbox.y().onTrue(new AutoAlignCommand(visionSubsystem, drivebase,  () -> scoringTargetManager.getCurrentTarget()));
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
     NamedCommands.registerCommand("goToSecondFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 1).until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));
@@ -255,8 +227,8 @@ driverXbox.start().onTrue(Commands.runOnce(() -> {
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
     // driverXbox.a().whileTrue(chaseCommand);
     // driverXbox.a().whileTrue(ChaseTag2);
-    // driverXbox.a().whileTrue(ChaseTag2);
-driverXbox.a().onTrue(
+
+driverXbox.a().whileTrue(
     Commands.sequence(
         Commands.runOnce(() -> {
             // 1. Get next target from ReefMap
@@ -281,7 +253,7 @@ driverXbox.a().onTrue(
             elevatorSubsystem,
             intakeMotorSubsystem,
             scoringTargetManager
-        ).withTimeout(10),  // Add overall timeout
+        ).withTimeout(50),  // Add overall timeout
         
         // 5. Mark as scored only if sequence completed
         Commands.runOnce(() -> {
@@ -300,13 +272,72 @@ driverXbox.a().onTrue(
     .withName("FullScoringSequence")
 );
 
-    //NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
+    // NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     //controller0.button(2).whileTrue(runMotorCommand);
    
+    autoChooser.addOption(
+      "Sequence",
+     new RepeatCommand(
+  new ProxyCommand(() ->
+    new MultiScoreCommand(
+      visionSubsystem,
+      drivebase,
+      elevatorSubsystem,
+      intakeMotorSubsystem,
+      scoringTargetManager
+    )
+  )
+).until(() -> !scoringTargetManager.hasUnscoredTargets())
+    );
+    
+
+    autoChooser.addOption("+Score Sequence", 
+    Commands.sequence(
+        Commands.runOnce(() -> {
+            // 1. Get next target from ReefMap
+            int[] next = reefMap.getNextTarget();
+            if (next == null) {
+                System.out.println("[ERROR] No available targets!");
+                return;
+            }
+            
+            // 2. Convert to ScoringTarget (ReefMap levels are 0-2)
+            ScoringTarget tgt = new ScoringTarget(next[0], next[1] + 1);
+            System.out.println("Selected target: " + tgt);
+            
+            // 3. Store in manager
+            scoringTargetManager.callTarget(tgt);
+        }),
+        
+        // 4. Run scoring sequence with timeout
+        new ScoreTargetSequence(
+            visionSubsystem,
+            drivebase,
+            elevatorSubsystem,
+            intakeMotorSubsystem,
+            scoringTargetManager
+        ).withTimeout(50),  // Add overall timeout
+        
+        // 5. Mark as scored only if sequence completed
+        Commands.runOnce(() -> {
+            scoringTargetManager.getCurrentTarget().ifPresent(t -> {
+                if (!CommandScheduler.getInstance().isScheduled(
+                    new ScoreTargetSequence(visionSubsystem, drivebase, 
+                        elevatorSubsystem, intakeMotorSubsystem, scoringTargetManager))) {
+                    ReefMap.Level level = ReefMap.Level.values()[t.getLevel() - 1];
+                    reefMap.markScored(t.getFace(), level);
+                    System.out.println("Marked scored: " + t);
+                }
+            });
+        })
+    )
+    .handleInterrupt(() -> System.out.println("Scoring interrupted!"))
+    .withName("FullScoringSequence")
+);
       
   autoChooser.addOption("Intake+Score Sequence", 
     new CoralIntakeToScoreCommandGroup(
@@ -371,8 +402,9 @@ driverXbox.a().onTrue(
       driverXbox.b().whileTrue(pivotToStow);
       controller1.povLeft().toggleOnTrue(eSpitCMD);
       controller1.povRight().toggleOnTrue(intakeCMD);
-      elevatorSubsystem.setDefaultCommand(goToFloor);
-      intakePivotSubsystem.setDefaultCommand(goToFloor);
+      
+     // elevatorSubsystem.setDefaultCommand(goToFloor);
+      // intakePivotSubsystem.setDefaultCommand(goToFloor);
       // ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSim.getCamera(), drivebase);
 
       // driverXbox.a().whileTrue(chaseCommand);
