@@ -70,10 +70,16 @@ public static final double AUTO_ALIGN_kD = 0.1;
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10));
     
 
-    public static final int[][] TAG_IDS = {
-      {6, 7, 8}, // face 0 → levels 1,2,3
-      {9, 10, 11}, // face 1
-   // up through face 5
+   package frc.robot;
+
+    /** AprilTag IDs for reef faces 0–5 */
+    public static final int[] REEF_TAG_IDS = {
+      6,  // face 0
+      7,  // face 1
+      8,  // face 2
+      9,  // face 3
+      10, // face 4
+      11  // face 5
     };
     
 

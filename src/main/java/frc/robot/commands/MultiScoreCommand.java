@@ -12,49 +12,45 @@ import frc.robot.commands.ElevatorCMDs.SetElevatorLevelCommand;
 import frc.robot.commands.IntakeMotorCMDs.ESpitCMD;
 import frc.robot.commands.AutoAlignCommand;
 public class MultiScoreCommand extends SequentialCommandGroup {
-    public MultiScoreCommand(
+  public MultiScoreCommand(
       VisionSubsystem vision,
       SwerveSubsystem drivebase,
       ElevatorSubsystem elevator,
       IntakeMotorSubsystem intake,
       ScoringTargetManager manager
-    ) {
-      addCommands(
-        new RepeatCommand(
-          new ProxyCommand(() -> {
-            ScoringTarget target = manager.getNextTarget();
-            if (target == null) {
-              return Commands.none(); // gracefully finish
-            }
-  
-            manager.callTarget(target);
-            SmartDashboard.putString("Picked target", target.toString());
-  
-            return new SequentialCommandGroup(
-              // Align to that target
-              new AutoAlignCommand( vision,  drivebase, (Supplier<Optional<ScoringTarget>>) () -> Optional.of(target))
-                .beforeStarting(() ->
-                  System.out.println("[MultiScore] Aligning to TagID: " + target.getTagId())
-                ),
-  
-              // Move elevator
-              new SetElevatorLevelCommand(elevator, target.getLevel())
-                .beforeStarting(() ->
-                  System.out.println("[MultiScore] Elevator to level " + target.getLevel())
-                ),
-  
-              // Score
-              new ESpitCMD(intake).withTimeout(1.0),
-  
-              // Mark scored
-              Commands.runOnce(() -> {
-                manager.markScored(target);
-                System.out.println("[MultiScore] Scored: " + target);
-              })
-            );
-          })
-        ).until(() -> manager.getNextTarget() == null)
+  ) {
+    // Build one proxy that handles fetching + building the inner sequence
+    ProxyCommand loopBody = new ProxyCommand(() -> {
+      ScoringTarget target = manager.getNextTarget();
+      if (target == null) {
+        // No targets left → no-op instantly, will break the repeat
+        return Commands.none();
+      }
+
+      // Announce & reserve
+      manager.callTarget(target);
+      SmartDashboard.putString("Picked target", target.toString());
+      System.out.println("[MultiScore] Aligning to TagID: " + target.getTagId());
+
+      // Per-target action sequence
+      return Commands.sequence(
+        new AutoAlignCommand(vision, drivebase, () -> Optional.of(target)),
+        new SetElevatorLevelCommand(elevator, target.getLevel())
+          .beforeStarting(()
+            -> System.out.println("[MultiScore] Elevator to level " + target.getLevel())
+          ),
+        new ESpitCMD(intake).withTimeout(1.0),
+        Commands.runOnce(() -> {
+          manager.markScored(target);
+          System.out.println("[MultiScore] Scored: " + target);
+        })
       );
-    }
+    });
+
+    // Repeat until manager reports no more unscored targets
+    addCommands(
+      Commands.repeat(loopBody)
+              .until(() -> !manager.hasUnscoredTargets())
+    );
   }
-  
+}

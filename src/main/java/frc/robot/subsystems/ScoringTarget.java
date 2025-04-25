@@ -1,87 +1,39 @@
-// package frc.robot.subsystems;
-// import frc.robot.Constants;
-
-// /**
-//  * Represents a scoring target on the reef: face index (0-5) and level (1-3).
-//  */
-// public class ScoringTarget {
-//     private final int face;
-//     private final int level; // 1, 2, or 3
-
-//     public ScoringTarget(int face, int level) {
-//         this.face = face;
-//         this.level = level;
-//     }
-
-//     public int getFace() {
-//         return face;
-//     }
-
-//     public int getLevel() {
-//         return level;
-//     }
-
-//     /**
-//      * Look up the AprilTag ID for this target using your Constants mapping.
-//      */
-//     public int getTagId() {
-//         // Example: Constants.Vision.TAG_IDS[face][level-1]
-//         return frc.robot.Constants.Vision.TARGET_TAG_ID;
-        
-    
-//     }
-// }
-
-
-
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
 
 /**
- * Represents a scoring target on the reef: face index (0-5) and level (1-3).
+ * Represents a scoring target on the reef: face index (0–5) and level (1–4).
  */
 public class ScoringTarget {
-    private final int face;
-    private final int level; // 1, 2, or 3
+  private final int face;
+  private final int level; // 1–4
 
-    /**
-     * @param face 0–5, corresponds to reef face
-     * @param level 1–3, corresponds to scoring level on that face
-     */
-    public ScoringTarget(int face, int level) {
-        this.face = face;
-        this.level = level;
+  public ScoringTarget(int face, int level) {
+    if (face < 0 || face >= Constants.Vision.REEF_TAG_IDS.length) {
+      throw new IllegalArgumentException("Face index out of range: " + face);
     }
+    if (level < 1 || level > 4) {
+      throw new IllegalArgumentException("Level out of range: " + level);
+    }
+    this.face = face;
+    this.level = level;
+  }
 
-    public int getFace() {
-        return face;
-    }
+  public int getFace() { return face; }
+  public int getLevel() { return level; }
 
-    public int getLevel() {
-        return level;
-    }
+  /** Returns the AprilTag ID for this face (levels share the same face tag). */
+  public int getTagId() {
+    return Constants.Vision.REEF_TAG_IDS[face];
+  }
 
-    /**
-     * Look up the AprilTag ID for this target using your Constants mapping.
-     * Assumes you have defined in Constants.Vision:
-     *   public static final int[][] TAG_IDS = new int[6][3];
-     */
-    public int getTagId() {
-        // sanity-check
-        if (face < 0 || face >= Constants.Vision.TAG_IDS.length) {
-            throw new IllegalArgumentException("Face index out of range: " + face);
-        }
-        if (level < 1 || level > Constants.Vision.TAG_IDS[face].length) {
-            throw new IllegalArgumentException("Level out of range: " + level);
-        }
-        // level-1 because array is 0-based
-        return Constants.Vision.TAG_IDS[face][level - 1];
-    }
-
-    @Override
-    public String toString() {
-        return String.format("ScoringTarget{face=%d, level=%d, tagId=%d}", 
-            face, level, getTagId());
-    }
+  @Override
+  public String toString() {
+    return String.format(
+      "ScoringTarget{face=%d (tag %d), level=L%d}",
+      face, getTagId(), level
+    );
+  }
 }
+    
