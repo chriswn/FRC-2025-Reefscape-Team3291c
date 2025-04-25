@@ -69,6 +69,7 @@ public static final double AUTO_ALIGN_kD = 0.1;
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.7, 0.7, Units.degreesToRadians(30));
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10));
     
+<<<<<<< HEAD
     public static final int[][] TAG_IDS = {
       {17}, // Face 0
       {18}, // Face 1
@@ -77,6 +78,20 @@ public static final double AUTO_ALIGN_kD = 0.1;
       {21}, // Face 4
       {22}, // Face 5
   };
+=======
+
+   package frc.robot;
+
+    /** AprilTag IDs for reef faces 0–5 */
+    public static final int[] REEF_TAG_IDS = {
+      6,  // face 0
+      7,  // face 1
+      8,  // face 2
+      9,  // face 3
+      10, // face 4
+      11  // face 5
+    };
+>>>>>>> 85c5ae3c73aa630ae5af5d3411259d32da4df784
     
 
     }

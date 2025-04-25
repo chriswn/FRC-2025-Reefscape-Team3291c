@@ -9,11 +9,17 @@ import java.util.Map;
  * Tracks the Reef faces and levels scored, publishes to dashboard, and reads manual overrides.
  */
 public class ReefMap {
+<<<<<<< HEAD
   public enum Level {L1, L2, L3} // 0, 1, 2 corresponds to levels 1, 2, 3
+=======
+  public enum Level { L1, L2, L3, L4 }        // ← Added L4
+
+>>>>>>> 85c5ae3c73aa630ae5af5d3411259d32da4df784
   public static class FaceState {
     public boolean l1 = false;
     public boolean l2 = false;
     public boolean l3 = false;
+    public boolean l4 = false;                // ← Track 4th level
   }
 
   private final Map<Integer, FaceState> faceStates = new HashMap<>();
@@ -23,9 +29,10 @@ public class ReefMap {
     // Initialize 6 reef faces: IDs 0-5
     for (int i = 0; i < 6; i++) {
       faceStates.put(i, new FaceState());
-      SmartDashboard.putBoolean(key(i, Level.L1), false);
-      SmartDashboard.putBoolean(key(i, Level.L2), false);
-      SmartDashboard.putBoolean(key(i, Level.L3), false);
+      // Publish all four levels to SmartDashboard
+      for (Level lvl : Level.values()) {
+        SmartDashboard.putBoolean(key(i, lvl), false);
+      }
       overrideChooser.addOption("Face " + i, i);
     }
     overrideChooser.setDefaultOption("None", -1);
@@ -36,41 +43,38 @@ public class ReefMap {
     return String.format("Reef/Face%d_%s", face, level.name());
   }
 
-  /**
-   * Mark a given face and level as scored.
-   */
+  /** Mark a given face and level as scored. */
   public void markScored(int face, Level level) {
     FaceState fs = faceStates.get(face);
     if (fs == null) return;
-    switch(level) {
+    switch (level) {
       case L1: fs.l1 = true; break;
       case L2: fs.l2 = true; break;
       case L3: fs.l3 = true; break;
+      case L4: fs.l4 = true; break;         // ← Handle L4
     }
     SmartDashboard.putBoolean(key(face, level), true);
   }
 
   public boolean hasUnscoredTargets() {
-    for (int i = 0; i < 6; i++) {
-        FaceState fs = faceStates.get(i);
-        if (!fs.l1 || !fs.l2 || !fs.l3) {
-            return true;
-        }
+    for (FaceState fs : faceStates.values()) {
+      if (!fs.l1 || !fs.l2 || !fs.l3 || !fs.l4) {
+        return true;
+      }
     }
     return false;
   }
 
-  /**
-   * Reset all faces (e.g., at match start).
-   */
+  /** Reset all faces (e.g., at match start). */
   public void reset() {
     for (Map.Entry<Integer, FaceState> e : faceStates.entrySet()) {
-      e.getValue().l1 = e.getValue().l2 = e.getValue().l3 = false;
-      SmartDashboard.putBoolean(key(e.getKey(), Level.L1), false);
-      SmartDashboard.putBoolean(key(e.getKey(), Level.L2), false);
-      SmartDashboard.putBoolean(key(e.getKey(), Level.L3), false);
+      e.getValue().l1 = e.getValue().l2 = e.getValue().l3 = e.getValue().l4 = false;
+      for (Level lvl : Level.values()) {
+        SmartDashboard.putBoolean(key(e.getKey(), lvl), false);
+      }
     }
     overrideChooser.setDefaultOption("None", -1);
+    overrideChooser.setSelected(-1);       // ← also clear the selection
   }
 
   /**
@@ -89,16 +93,32 @@ public class ReefMap {
     int override = getOverrideFace();
     if (override >= 0 && override < 6) {
       FaceState fs = faceStates.get(override);
-      if (!fs.l1) return new int[]{override, Level.L1.ordinal()};
-      if (!fs.l2) return new int[]{override, Level.L2.ordinal()};
-      if (!fs.l3) return new int[]{override, Level.L3.ordinal()};
+      for (Level lvl : Level.values()) {
+        boolean done = switch (lvl) {
+          case L1 -> fs.l1;
+          case L2 -> fs.l2;
+          case L3 -> fs.l3;
+          case L4 -> fs.l4;
+        };
+        if (!done) {
+          return new int[]{override, lvl.ordinal()};
+        }
+      }
     }
     // no valid override, pick first free
     for (int i = 0; i < 6; i++) {
       FaceState fs = faceStates.get(i);
-      if (!fs.l1) return new int[]{i, Level.L1.ordinal()};
-      if (!fs.l2) return new int[]{i, Level.L2.ordinal()};
-      if (!fs.l3) return new int[]{i, Level.L3.ordinal()};
+      for (Level lvl : Level.values()) {
+        boolean done = switch (lvl) {
+          case L1 -> fs.l1;
+          case L2 -> fs.l2;
+          case L3 -> fs.l3;
+          case L4 -> fs.l4;
+        };
+        if (!done) {
+          return new int[]{i, lvl.ordinal()};
+        }
+      }
     }
     return null;
   }

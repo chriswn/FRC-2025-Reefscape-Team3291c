@@ -19,6 +19,7 @@ public class MultiScoreCommand extends SequentialCommandGroup {
       IntakeMotorSubsystem intake,
       ScoringTargetManager manager
   ) {
+<<<<<<< HEAD
     List<Command> steps = new ArrayList<>();  
 
     // Pull off every unscored target up front
@@ -70,5 +71,40 @@ public class MultiScoreCommand extends SequentialCommandGroup {
 
     // If no targets were found, this group will immediately finish.
     addCommands(steps.toArray(new Command[0]));
+=======
+    // Build one proxy that handles fetching + building the inner sequence
+    ProxyCommand loopBody = new ProxyCommand(() -> {
+      ScoringTarget target = manager.getNextTarget();
+      if (target == null) {
+        // No targets left → no-op instantly, will break the repeat
+        return Commands.none();
+      }
+
+      // Announce & reserve
+      manager.callTarget(target);
+      SmartDashboard.putString("Picked target", target.toString());
+      System.out.println("[MultiScore] Aligning to TagID: " + target.getTagId());
+
+      // Per-target action sequence
+      return Commands.sequence(
+        new AutoAlignCommand(vision, drivebase, () -> Optional.of(target)),
+        new SetElevatorLevelCommand(elevator, target.getLevel())
+          .beforeStarting(()
+            -> System.out.println("[MultiScore] Elevator to level " + target.getLevel())
+          ),
+        new ESpitCMD(intake).withTimeout(1.0),
+        Commands.runOnce(() -> {
+          manager.markScored(target);
+          System.out.println("[MultiScore] Scored: " + target);
+        })
+      );
+    });
+
+    // Repeat until manager reports no more unscored targets
+    addCommands(
+      Commands.repeat(loopBody)
+              .until(() -> !manager.hasUnscoredTargets())
+    );
+>>>>>>> 85c5ae3c73aa630ae5af5d3411259d32da4df784
   }
 }
