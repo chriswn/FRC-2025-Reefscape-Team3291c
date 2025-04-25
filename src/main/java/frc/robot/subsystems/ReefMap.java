@@ -9,17 +9,13 @@ import java.util.Map;
  * Tracks the Reef faces and levels scored, publishes to dashboard, and reads manual overrides.
  */
 public class ReefMap {
-<<<<<<< HEAD
-  public enum Level {L1, L2, L3} // 0, 1, 2 corresponds to levels 1, 2, 3
-=======
-  public enum Level { L1, L2, L3, L4 }        // ← Added L4
+  public enum Level { L1, L2, L3, L4 }  // Added L4
 
->>>>>>> 85c5ae3c73aa630ae5af5d3411259d32da4df784
   public static class FaceState {
     public boolean l1 = false;
     public boolean l2 = false;
     public boolean l3 = false;
-    public boolean l4 = false;                // ← Track 4th level
+    public boolean l4 = false;           // Track 4th level
   }
 
   private final Map<Integer, FaceState> faceStates = new HashMap<>();
@@ -34,7 +30,9 @@ public class ReefMap {
         SmartDashboard.putBoolean(key(i, lvl), false);
       }
       overrideChooser.addOption("Face " + i, i);
+      
     }
+    // Default to “None” (-1) if not overridden
     overrideChooser.setDefaultOption("None", -1);
     SmartDashboard.putData("Reef Override Face", overrideChooser);
   }
@@ -51,11 +49,12 @@ public class ReefMap {
       case L1: fs.l1 = true; break;
       case L2: fs.l2 = true; break;
       case L3: fs.l3 = true; break;
-      case L4: fs.l4 = true; break;         // ← Handle L4
+      case L4: fs.l4 = true; break;  // Handle L4
     }
     SmartDashboard.putBoolean(key(face, level), true);
   }
 
+  /** Returns true if any face has at least one unscored level. */
   public boolean hasUnscoredTargets() {
     for (FaceState fs : faceStates.values()) {
       if (!fs.l1 || !fs.l2 || !fs.l3 || !fs.l4) {
@@ -68,13 +67,16 @@ public class ReefMap {
   /** Reset all faces (e.g., at match start). */
   public void reset() {
     for (Map.Entry<Integer, FaceState> e : faceStates.entrySet()) {
-      e.getValue().l1 = e.getValue().l2 = e.getValue().l3 = e.getValue().l4 = false;
+      e.getValue().l1 = false;
+      e.getValue().l2 = false;
+      e.getValue().l3 = false;
+      e.getValue().l4 = false;
       for (Level lvl : Level.values()) {
         SmartDashboard.putBoolean(key(e.getKey(), lvl), false);
       }
     }
+    // Re-establish “None” as the default/selected override
     overrideChooser.setDefaultOption("None", -1);
-    overrideChooser.setSelected(-1);       // ← also clear the selection
   }
 
   /**
@@ -105,7 +107,7 @@ public class ReefMap {
         }
       }
     }
-    // no valid override, pick first free
+    // No valid override or override exhausted; pick first free
     for (int i = 0; i < 6; i++) {
       FaceState fs = faceStates.get(i);
       for (Level lvl : Level.values()) {

@@ -245,11 +245,12 @@ ProxyCommand loopBody = new ProxyCommand(() -> {
     ).withTimeout(50);
 });
 
-// Bind A to “while held, keep looping the above until done”
+// Bind A to while held, keep looping the above until done
 driverXbox.a().whileTrue(
-  Commands.repeat(loopBody)
-          .until(() -> !scoringTargetManager.hasUnscoredTargets())
-  .handleInterrupt(() -> System.out.println("[RobotContainer] Scoring interrupted!"))
+        // ✅ use RepeatCommand directly
+  new RepeatCommand(loopBody)
+  .until(() -> !scoringTargetManager.hasUnscoredTargets())
+    .handleInterrupt(() -> System.out.println("[RobotContainer] Scoring interrupted!"))
   .withName("AutoScoringLoop")
 );
 
@@ -276,49 +277,44 @@ driverXbox.a().whileTrue(
     );
     
 
-    autoChooser.addOption("+Score Sequence", 
-    Commands.sequence(
-        Commands.runOnce(() -> {
-            // 1. Get next target from ReefMap
-            scoringTargetManager.getNextTarget();
-            if (next == null) {
-                System.out.println("[ERROR] No available targets!");
-                return;
-            }
-            
-            // 2. Convert to ScoringTarget (ReefMap levels are 0-2)
-            ScoringTarget tgt = new ScoringTarget(next[0], next[1] + 1);
-            System.out.println("Selected target: " + tgt);
-            
-            // 3. Store in manager
-            scoringTargetManager.callTarget(tgt);
-        }),
-        
-        // 4. Run scoring sequence with timeout
-        new ScoreTargetSequence(
-            visionSubsystem,
-            drivebase,
-            elevatorSubsystem,
-            intakeMotorSubsystem,
-            scoringTargetManager
-        ).withTimeout(50),  // Add overall timeout
-        
-        // 5. Mark as scored only if sequence completed
-        Commands.runOnce(() -> {
-            scoringTargetManager.getCurrentTarget().ifPresent(t -> {
-                if (!CommandScheduler.getInstance().isScheduled(
-                    new ScoreTargetSequence(visionSubsystem, drivebase, 
-                        elevatorSubsystem, intakeMotorSubsystem, scoringTargetManager))) {
-                    ReefMap.Level level = ReefMap.Level.values()[t.getLevel() - 1];
-                    reefMap.markScored(t.getFace(), level);
-                    System.out.println("Marked scored: " + t);
-                }
-            });
-        })
-    )
-    .handleInterrupt(() -> System.out.println("Scoring interrupted!"))
-    .withName("FullScoringSequence")
-);
+     // single "score all" option that loops through targets via the manager
+     autoChooser.addOption("+Score Sequence",
+       Commands.sequence(
+         // fetch & reserve the first target
+         Commands.runOnce(() -> {
+           ScoringTarget tgt = scoringTargetManager.getNextTarget();
+           if (tgt == null) {
+             System.out.println("[AutoChooser] No targets available!");
+             return;
+           }
+           scoringTargetManager.callTarget(tgt);
+           System.out.println("[AutoChooser] Starting coral score at " + tgt);
+         }),
+         // run the full auto-score loop under A same as your binding
+         new RepeatCommand(
+           new ProxyCommand(() -> {
+             ScoringTarget tgt = scoringTargetManager.getNextTarget();
+             if (tgt == null) {
+               return Commands.none();
+             }
+             scoringTargetManager.callTarget(tgt);
+             return new ScoreTargetSequence(
+               visionSubsystem,
+               drivebase,
+               elevatorSubsystem,
+               intakeMotorSubsystem,
+               scoringTargetManager
+             ).withTimeout(50);
+           })
+         ).until(() -> !scoringTargetManager.hasUnscoredTargets()),
+         // final cleanup
+         Commands.runOnce(() ->
+           System.out.println("[AutoChooser] Finished scoring all targets")
+         )
+       )
+       .handleInterrupt(() -> System.out.println("[AutoChooser] Scoring interrupted!"))
+       .withName("AutoScoreAll")
+     );
       
   autoChooser.addOption("Intake+Score Sequence", 
     new CoralIntakeToScoreCommandGroup(
