@@ -229,20 +229,24 @@ if (RobotBase.isSimulation()) {
 // Create a ProxyCommand that pulls one target and returns the ScoreTargetSequence for it
 ProxyCommand loopBody = new ProxyCommand(() -> {
   ScoringTarget tgt = scoringTargetManager.getNextTarget();
+
   if (tgt == null) {
     // No targets left → instantly finish to break the loop
     return Commands.none();
   }
+
+  // Set this as the current target
   scoringTargetManager.callTarget(tgt);
   System.out.println("[RobotContainer] Scoring target: " + tgt);
-  // Return the per-target scoring routine
-  return new ScoreTargetSequence(
+
+  // Return the command sequence to handle this target
+  return new MultiScoreCommand(
       visionSubsystem,
       drivebase,
       elevatorSubsystem,
       intakeMotorSubsystem,
       scoringTargetManager
-    ).withTimeout(50);
+  );
 });
 
 // Bind A to while held, keep looping the above until done
@@ -264,57 +268,56 @@ driverXbox.a().whileTrue(
     autoChooser.addOption(
       "Sequence",
      new RepeatCommand(
-  new ProxyCommand(() ->
     new MultiScoreCommand(
       visionSubsystem,
       drivebase,
       elevatorSubsystem,
       intakeMotorSubsystem,
       scoringTargetManager
-    )
+  
   )
 ).until(() -> !scoringTargetManager.hasUnscoredTargets())
     );
     
 
-     // single "score all" option that loops through targets via the manager
-     autoChooser.addOption("+Score Sequence",
-       Commands.sequence(
-         // fetch & reserve the first target
-         Commands.runOnce(() -> {
-           ScoringTarget tgt = scoringTargetManager.getNextTarget();
-           if (tgt == null) {
-             System.out.println("[AutoChooser] No targets available!");
-             return;
-           }
-           scoringTargetManager.callTarget(tgt);
-           System.out.println("[AutoChooser] Starting coral score at " + tgt);
-         }),
-         // run the full auto-score loop under A same as your binding
-         new RepeatCommand(
-           new ProxyCommand(() -> {
-             ScoringTarget tgt = scoringTargetManager.getNextTarget();
-             if (tgt == null) {
-               return Commands.none();
-             }
-             scoringTargetManager.callTarget(tgt);
-             return new ScoreTargetSequence(
-               visionSubsystem,
-               drivebase,
-               elevatorSubsystem,
-               intakeMotorSubsystem,
-               scoringTargetManager
-             ).withTimeout(50);
-           })
-         ).until(() -> !scoringTargetManager.hasUnscoredTargets()),
-         // final cleanup
-         Commands.runOnce(() ->
-           System.out.println("[AutoChooser] Finished scoring all targets")
-         )
-       )
-       .handleInterrupt(() -> System.out.println("[AutoChooser] Scoring interrupted!"))
-       .withName("AutoScoreAll")
-     );
+    //  // single "score all" option that loops through targets via the manager
+    //  autoChooser.addOption("+Score Sequence",
+    //    Commands.sequence(
+    //      // fetch & reserve the first target
+    //      Commands.runOnce(() -> {
+    //        ScoringTarget tgt = scoringTargetManager.getNextTarget();
+    //        if (tgt == null) {
+    //          System.out.println("[AutoChooser] No targets available!");
+    //          return;
+    //        }
+    //        scoringTargetManager.callTarget(tgt);
+    //        System.out.println("[AutoChooser] Starting coral score at " + tgt);
+    //      }),
+    //      // run the full auto-score loop under A same as your binding
+    //      new RepeatCommand(
+    //        new ProxyCommand(() -> {
+    //          ScoringTarget tgt = scoringTargetManager.getNextTarget();
+    //          if (tgt == null) {
+    //            return Commands.none();
+    //          }
+    //          scoringTargetManager.callTarget(tgt);
+    //          return new ScoreTargetSequence(
+    //            visionSubsystem,
+    //            drivebase,
+    //            elevatorSubsystem,
+    //            intakeMotorSubsystem,
+    //            scoringTargetManager
+    //          ).withTimeout(50);
+    //        })
+    //      ).until(() -> !scoringTargetManager.hasUnscoredTargets()),
+    //      // final cleanup
+    //      Commands.runOnce(() ->
+    //        System.out.println("[AutoChooser] Finished scoring all targets")
+    //      )
+    //    )
+    //    .handleInterrupt(() -> System.out.println("[AutoChooser] Scoring interrupted!"))
+    //    .withName("AutoScoreAll")
+    //  );
       
   autoChooser.addOption("Intake+Score Sequence", 
     new CoralIntakeToScoreCommandGroup(
