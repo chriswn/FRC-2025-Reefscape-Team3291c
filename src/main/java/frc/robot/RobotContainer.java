@@ -58,7 +58,6 @@ import frc.robot.commands.IntakeMotorCMDs.IntakeCMD;
 import frc.robot.commands.IntakePivotCMDs.PivotToGround;
 import frc.robot.commands.IntakePivotCMDs.PivotToStow;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.ReefMap;
 import frc.robot.subsystems.ScoringTargetManager;
 import frc.robot.subsystems.VisionSubsystem;
 //import frc.robot.subsystems.VisionSubsystem;
@@ -106,7 +105,6 @@ public class RobotContainer {
   public final VisionSim visionSim = new VisionSim(camera);
   private final VisionSubsystem visionSubsystem = new VisionSubsystem();
 private final ScoringTargetManager scoringTargetManager = new ScoringTargetManager();
-private final ReefMap reefMap = new ReefMap();
 
   private final Command autoAlignCommand = new AutoAlignCommand(visionSubsystem, drivebase, /*Constants.Vision.TARGET_TAG_ID*/
   () -> scoringTargetManager.getCurrentTarget());
@@ -227,49 +225,32 @@ if (RobotBase.isSimulation()) {
     NamedCommands.registerCommand("eSpitCMD", eSpitCMD);
     // driverXbox.a().whileTrue(chaseCommand);
     // driverXbox.a().whileTrue(ChaseTag2);
+    
+// Create a ProxyCommand that pulls one target and returns the ScoreTargetSequence for it
+ProxyCommand loopBody = new ProxyCommand(() -> {
+  ScoringTarget tgt = scoringTargetManager.getNextTarget();
+  if (tgt == null) {
+    // No targets left → instantly finish to break the loop
+    return Commands.none();
+  }
+  scoringTargetManager.callTarget(tgt);
+  System.out.println("[RobotContainer] Scoring target: " + tgt);
+  // Return the per-target scoring routine
+  return new ScoreTargetSequence(
+      visionSubsystem,
+      drivebase,
+      elevatorSubsystem,
+      intakeMotorSubsystem,
+      scoringTargetManager
+    ).withTimeout(50);
+});
 
+// Bind A to “while held, keep looping the above until done”
 driverXbox.a().whileTrue(
-    Commands.sequence(
-        Commands.runOnce(() -> {
-            // 1. Get next target from ReefMap
-            int[] next = reefMap.getNextTarget();
-            if (next == null) {
-                System.out.println("[ERROR] No available targets!");
-                return;
-            }
-            
-            // 2. Convert to ScoringTarget (ReefMap levels are 0-2)
-            ScoringTarget tgt = new ScoringTarget(next[0], next[1] + 1);
-            System.out.println("Selected target: " + tgt);
-            
-            // 3. Store in manager
-            scoringTargetManager.callTarget(tgt);
-        }),
-        
-        // 4. Run scoring sequence with timeout
-        new ScoreTargetSequence(
-            visionSubsystem,
-            drivebase,
-            elevatorSubsystem,
-            intakeMotorSubsystem,
-            scoringTargetManager
-        ).withTimeout(50),  // Add overall timeout
-        
-        // 5. Mark as scored only if sequence completed
-        Commands.runOnce(() -> {
-            scoringTargetManager.getCurrentTarget().ifPresent(t -> {
-                if (!CommandScheduler.getInstance().isScheduled(
-                    new ScoreTargetSequence(visionSubsystem, drivebase, 
-                        elevatorSubsystem, intakeMotorSubsystem, scoringTargetManager))) {
-                    ReefMap.Level level = ReefMap.Level.values()[t.getLevel() - 1];
-                    reefMap.markScored(t.getFace(), level);
-                    System.out.println("Marked scored: " + t);
-                }
-            });
-        })
-    )
-    .handleInterrupt(() -> System.out.println("Scoring interrupted!"))
-    .withName("FullScoringSequence")
+  Commands.repeat(loopBody)
+          .until(() -> !scoringTargetManager.hasUnscoredTargets())
+  .handleInterrupt(() -> System.out.println("[RobotContainer] Scoring interrupted!"))
+  .withName("AutoScoringLoop")
 );
 
     // NamedCommands.registerCommand("RunMotor", new RunMotorCommand(runMotorSub, () -> 2).withTimeout(5));
@@ -299,7 +280,7 @@ driverXbox.a().whileTrue(
     Commands.sequence(
         Commands.runOnce(() -> {
             // 1. Get next target from ReefMap
-            int[] next = reefMap.getNextTarget();
+            scoringTargetManager.getNextTarget();
             if (next == null) {
                 System.out.println("[ERROR] No available targets!");
                 return;
