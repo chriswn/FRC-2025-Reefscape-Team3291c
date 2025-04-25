@@ -110,7 +110,8 @@ public class RobotContainer {
 private final ScoringTargetManager scoringTargetManager = new ScoringTargetManager();
 private final ReefMap reefMap = new ReefMap();
 
-  private final Command autoAlignCommand = new AutoAlignCommand(visionSubsystem, drivebase, Constants.Vision.TARGET_TAG_ID);
+  private final Command autoAlignCommand = new AutoAlignCommand(visionSubsystem, drivebase, /*Constants.Vision.TARGET_TAG_ID*/
+  () -> scoringTargetManager.getCurrentTarget());
 
   //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,
@@ -244,7 +245,7 @@ driverXbox.start().onTrue(Commands.runOnce(() -> {
         
     // Configure the trigger bindings
     configureBindings();
-    driverXbox.y().whileTrue(new AutoAlignCommand(visionSubsystem, drivebase, Constants.Vision.TARGET_TAG_ID));
+    driverXbox.y().onTrue(new AutoAlignCommand(visionSubsystem, drivebase,  () -> scoringTargetManager.getCurrentTarget()));
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
     NamedCommands.registerCommand("goToSecondFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 1).until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));

@@ -226,18 +226,34 @@ public class Robot extends TimedRobot
   /**
    * This function is called periodically whilst in simulation.
    */
-  @Override
-  public void simulationPeriodic()
-  { // Safe null-checked access
+  // @Override
+  // public void simulationPeriodic()
+  // { // Safe null-checked access
    
-    if (m_robotContainer != null && 
-        getDrivebase() != null && 
-        getVisionSim() != null) {
+  //   if (m_robotContainer != null && 
+  //       getDrivebase() != null && 
+  //       getVisionSim() != null) {
         
-        Pose2d currentPose = getDrivebase().getPose();
-        if (currentPose != null) {
-            getVisionSim().simulationPeriodic(currentPose);
-        }
-    }
+  //       Pose2d currentPose = getDrivebase().getPose();
+  //       if (currentPose != null) {
+  //           getVisionSim().simulationPeriodic(currentPose);
+  //       }
+  //   }
+  // }
+
+  private int simTick = 0;
+  @Override
+  public void simulationPeriodic() {
+      simTick++;
+      if (simTick % 5 != 0) return; // Only update every 5 ticks (100ms)
+      
+      if (m_robotContainer != null && getDrivebase() != null && getVisionSim() != null) {
+          Pose2d currentPose = getDrivebase().getPose();
+          if (currentPose != null) {
+              getVisionSim().simulationPeriodic(currentPose);
+          }
+      }
   }
+  
+
 }
