@@ -69,12 +69,14 @@ public static final double AUTO_ALIGN_kD = 0.1;
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.7, 0.7, Units.degreesToRadians(30));
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10));
     
-
     public static final int[][] TAG_IDS = {
-      {6, 7, 8}, // face 0 → levels 1,2,3
-      {9, 10, 11}, // face 1
-   // up through face 5
-    };
+      {17}, // Face 0
+      {18}, // Face 1
+      {19}, // Face 2
+      {20}, // Face 3
+      {21}, // Face 4
+      {22}, // Face 5
+  };
     
 
     }

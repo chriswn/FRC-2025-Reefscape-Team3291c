@@ -224,7 +224,19 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Constants.Elevator.groundFloor;
     }
   }
-
+// In ElevatorSubsystem.java
+public int getCurrentLevel() {
+  switch (floor_target) {
+      case SECOND_FLOOR:
+          return 1;
+      case THIRD_FLOOR:
+          return 2;
+      case FOURTH_FLOOR:
+          return 3;
+      default:
+          return 0; // Default case for other targets
+  }
+}
    //check if at floor
   public boolean ifAtFloor(Double target) {
     boolean value = false;

@@ -25,6 +25,7 @@ public class AutoAlignCommand extends Command {
     private final Supplier<Optional<ScoringTarget>> scoringTargetSupplier;
 
     private boolean isActive = false;
+    private boolean isFinished = false;
 
     private final ProfiledPIDController xController =
         new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
@@ -81,6 +82,7 @@ public void initialize() {
                 yController.setGoal(targetPose.getY());
                 double yawGoal = MathUtil.angleModulus(tagYawRad + Math.PI);
                 thetaController.setGoal(yawGoal);
+                loadPIDFromSmartDashboard();
 
                 SmartDashboard.putNumber("AutoAlign/TargetID", tagId);
                 SmartDashboard.putString("AutoAlign/TargetPose", targetPose.toString());
@@ -90,12 +92,14 @@ public void initialize() {
                 SmartDashboard.putString("AutoAlign/TagPose2D", targetPose.toString());
                 SmartDashboard.putNumber("AutoAlign/TagYawRad", tagYawRad);
                 SmartDashboard.putNumber("AutoAlign/TagYawDeg", Math.toDegrees(tagYawRad));
+                
         
             });
     });
 }
     @Override
     public void execute() {
+        loadPIDFromSmartDashboard();
         if (!hasValidTarget) return;
 
         // always use odometry for current pose
@@ -138,6 +142,7 @@ public void initialize() {
 
     @Override
     public void end(boolean interrupted) {
+        isFinished=true;
         System.out.println("AutoAlignCommand ended. Interrupted = " + interrupted);
         drivebase.drive(new ChassisSpeeds());
         SmartDashboard.putBoolean("AutoAlign/Interrupted", interrupted);
@@ -146,10 +151,31 @@ public void initialize() {
 
     @Override
     public boolean isFinished() {
-        return hasValidTarget
-            && xController.atGoal()
-            && yController.atGoal()
-            && thetaController.atGoal()
-            && Timer.getFPGATimestamp() - startTime > 1.0;
+        // Tolerances for how close we need to be to the target before finishing
+    double xTolerance = 0.5; // Adjust as needed
+    double yTolerance = 0.5; // Adjust as needed
+    double thetaTolerance = Units.degreesToRadians(5.0); // Adjust angle tolerance if necessary
+    
+    // Check if within tolerance of the target
+    return hasValidTarget
+        && Math.abs(xController.getPositionError()) < xTolerance
+        && Math.abs(yController.getPositionError()) < yTolerance
+        && Math.abs(thetaController.getPositionError()) < thetaTolerance
+        && Timer.getFPGATimestamp() - startTime > 1.0;  // Minimum time for alignment
+        }
+
+        private void loadPIDFromSmartDashboard() {
+            // Load PID constants from SmartDashboard
+            xController.setP(SmartDashboard.getNumber("AutoAlign/X_P", 1.5));
+            xController.setI(SmartDashboard.getNumber("AutoAlign/X_I", 0.0));
+            xController.setD(SmartDashboard.getNumber("AutoAlign/X_D", 0.2));
+    
+            yController.setP(SmartDashboard.getNumber("AutoAlign/Y_P", 1.5));
+            yController.setI(SmartDashboard.getNumber("AutoAlign/Y_I", 0.0));
+            yController.setD(SmartDashboard.getNumber("AutoAlign/Y_D", 0.2));
+    
+            thetaController.setP(SmartDashboard.getNumber("AutoAlign/Theta_P", 2.0));
+            thetaController.setI(SmartDashboard.getNumber("AutoAlign/Theta_I", 0.0));
+            thetaController.setD(SmartDashboard.getNumber("AutoAlign/Theta_D", 0.1));
         }
 }

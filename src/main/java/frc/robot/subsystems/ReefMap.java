@@ -9,7 +9,7 @@ import java.util.Map;
  * Tracks the Reef faces and levels scored, publishes to dashboard, and reads manual overrides.
  */
 public class ReefMap {
-  public enum Level {L1, L2, L3}
+  public enum Level {L1, L2, L3} // 0, 1, 2 corresponds to levels 1, 2, 3
   public static class FaceState {
     public boolean l1 = false;
     public boolean l2 = false;
@@ -49,6 +49,7 @@ public class ReefMap {
     }
     SmartDashboard.putBoolean(key(face, level), true);
   }
+
   public boolean hasUnscoredTargets() {
     for (int i = 0; i < 6; i++) {
         FaceState fs = faceStates.get(i);
@@ -57,7 +58,7 @@ public class ReefMap {
         }
     }
     return false;
-}
+  }
 
   /**
    * Reset all faces (e.g., at match start).
