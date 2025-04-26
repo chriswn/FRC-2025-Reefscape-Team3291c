@@ -38,7 +38,7 @@ import static frc.robot.Constants.Vision.BLUE_START_POSE;
 
 public class VisionSubsystem extends SubsystemBase {
     // Use a consistent camera name variable
-    private static final String CAMERA_NAME = "limelight-front-3291";  // Update with actual camera name
+    private static final String CAMERA_NAME = "cam_inlimelight-front-3291";  // Update with actual camera name
     private final PhotonCamera photonCamera;
 
     // For future multiple camera support:

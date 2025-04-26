@@ -40,6 +40,11 @@ public class AutoAlignCommand extends Command {
   private boolean hasValidTarget = false;
   private double tagYawRad = 0.0;
 
+  
+private static final double XY_TOLERANCE    = 0.10;                            // 10 cm
+private static final double THETA_TOLERANCE = Units.degreesToRadians(5.0);    // 5°
+
+
   public AutoAlignCommand(
       VisionSubsystem visionSubsystem,
       SwerveSubsystem drivebase,
@@ -130,14 +135,38 @@ public class AutoAlignCommand extends Command {
     SmartDashboard.putBoolean("AutoAlign/Interrupted", interrupted);
   }
 
-  @Override
-  public boolean isFinished() {
-    return hasValidTarget
-        && xController.atGoal()
-        && yController.atGoal()
-        && thetaController.atGoal()
-        && (Timer.getFPGATimestamp() - startTime) > 1.0;
+//   @Override
+//   public boolean isFinished() {
+//     return hasValidTarget
+//         && xController.atGoal()
+//         && yController.atGoal()
+//         && thetaController.atGoal()
+//         && (Timer.getFPGATimestamp() - startTime) > 1.0;
+//   }
+@Override
+public boolean isFinished() {
+  if (!hasValidTarget) {
+    return false;
   }
+
+  // Compute absolute errors
+  double xErr  = Math.abs(xController.getPositionError());
+  double yErr  = Math.abs(yController.getPositionError());
+  double tErr  = Math.abs(thetaController.getPositionError());
+  double elapsed = Timer.getFPGATimestamp() - startTime;
+
+  // Push to Shuffleboard for debugging
+  SmartDashboard.putNumber("AutoAlign/X Error", xErr);
+  SmartDashboard.putNumber("AutoAlign/Y Error", yErr);
+  SmartDashboard.putNumber("AutoAlign/Theta Error (deg)", Math.toDegrees(tErr));
+  SmartDashboard.putNumber("AutoAlign/Time Elapsed", elapsed);
+
+  // Finish when within tolerances AND we've spent at least 1 s moving
+  return xErr  < XY_TOLERANCE
+      && yErr  < XY_TOLERANCE
+      && tErr  < THETA_TOLERANCE
+      && elapsed > 1.0;
+}
 
   private void loadPIDFromSmartDashboard() {
     xController.setP(SmartDashboard.getNumber("AutoAlign/X_P", 1.5));
