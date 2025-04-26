@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.ElevatorCMDs.SetElevatorLevelCommand;
 import frc.robot.commands.IntakeMotorCMDs.ESpitCMD;
@@ -11,14 +12,17 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.util.Optional;
 
 public class ScoreTargetSequence extends SequentialCommandGroup {
-
+ private final Field2d field;
     public ScoreTargetSequence(
         VisionSubsystem vision,
         SwerveSubsystem drivebase,
         ElevatorSubsystem elevator,
         IntakeMotorSubsystem intakeMotor,
-        ScoringTargetManager manager
+        ScoringTargetManager manager,
+        Field2d field
     ) {
+        this.field = field;
+
         if (manager == null) {
             throw new IllegalStateException("[ERROR] ScoringTargetManager is null!");
         }
@@ -32,7 +36,7 @@ public class ScoreTargetSequence extends SequentialCommandGroup {
         System.out.println("[ScoreTargetCommand] Target selected: " + target);
 
         addCommands(
-            new AutoAlignCommand(vision, drivebase, () -> Optional.of(target))
+            new AutoAlignCommand(vision, drivebase, () -> Optional.of(target),field)
                 .beforeStarting(() -> System.out.println("[ScoreTargetCommand] Starting ALIGN to TagID: " + target.getTagId())),
 
             new SetElevatorLevelCommand(elevator, target.getLevel())

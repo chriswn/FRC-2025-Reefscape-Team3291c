@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -102,12 +103,13 @@ public class RobotContainer {
   private final Command intakeCMD = new IntakeCMD(intakeMotorSubsystem);
   private final GoToFloor goToFloor = new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.pov(180).getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean());
   private final PhotonCamera camera = new PhotonCamera("cam_in");
+ 
   public final VisionSim visionSim = new VisionSim(camera);
   private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+  private Field2d field = visionSim.getSimDebugField();
 private final ScoringTargetManager scoringTargetManager = new ScoringTargetManager();
-
   private final Command autoAlignCommand = new AutoAlignCommand(visionSubsystem, drivebase, /*Constants.Vision.TARGET_TAG_ID*/
-  () -> scoringTargetManager.getCurrentTarget());
+  () -> scoringTargetManager.getCurrentTarget(), field);
 
   //     private final RunMotorCommand runMotorCommand = new RunMotorCommand(
 //         runMotorSub,
@@ -200,6 +202,8 @@ private final ScoringTargetManager scoringTargetManager = new ScoringTargetManag
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    this.field = visionSim.getSimDebugField();
+    SmartDashboard.putData("Vision Sim Field", field);
     // ChaseTagCommand chaseCommand = new ChaseTagCommand(visionSubsystem.getCamera(), drivebase);
     // ChaseTag2 ChaseTag2 = new ChaseTag2(visionSubsystem, drivebase);
     scoringTargetManager.reset(); // Reset on init
@@ -215,7 +219,7 @@ if (RobotBase.isSimulation()) {
         
     // Configure the trigger bindings
     configureBindings();
-   // driverXbox.y().onTrue(new AutoAlignCommand(visionSubsystem, drivebase,  () -> scoringTargetManager.getCurrentTarget()));
+    driverXbox.y().onTrue(new AutoAlignCommand(visionSubsystem, drivebase,  () -> scoringTargetManager.getCurrentTarget(), field));
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("goToGroundFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(), () -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 0).until(() -> elevatorSubsystem.ifAtFloor(Elevator.groundFloor)));
     NamedCommands.registerCommand("goToSecondFloor", new GoToFloor(elevatorSubsystem, intakePivotSubsystem, () -> controller1.povUp().getAsBoolean(), () -> controller1.povDown().getAsBoolean(),() -> controller1.button(Constants.ButtonList.start).getAsBoolean(), () -> controller1.button(Constants.ButtonList.a).getAsBoolean(), 1).until(() -> elevatorSubsystem.ifAtFloor(Elevator.secondFloor)));
@@ -245,7 +249,8 @@ ProxyCommand loopBody = new ProxyCommand(() -> {
       drivebase,
       elevatorSubsystem,
       intakeMotorSubsystem,
-      scoringTargetManager
+      scoringTargetManager,
+      field
   );
 });
 
@@ -273,8 +278,8 @@ driverXbox.a().whileTrue(
       drivebase,
       elevatorSubsystem,
       intakeMotorSubsystem,
-      scoringTargetManager
-  
+      scoringTargetManager,
+      field
   )
 ).until(() -> !scoringTargetManager.hasUnscoredTargets())
     );
