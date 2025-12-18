@@ -4,6 +4,9 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -50,6 +53,14 @@ public class PhotonVisionSubsystem extends SubsystemBase {
     
     // Current standard deviations for pose estimation
     private Matrix<N3, N1> currentStdDevs = SINGLE_TAG_STD_DEVS;
+    
+    // Executor for camera status monitoring
+    private final ScheduledExecutorService statusExecutor = 
+        Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "PhotonVision-Status");
+            t.setDaemon(true);  // Daemon thread will shut down with JVM
+            return t;
+        });
     
     /**
      * Creates a new PhotonVisionSubsystem.
@@ -284,21 +295,32 @@ public class PhotonVisionSubsystem extends SubsystemBase {
         }
     }
     
+    /**
+     * Starts the camera status monitoring task.
+     * Uses a scheduled executor service for proper lifecycle management.
+     */
     private void startCameraStatusThread() {
-        new Thread(() -> {
-            while (true) {
-                boolean connected = isCameraConnected();
-                SmartDashboard.putBoolean("Vision/CameraConnected", connected);
-                SmartDashboard.putString("Vision/CameraStatus", 
-                    connected ? "Connected" : "Not Connected");
-                
-                try {
-                    Thread.sleep(CAMERA_STATUS_UPDATE_RATE_MS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+        statusExecutor.scheduleAtFixedRate(() -> {
+            boolean connected = isCameraConnected();
+            SmartDashboard.putBoolean("Vision/CameraConnected", connected);
+            SmartDashboard.putString("Vision/CameraStatus", 
+                connected ? "Connected" : "Not Connected");
+        }, 0, CAMERA_STATUS_UPDATE_RATE_MS, TimeUnit.MILLISECONDS);
+    }
+    
+    /**
+     * Shuts down the camera status monitoring.
+     * Should be called when the subsystem is no longer needed.
+     */
+    public void shutdown() {
+        statusExecutor.shutdown();
+        try {
+            if (!statusExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+                statusExecutor.shutdownNow();
             }
-        }).start();
+        } catch (InterruptedException e) {
+            statusExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

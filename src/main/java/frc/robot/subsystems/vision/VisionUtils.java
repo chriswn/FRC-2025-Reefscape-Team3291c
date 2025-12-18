@@ -82,16 +82,18 @@ public final class VisionUtils {
      * 
      * @param robotPose Current robot pose
      * @param tagId AprilTag ID
-     * @return Distance in meters, or -1.0 if tag doesn't exist
+     * @return OptionalDouble containing the distance in meters if tag exists, empty otherwise
      */
-    public static double getDistanceToTag(Pose2d robotPose, int tagId) {
+    public static java.util.OptionalDouble getDistanceToTag(Pose2d robotPose, int tagId) {
         Optional<Pose3d> tagPose = VisionConstants.APRILTAG_FIELD_LAYOUT.getTagPose(tagId);
         
         if (tagPose.isEmpty()) {
-            return -1.0;
+            return java.util.OptionalDouble.empty();
         }
         
-        return robotPose.getTranslation()
+        double distance = robotPose.getTranslation()
             .getDistance(tagPose.get().toPose2d().getTranslation());
+        
+        return java.util.OptionalDouble.of(distance);
     }
 }
