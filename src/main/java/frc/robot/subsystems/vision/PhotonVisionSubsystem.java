@@ -240,13 +240,7 @@ public class PhotonVisionSubsystem extends SubsystemBase {
     }
     
     private double[] pose3dToDoubleArray(Pose3d pose) {
-        return new double[] {
-            pose.getX(), pose.getY(), pose.getZ(),
-            pose.getRotation().getQuaternion().getW(),
-            pose.getRotation().getQuaternion().getX(),
-            pose.getRotation().getQuaternion().getY(),
-            pose.getRotation().getQuaternion().getZ()
-        };
+        return VisionUtils.pose3dToDoubleArray(pose);
     }
     
     /**

@@ -174,14 +174,9 @@ public class VisionSim {
         return new Pose2d(0, 0, new Rotation2d(0));
 
     }
+    
     private double[] pose3dToDoubleArray(Pose3d pose) {
-        return new double[] {
-            pose.getX(), pose.getY(), pose.getZ(),
-            pose.getRotation().getQuaternion().getW(),
-            pose.getRotation().getQuaternion().getX(),
-            pose.getRotation().getQuaternion().getY(),
-            pose.getRotation().getQuaternion().getZ()
-        };
+        return frc.robot.subsystems.vision.VisionUtils.pose3dToDoubleArray(pose);
     }
 
     public void logRobotPose3d(Pose3d pose) {
