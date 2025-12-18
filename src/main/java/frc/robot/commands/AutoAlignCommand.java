@@ -5,27 +5,26 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.VisionSim;
+import frc.robot.subsystems.vision.VisionConstants;
 
+/**
+ * Command to automatically align the robot to a specific AprilTag.
+ * Uses ProfiledPIDControllers for smooth motion to the goal pose.
+ */
 public class AutoAlignCommand extends Command {
     private final VisionSubsystem visionSubsystem;
     private final SwerveSubsystem drivebase;
     private final int targetTagId;
     private boolean isActive = false;
 
-    private final ProfiledPIDController xController =
-        new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
-    private final ProfiledPIDController yController =
-        new ProfiledPIDController(1.5, 0, 0.2, new TrapezoidProfile.Constraints(3, 2));
-    private final ProfiledPIDController thetaController =
-        new ProfiledPIDController(2.0, 0, 0.1, new TrapezoidProfile.Constraints(8, 8));
+    private final ProfiledPIDController xController;
+    private final ProfiledPIDController yController;
+    private final ProfiledPIDController thetaController;
 
     private Pose2d targetPose = new Pose2d();
     private Pose2d startingPose;
@@ -33,14 +32,53 @@ public class AutoAlignCommand extends Command {
     private boolean hasValidTarget = false;
     private double tagYawRad = 0.0;  // remember tag orientation
 
+    /**
+     * Creates a new AutoAlignCommand.
+     * 
+     * @param visionSubsystem The vision subsystem for target detection
+     * @param drivebase The swerve drive subsystem
+     * @param targetTagId The AprilTag ID to align to
+     */
     public AutoAlignCommand(VisionSubsystem visionSubsystem, SwerveSubsystem drivebase, int targetTagId) {
         this.visionSubsystem = visionSubsystem;
-        this.drivebase   = drivebase;
+        this.drivebase = drivebase;
         this.targetTagId = targetTagId;
 
-        xController.setTolerance(0.05);
-        yController.setTolerance(0.05);
-        thetaController.setTolerance(Units.degreesToRadians(1.5));
+        // Initialize PID controllers with constants from VisionConstants
+        this.xController = new ProfiledPIDController(
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KP, 
+            0, 
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KD,
+            new TrapezoidProfile.Constraints(
+                VisionConstants.AUTO_ALIGN_MAX_VELOCITY,
+                VisionConstants.AUTO_ALIGN_MAX_ACCELERATION
+            )
+        );
+        
+        this.yController = new ProfiledPIDController(
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KP, 
+            0, 
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KD,
+            new TrapezoidProfile.Constraints(
+                VisionConstants.AUTO_ALIGN_MAX_VELOCITY,
+                VisionConstants.AUTO_ALIGN_MAX_ACCELERATION
+            )
+        );
+        
+        this.thetaController = new ProfiledPIDController(
+            VisionConstants.AUTO_ALIGN_ROTATION_KP, 
+            0, 
+            VisionConstants.AUTO_ALIGN_ROTATION_KD,
+            new TrapezoidProfile.Constraints(
+                VisionConstants.AUTO_ALIGN_MAX_ANGULAR_VELOCITY,
+                VisionConstants.AUTO_ALIGN_MAX_ANGULAR_ACCELERATION
+            )
+        );
+
+        // Set tolerances from constants
+        xController.setTolerance(VisionConstants.AUTO_ALIGN_POSITION_TOLERANCE);
+        yController.setTolerance(VisionConstants.AUTO_ALIGN_POSITION_TOLERANCE);
+        thetaController.setTolerance(VisionConstants.AUTO_ALIGN_ROTATION_TOLERANCE);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         addRequirements(drivebase);
@@ -57,24 +95,25 @@ public class AutoAlignCommand extends Command {
         yController.reset(startingPose.getY());
         thetaController.reset(startingPose.getRotation().getRadians());
 
-        Constants.Vision.APRILTAG_FIELD_LAYOUT
+        VisionConstants.APRILTAG_FIELD_LAYOUT
             .getTagPose(targetTagId)
             .ifPresent(tagPose3d -> {
-                // capture tag yaw
+                // Capture tag yaw for orientation
                 tagYawRad = tagPose3d.getRotation().getZ();
 
-                // offset 1m in front of tag
+                // Offset 2m in front of tag (adjust as needed for your robot)
                 Transform3d tagToGoal = new Transform3d(
                     new Translation3d(2.0, 0.0, 0.0),
                     new Rotation3d()
                 );
-                Pose3d goal3d  = tagPose3d.transformBy(tagToGoal);
-                targetPose     = goal3d.toPose2d();
+                Pose3d goal3d = tagPose3d.transformBy(tagToGoal);
+                targetPose = goal3d.toPose2d();
                 hasValidTarget = true;
 
                 xController.setGoal(targetPose.getX());
                 yController.setGoal(targetPose.getY());
 
+                // Face opposite direction of tag
                 double yawGoal = MathUtil.angleModulus(tagYawRad + Math.PI);
                 thetaController.setGoal(yawGoal);
             });

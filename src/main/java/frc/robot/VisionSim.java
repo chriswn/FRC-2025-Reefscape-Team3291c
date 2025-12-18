@@ -3,8 +3,6 @@ package frc.robot;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -17,6 +15,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.subsystems.vision.VisionConstants;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -29,8 +28,13 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.List;
 import java.util.Optional;
 
-import static frc.robot.Constants.Vision.*;
-
+/**
+ * Legacy vision simulation class.
+ * 
+ * @deprecated Use {@link frc.robot.subsystems.vision.PhotonVisionSubsystem} 
+ *             and {@link frc.robot.subsystems.vision.PhotonVisionSimulation} instead.
+ */
+@Deprecated
 public class VisionSim {
     private final PhotonCamera camera;
     private final PhotonPoseEstimator photonEstimator;
@@ -54,7 +58,7 @@ public class VisionSim {
         photonEstimator = new PhotonPoseEstimator(
             AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            kRobotToCam
+            VisionConstants.ROBOT_TO_CAMERA
             //MULTI_TAG_PNP_ON_COPROCESSOR
         );
         photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
@@ -90,7 +94,7 @@ public class VisionSim {
             if (RobotBase.isSimulation() && visionSim != null) {
                 Alliance alliance = getAlliance();
                 Pose2d startPose = (alliance == Alliance.Blue) ? 
-                    Constants.Vision.BLUE_START_POSE : Constants.Vision.RED_START_POSE;
+                    VisionConstants.BLUE_START_POSE : VisionConstants.RED_START_POSE;
                 
                 resetSimPose(startPose);
                 visionSim.getDebugField().setRobotPose(startPose);
@@ -121,7 +125,7 @@ public class VisionSim {
         cameraSim.enableRawStream(true);
         cameraSim.enableProcessedStream(true);
         cameraSim.enableDrawWireframe(true);
-        visionSim.addCamera(cameraSim, kRobotToCam);
+        visionSim.addCamera(cameraSim, VisionConstants.ROBOT_TO_CAMERA);
         // Force initial update with robot near tags
         // visionSim.update(new Pose2d(1.5, 1.5, new Rotation2d()));
 
@@ -187,11 +191,11 @@ public class VisionSim {
     private void updateEstimationStdDevs(
             Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
         if (estimatedPose.isEmpty()) {
-            curStdDevs = kSingleTagStdDevs;
+            curStdDevs = VisionConstants.SINGLE_TAG_STD_DEVS;
             return;
         }
 
-        var estStdDevs = kSingleTagStdDevs;
+        var estStdDevs = VisionConstants.SINGLE_TAG_STD_DEVS;
         int numTags = 0;
         double avgDist = 0;
 
@@ -205,10 +209,10 @@ public class VisionSim {
         }
 
         if (numTags == 0) {
-            curStdDevs = kSingleTagStdDevs;
+            curStdDevs = VisionConstants.SINGLE_TAG_STD_DEVS;
         } else {
             avgDist /= numTags;
-            estStdDevs = numTags > 1 ? kMultiTagStdDevs : kSingleTagStdDevs;
+            estStdDevs = numTags > 1 ? VisionConstants.MULTI_TAG_STD_DEVS : VisionConstants.SINGLE_TAG_STD_DEVS;
             estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
             curStdDevs = estStdDevs;
         }

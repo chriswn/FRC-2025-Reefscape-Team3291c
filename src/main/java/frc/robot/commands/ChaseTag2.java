@@ -3,40 +3,34 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.Optional;
 
+/**
+ * Command to chase and align to an AprilTag using vision feedback.
+ * Dynamically calculates the goal position relative to the detected tag.
+ */
 public class ChaseTag2 extends Command {
-    
-    // Motion constraints for profiling
-    private static final TrapezoidProfile.Constraints XY_CONSTRAINTS = 
-        new TrapezoidProfile.Constraints(3.0, 2.0);
-    private static final TrapezoidProfile.Constraints OMEGA_CONSTRAINTS = 
-        new TrapezoidProfile.Constraints(8.0, 8.0);
     
     private final VisionSubsystem visionSubsystem;
     private final SwerveSubsystem drivebase;
     
-    private final ProfiledPIDController xController = 
-        new ProfiledPIDController(3.0, 0.0, 0.0, XY_CONSTRAINTS);
-    private final ProfiledPIDController yController = 
-        new ProfiledPIDController(3.0, 0.0, 0.0, XY_CONSTRAINTS);
-    private final ProfiledPIDController omegaController = 
-        new ProfiledPIDController(2.0, 0.0, 0.0, OMEGA_CONSTRAINTS);
+    private final ProfiledPIDController xController;
+    private final ProfiledPIDController yController;
+    private final ProfiledPIDController omegaController;
 
     // This transform offsets the tag to a goal pose (adjust as needed)
     private final Transform3d TAG_TO_GOAL = new Transform3d(
@@ -50,13 +44,50 @@ public class ChaseTag2 extends Command {
     private boolean hasValidTarget = false;
     private double tagYawRad = 0.0;  // Remember tag orientation
 
+    /**
+     * Creates a new ChaseTag2 command.
+     * 
+     * @param visionSubsystem The vision subsystem for target detection
+     * @param drivebase The swerve drive subsystem
+     */
     public ChaseTag2(VisionSubsystem visionSubsystem, SwerveSubsystem drivebase) {
         this.visionSubsystem = visionSubsystem;
         this.drivebase = drivebase;
 
-        xController.setTolerance(0.2);
-        yController.setTolerance(0.2);
-        omegaController.setTolerance(Units.degreesToRadians(3));
+        // Initialize PID controllers with constants
+        this.xController = new ProfiledPIDController(
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KP, 
+            0.0, 
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KD,
+            new TrapezoidProfile.Constraints(
+                VisionConstants.AUTO_ALIGN_MAX_VELOCITY,
+                VisionConstants.AUTO_ALIGN_MAX_ACCELERATION
+            )
+        );
+        
+        this.yController = new ProfiledPIDController(
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KP, 
+            0.0, 
+            VisionConstants.AUTO_ALIGN_TRANSLATION_KD,
+            new TrapezoidProfile.Constraints(
+                VisionConstants.AUTO_ALIGN_MAX_VELOCITY,
+                VisionConstants.AUTO_ALIGN_MAX_ACCELERATION
+            )
+        );
+        
+        this.omegaController = new ProfiledPIDController(
+            VisionConstants.AUTO_ALIGN_ROTATION_KP, 
+            0.0, 
+            VisionConstants.AUTO_ALIGN_ROTATION_KD,
+            new TrapezoidProfile.Constraints(
+                VisionConstants.AUTO_ALIGN_MAX_ANGULAR_VELOCITY,
+                VisionConstants.AUTO_ALIGN_MAX_ANGULAR_ACCELERATION
+            )
+        );
+
+        xController.setTolerance(VisionConstants.AUTO_ALIGN_POSITION_TOLERANCE);
+        yController.setTolerance(VisionConstants.AUTO_ALIGN_POSITION_TOLERANCE);
+        omegaController.setTolerance(VisionConstants.AUTO_ALIGN_ROTATION_TOLERANCE);
         omegaController.enableContinuousInput(-Math.PI, Math.PI);
 
         addRequirements(drivebase);
@@ -89,9 +120,9 @@ SmartDashboard.putString("ChaseTag2/TargetStatus", "Target Found");
 
        
 
-        // Find the best target (smallest pose ambiguity)
+        // Find the best target (smallest pose ambiguity, using constants for validation)
         Optional<PhotonTrackedTarget> targetOpt = result.getTargets().stream()
-        .filter(t -> t.getPoseAmbiguity() <= 0.9 && t.getPoseAmbiguity() != -1)
+        .filter(VisionUtils::isTargetValid)
         .min((t1, t2) -> Double.compare(t1.getPoseAmbiguity(), t2.getPoseAmbiguity()));
     
     if (targetOpt.isEmpty()) {
@@ -110,8 +141,8 @@ SmartDashboard.putString("ChaseTag2/TargetStatus", "Target Found");
     private void updateGoalPosition(PhotonTrackedTarget target) {
         Pose2d currentPose = drivebase.getPose();
         
-        // Using your constants, get the transformation from robot to camera.
-        Transform3d cameraToRobot = Constants.Vision.ROBOT_TO_CAMERA.inverse();
+        // Get the transformation from robot to camera using VisionConstants
+        Transform3d cameraToRobot = VisionConstants.ROBOT_TO_CAMERA.inverse();
         
         // Get camera-to-target transform from the vision target data
         Transform3d cameraToTarget = target.getBestCameraToTarget();

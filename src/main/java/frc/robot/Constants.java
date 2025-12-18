@@ -34,41 +34,39 @@ import swervelib.math.Matter;
  */
 public final class Constants {
 
+    /**
+     * Vision constants - Deprecated: Use frc.robot.subsystems.vision.VisionConstants instead.
+     * These are kept for backwards compatibility only.
+     * 
+     * @deprecated Use {@link frc.robot.subsystems.vision.VisionConstants}
+     */
+    @Deprecated
     public static class Vision {
-      public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(
-    new Translation3d(0.5, 0.0, 0.5), // Example values - measure your actual camera position
-    new Rotation3d(0.0, 0.0, 0.0)
-); 
-// public static final Transform3d TAG_TO_GOAL = new Transform3d(
-//   new Translation3d(1.5, 0.0, 0.0),
-//   new Rotation3d(0.0, 0.0, Math.PI)
-// );
+      // All vision constants have been moved to frc.robot.subsystems.vision.VisionConstants
+      // These are maintained for backwards compatibility only
+      
+      public static final Transform3d ROBOT_TO_CAMERA = 
+          frc.robot.subsystems.vision.VisionConstants.ROBOT_TO_CAMERA;
+      
+      public static final Pose2d BLUE_START_POSE = 
+          frc.robot.subsystems.vision.VisionConstants.BLUE_START_POSE;
+      
+      public static final Pose2d RED_START_POSE = 
+          frc.robot.subsystems.vision.VisionConstants.RED_START_POSE;
 
-public static final Pose2d BLUE_START_POSE = new Pose2d(8.05, 4.5, Rotation2d.fromDegrees(180)); // Example
-public static final Pose2d RED_START_POSE = new Pose2d(9.5, 2.5, Rotation2d.fromDegrees(0));  // Example
+      public static final int TARGET_TAG_ID = 
+          frc.robot.subsystems.vision.VisionConstants.DEFAULT_TARGET_TAG_ID;
+      
+      public static final Transform3d kRobotToCam = ROBOT_TO_CAMERA;
 
-      public static final int TARGET_TAG_ID = 12;
-      public static final double CAMERA_HEIGHT = 0.5; // meters
-       public static final double TAG_HEIGHT = 1.0; // meters
-        // public static final String kCameraName = "YOUR CAMERA NAME";
-        // // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-        public static final Transform3d kRobotToCam =
-                new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0));
+      public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = 
+          frc.robot.subsystems.vision.VisionConstants.APRILTAG_FIELD_LAYOUT;
 
-                public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
-
-// PID Constants (tune these per robot)
-public static final double AUTO_ALIGN_kP = 0.8;
-public static final double AUTO_ALIGN_kI = 0.0;
-public static final double AUTO_ALIGN_kD = 0.1;
-        // The standard deviations of our vision estimated poses, which affect correction rate
-        // (Fake values. Experiment and determine estimation noise on an actual robot.)
-        // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-        // public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-
-        public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.7, 0.7, Units.degreesToRadians(30));
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10));
-    
+      public static final Matrix<N3, N1> kSingleTagStdDevs = 
+          frc.robot.subsystems.vision.VisionConstants.SINGLE_TAG_STD_DEVS;
+      
+      public static final Matrix<N3, N1> kMultiTagStdDevs = 
+          frc.robot.subsystems.vision.VisionConstants.MULTI_TAG_STD_DEVS;
     }
     // public static final double CAMERA_HEIGHT_METERS = 0.5;
     // public static final double TAG_HEIGHT_METERS = 1.0;
