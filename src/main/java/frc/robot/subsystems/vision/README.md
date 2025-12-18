@@ -27,6 +27,12 @@ public void robotInit() {
 public void robotPeriodic() {
     vision.updateOdometry(drivebase);  // Fuses vision with wheel odometry
 }
+
+// Optional: Clean up resources when robot is shutting down
+@Override
+public void close() {
+    vision.close();  // PhotonVisionSubsystem implements AutoCloseable
+}
 ```
 
 ### 2. With Simulation

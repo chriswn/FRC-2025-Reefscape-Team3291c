@@ -38,8 +38,10 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
  * - Estimate robot pose using camera measurements
  * - Update robot odometry with vision measurements
  * - Provide diagnostics and telemetry
+ * 
+ * Implements AutoCloseable for proper resource cleanup.
  */
-public class PhotonVisionSubsystem extends SubsystemBase {
+public class PhotonVisionSubsystem extends SubsystemBase implements AutoCloseable {
     
     private final PhotonCamera photonCamera;
     private final PhotonPoseEstimator photonPoseEstimator;
@@ -310,7 +312,8 @@ public class PhotonVisionSubsystem extends SubsystemBase {
     
     /**
      * Shuts down the camera status monitoring.
-     * Should be called when the subsystem is no longer needed.
+     * Called automatically when using try-with-resources or can be called manually.
+     * Also called when the subsystem is closed via close().
      */
     public void shutdown() {
         statusExecutor.shutdown();
@@ -322,5 +325,14 @@ public class PhotonVisionSubsystem extends SubsystemBase {
             statusExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+    
+    /**
+     * Closes the subsystem and releases resources.
+     * Part of AutoCloseable interface for proper resource management.
+     */
+    @Override
+    public void close() {
+        shutdown();
     }
 }

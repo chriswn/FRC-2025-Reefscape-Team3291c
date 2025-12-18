@@ -118,7 +118,8 @@ public class PhotonVisionSimulation {
         SimCameraProperties cameraProps = new SimCameraProperties();
         
         // Configure camera resolution and FOV
-        // 1280x720 with 90 degree diagonal FOV (adjust to match your real camera)
+        // 1280x720 resolution with 90 degree FOV
+        // Note: FOV parameter meaning may vary by PhotonVision version - verify against your camera specs
         cameraProps.setCalibration(1280, 720, Rotation2d.fromDegrees(90));
         
         // Simulate detection noise (average and std dev error in pixels)
