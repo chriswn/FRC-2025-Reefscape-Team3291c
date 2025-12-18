@@ -22,6 +22,7 @@ public final class VisionConstants {
     // Camera Configuration
     /**
      * Name of the PhotonVision camera as configured in the PhotonVision UI.
+     * IMPORTANT: Change this to match your team's camera configuration.
      */
     public static final String CAMERA_NAME = "limelight-front-3291";
     

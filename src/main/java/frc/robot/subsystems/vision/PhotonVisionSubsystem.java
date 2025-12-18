@@ -291,7 +291,10 @@ public class PhotonVisionSubsystem extends SubsystemBase implements AutoCloseabl
             // Use better std devs for multi-tag detections
             estStdDevs = numTags > 1 ? MULTI_TAG_STD_DEVS : SINGLE_TAG_STD_DEVS;
             
-            // Increase uncertainty with distance
+            // Increase uncertainty with distance using quadratic scaling
+            // Dividing by 30 provides reasonable uncertainty increase over typical field distances (0-5m)
+            // Formula: stdDev = baseStdDev * (1 + distance² / 30)
+            // At 1m: ~1.03x, at 3m: ~1.3x, at 5m: ~1.83x
             estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
             currentStdDevs = estStdDevs;
         }

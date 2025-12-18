@@ -119,7 +119,9 @@ public class PhotonVisionSimulation {
         
         // Configure camera resolution and FOV
         // 1280x720 resolution with 90 degree FOV
-        // Note: FOV parameter meaning may vary by PhotonVision version - verify against your camera specs
+        // IMPORTANT: FOV parameter interpretation may change between PhotonVision versions.
+        // Verify this matches your camera specifications and PhotonVision API documentation.
+        // Incorrect FOV settings will produce inaccurate simulation results.
         cameraProps.setCalibration(1280, 720, Rotation2d.fromDegrees(90));
         
         // Simulate detection noise (average and std dev error in pixels)
